@@ -1,0 +1,15 @@
+from proyectofinal.state.users_state import UsersState
+
+s = UsersState()
+print('Test nombre inválido:')
+s.create_user({'nombre':'', 'apellido':'Perez','contrasena':'abcd12','email':'a@b.com','telefono':'123456'})
+print('error:', s.error_message)
+print('Test email inválido:')
+s.create_user({'nombre':'Juan','apellido':'Perez','contrasena':'abcd12','email':'no-email','telefono':'123456'})
+print('error:', s.error_message)
+print('Test contraseña corta:')
+s.create_user({'nombre':'Juan','apellido':'Perez','contrasena':'123','email':'a@b.com','telefono':'123456'})
+print('error:', s.error_message)
+print('Test válido (puede crear usuario en DB):')
+s.create_user({'nombre':'Juan','apellido':'Perez','contrasena':'abcd12','email':'unique_test_email_12345@example.com','telefono':'123456'})
+print('error:', s.error_message)
