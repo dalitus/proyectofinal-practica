@@ -264,7 +264,6 @@ def admin_dashboard_page() -> rx.Component:
         rx.flex(
             PageHeader("Panel de Administración de Productos", "Gestioná productos y consultas"),
             PrimaryButton("Ir a consultas de usuarios", on_click=ir_a_consultas, width="100%"),
-            SecondaryButton("Ver Compras (Admin)", on_click=ir_a_compras, width="100%"),
             SecondaryButton("Gestionar Pedidos", on_click=ir_a_pedidos, width="100%"),
             crear_producto_dialog_component(),
             table_productos(),
