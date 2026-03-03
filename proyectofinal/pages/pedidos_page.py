@@ -1,43 +1,22 @@
 # proyectofinal/pages/pedidos_page.py
 import reflex as rx
-import json
-from proyectofinal.state.data import PedidoData
 from proyectofinal.state.pedido_state import PedidoState
 
-def mostrar_productos(productos_json: str) -> rx.Component:
-    try:
-        if not productos_json or productos_json in ["None", "[]"]:
-            return rx.text("Sin productos registrados", color="gray", font_size="sm")
-        
-        productos = json.loads(productos_json)
-        if not productos:
-            return rx.text("Sin productos registrados", color="gray", font_size="sm")
-        
-        return rx.table(
-            rx.thead(
-                rx.tr(
-                    rx.th("Producto"),
-                    rx.th("Cantidad"),
-                    rx.th("Subtotal")
-                )
-            ),
-            rx.tbody(
-                *[
-                    rx.tr(
-                        rx.td(p.get("nombre", "Producto")),
-                        rx.td(str(p.get("cantidad", 1))),
-                        rx.td(f"${p.get('subtotal', 0):.2f}")
-                    )
-                    for p in productos
-                ]
-            ),
-            width="100%",
-            border="1px solid #ccc",
-            border_collapse="collapse",
-            margin_top="10px"
-        )
-    except Exception:
-        return rx.text("Sin información de productos", color="gray", font_size="sm")
+def mostrar_productos(productos: list) -> rx.Component:
+    return rx.cond(
+        productos.length() > 0,
+        rx.foreach(
+            productos,
+            lambda p: rx.hstack(
+                rx.text(f"{p['nombre']} x{p['cantidad']}", font_size="sm"),
+                rx.spacer(),
+                rx.text(f"${p['subtotal']:.2f}", font_size="sm", font_weight="bold"),
+                width="100%",
+                spacing="2"
+            )
+        ),
+        rx.text("Sin productos registrados", color="gray", font_size="sm")
+    )
 
 def estado_badge(estado: str) -> rx.Component:
     color_map = {
@@ -48,14 +27,31 @@ def estado_badge(estado: str) -> rx.Component:
     color = color_map.get(estado, "gray")
     return rx.badge(estado.upper(), color_scheme=color, variant="solid")
 
-def pedido_card(pedido: PedidoData) -> rx.Component:
+def pedido_card_usuario(pedido) -> rx.Component:
     return rx.card(
         rx.vstack(
+            # Encabezado
             rx.text(f"Pedido #{pedido.id_pedido}", font_weight="bold", font_size="1.2em"),
+
+            # Dirección completa
+            rx.cond(pedido.direccion != None, rx.text(f"Calle: {pedido.direccion}"), rx.text("Calle: N/A")),
+            rx.cond(pedido.numero != None, rx.text(f"Número: {pedido.numero}"), rx.text("Número: N/A")),
+            rx.cond(pedido.departamento != None, rx.text(f"Departamento: {pedido.departamento}"), rx.text("Departamento: N/A")),
+            rx.cond(pedido.codigo_postal != None, rx.text(f"Código Postal: {pedido.codigo_postal}"), rx.text("Código Postal: N/A")),
+            rx.cond(pedido.ciudad != None, rx.text(f"Ciudad: {pedido.ciudad}"), rx.text("Ciudad: N/A")),
+            rx.cond(pedido.provincia != None, rx.text(f"Provincia: {pedido.provincia}"), rx.text("Provincia: N/A")),
+
+            # Fecha y estado
             rx.text(f"Fecha: {pedido.fecha_pedido}"),
             estado_badge(pedido.estado),
-            rx.text(f"Total: ${pedido.total:.2f}", font_weight="bold"),
+
+            # Productos
+            rx.text("Productos:", font_weight="bold"),
             mostrar_productos(pedido.productos_json),
+
+            # Total
+            rx.text(f"Total: ${pedido.total:.2f}", font_weight="bold"),
+
             spacing="4",
             align_items="flex-start"
         ),
@@ -66,8 +62,7 @@ def pedido_card(pedido: PedidoData) -> rx.Component:
         border_radius="10px"
     )
 
-# 🔹 Usamos un wrapper para resetear y cargar pedidos al entrar en la página
-@rx.page(route="pedidos", title="Mis Pedidos", on_load=lambda: PedidoState.reset_and_load())
+@rx.page(route="pedidos", title="Mis Pedidos", on_load=lambda: PedidoState.get_all_pedidos(id_usuario=9))
 def pedidos_page() -> rx.Component:
     return rx.flex(
         rx.heading("Mis Pedidos", align="center"),
@@ -77,7 +72,7 @@ def pedidos_page() -> rx.Component:
             rx.cond(
                 PedidoState.pedidos.length() > 0,
                 rx.vstack(
-                    rx.foreach(PedidoState.pedidos, pedido_card),
+                    rx.foreach(PedidoState.pedidos, pedido_card_usuario),
                     width="100%",
                     spacing="2"
                 ),
@@ -95,6 +90,6 @@ def pedidos_page() -> rx.Component:
             )
         ),
         direction="column",
-        style={"width": "60vw", "margin": "auto", "padding": "20px"},
+        style={"width": "70vw", "margin": "auto", "padding": "20px"},
         spacing="4"
     )
