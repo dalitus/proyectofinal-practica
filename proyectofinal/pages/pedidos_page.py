@@ -1,4 +1,3 @@
-# proyectofinal/pages/pedidos_page.py
 import reflex as rx
 from proyectofinal.state.pedido_state import PedidoState
 
@@ -40,6 +39,10 @@ def pedido_card_usuario(pedido) -> rx.Component:
             rx.cond(pedido.codigo_postal != None, rx.text(f"Código Postal: {pedido.codigo_postal}"), rx.text("Código Postal: N/A")),
             rx.cond(pedido.ciudad != None, rx.text(f"Ciudad: {pedido.ciudad}"), rx.text("Ciudad: N/A")),
             rx.cond(pedido.provincia != None, rx.text(f"Provincia: {pedido.provincia}"), rx.text("Provincia: N/A")),
+
+            # 👇 Mostrar talles y colores seleccionados
+            rx.cond(pedido.talles != None, rx.text(f"Talles: {pedido.talles}"), rx.text("Talles: N/A")),
+            rx.cond(pedido.colores != None, rx.text(f"Colores: {pedido.colores}"), rx.text("Colores: N/A")),
 
             # Fecha y estado
             rx.text(f"Fecha: {pedido.fecha_pedido}"),

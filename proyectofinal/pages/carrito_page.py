@@ -34,7 +34,7 @@ def producto_en_carrito_card(p: dict) -> rx.Component:
 
 
 def modal_ubicacion() -> rx.Component:
-    """Modal emergente para solicitar datos de ubicación"""
+    """Modal emergente para solicitar datos de ubicación y preferencias"""
     return rx.dialog.root(
         rx.dialog.content(
             rx.dialog.title("📍 Datos de Entrega"),
@@ -100,6 +100,27 @@ def modal_ubicacion() -> rx.Component:
                                 width="100%"
                             )
                         ),
+                        
+                        # 👇 Campos nuevos para talles y colores
+                        rx.vstack(
+                            rx.text("Talles deseados *"),
+                            rx.input(
+                                placeholder="Ej: 38, 39, 40",
+                                value=CarritoState.talles,
+                                on_change=CarritoState.set_talles,
+                                width="100%"
+                            )
+                        ),
+                        rx.vstack(
+                            rx.text("Colores deseados *"),
+                            rx.input(
+                                placeholder="Ej: Negro, Blanco, Azul",
+                                value=CarritoState.colores,
+                                on_change=CarritoState.set_colores,
+                                width="100%"
+                            )
+                        ),
+                        
                         spacing="4",
                         width="100%"
                     ),
@@ -123,7 +144,7 @@ def modal_ubicacion() -> rx.Component:
         on_open_change=CarritoState.cerrar_modal_ubicacion
     )
 
-@rx.page(route="/carrito", on_load=CarritoState.cargar_carrito_agrupado)
+@rx.page(route="/carrito", on_load=CarritoState.cargar_carrito_detallado)
 def carrito_page() -> rx.Component:
     return rx.box(
         rx.center(
@@ -165,10 +186,24 @@ def carrito_page() -> rx.Component:
                 ),
                 rx.divider(),
                 rx.hstack(
-                    rx.text(f"🧮 Total: ${CarritoState.total}", font_size="1.2em", font_weight="bold"),
+                    rx.text(
+                        f"🧮 Total: ${CarritoState.total}",
+                        font_size="1.2em",
+                        font_weight="bold"
+                    ),
                     rx.spacer(),
-                    rx.text(f"🧺 Productos: {CarritoState.productos_agrupados.length()}", font_size="1em"),
+                    rx.text(
+                        f"🧺 Productos: {CarritoState.productos_agrupados.length()}",
+                        font_size="1em"
+                    ),
                     width="100%"
+                ),
+                # 👇 Mostrar talles y colores seleccionados
+                rx.vstack(
+                    rx.text(f"Talles seleccionados: {CarritoState.talles}", font_size="1em"),
+                    rx.text(f"Colores seleccionados: {CarritoState.colores}", font_size="1em"),
+                    width="100%",
+                    spacing="2"
                 ),
                 rx.hstack(
                     DangerButton("Vaciar Carrito", on_click=CarritoState.vaciar_carrito_completo),

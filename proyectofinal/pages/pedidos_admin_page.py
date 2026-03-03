@@ -1,6 +1,7 @@
 # proyectofinal/pages/pedidos_admin_page.py
 import reflex as rx
 from proyectofinal.state.pedido_state import PedidoState
+from proyectofinal.state.data import PedidoAdminData
 
 def mostrar_productos(productos: list) -> rx.Component:
     return rx.cond(
@@ -41,6 +42,10 @@ def pedido_card_admin(pedido) -> rx.Component:
             rx.cond(pedido.codigo_postal != None, rx.text(f"Código Postal: {pedido.codigo_postal}"), rx.text("Código Postal: N/A")),
             rx.cond(pedido.ciudad != None, rx.text(f"Ciudad: {pedido.ciudad}"), rx.text("Ciudad: N/A")),
             rx.cond(pedido.provincia != None, rx.text(f"Provincia: {pedido.provincia}"), rx.text("Provincia: N/A")),
+
+            # 👇 Mostrar talles y colores seleccionados
+            rx.cond(pedido.talles != None, rx.text(f"Talles: {pedido.talles}"), rx.text("Talles: N/A")),
+            rx.cond(pedido.colores != None, rx.text(f"Colores: {pedido.colores}"), rx.text("Colores: N/A")),
 
             # Fecha y estado
             rx.text(f"Fecha: {pedido.fecha_pedido}"),
@@ -86,6 +91,45 @@ def pedido_card_admin(pedido) -> rx.Component:
         border_radius="10px"
     )
 
+def table_pedidos_admin(pedidos: list[PedidoAdminData]) -> rx.Component:
+    return rx.table.root(
+        rx.table.header(
+            rx.table.row(
+                rx.table.cell("ID Pedido", font_weight="bold"),
+                rx.table.cell("Usuario", font_weight="bold"),
+                rx.table.cell("Fecha", font_weight="bold"),
+                rx.table.cell("Total", font_weight="bold"),
+                rx.table.cell("Dirección", font_weight="bold"),
+                rx.table.cell("Ciudad", font_weight="bold"),
+                rx.table.cell("Provincia", font_weight="bold"),
+                rx.table.cell("Talles", font_weight="bold"),
+                rx.table.cell("Colores", font_weight="bold"),
+                rx.table.cell("Estado", font_weight="bold"),
+            )
+        ),
+        rx.table.body(
+            rx.foreach(
+                pedidos,
+                lambda pedido: rx.table.row(
+                    rx.table.cell(pedido.id_pedido),
+                    rx.table.cell(pedido.nombre_usuario),
+                    rx.table.cell(pedido.fecha_pedido),
+                    rx.table.cell(f"${pedido.total:.2f}"),
+                    rx.table.cell(rx.cond(pedido.direccion != None, pedido.direccion, "N/A")),
+                    rx.table.cell(rx.cond(pedido.ciudad != None, pedido.ciudad, "N/A")),
+                    rx.table.cell(rx.cond(pedido.provincia != None, pedido.provincia, "N/A")),
+                    rx.table.cell(rx.cond(pedido.talles != None, pedido.talles, "N/A")),
+                    rx.table.cell(rx.cond(pedido.colores != None, pedido.colores, "N/A")),
+                    rx.table.cell(pedido.estado),
+                )
+            )
+        ),
+        width="100%",
+        variant="surface",   # 👈 usar 'surface' o 'ghost'
+        size="2",
+        margin_y="20px"
+    )
+
 @rx.page(route="pedidos_admin", title="Pedidos Admin", on_load=PedidoState.get_all_pedidos_admin)
 def pedidos_admin_page() -> rx.Component:
     return rx.box(
@@ -97,7 +141,11 @@ def pedidos_admin_page() -> rx.Component:
                 rx.cond(
                     PedidoState.pedidos.length() > 0,
                     rx.vstack(
+                        # 👇 Podés elegir mostrar tarjetas o tabla
+                        rx.heading("Vista en Tarjetas", size="5"),
                         rx.foreach(PedidoState.pedidos, pedido_card_admin),
+                        rx.heading("Vista en Tabla", size="5", margin_top="20px"),
+                        table_pedidos_admin(PedidoState.pedidos),
                         width="100%",
                         spacing="2"
                     ),

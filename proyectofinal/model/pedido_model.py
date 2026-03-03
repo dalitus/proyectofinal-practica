@@ -20,5 +20,9 @@ class Pedido(SQLModel, table=True):
     codigo_postal: Optional[str] = None
     ciudad: Optional[str] = None
     provincia: Optional[str] = None
+
+    # 👇 nuevos campos
+    talles: Optional[str] = None
+    colores: Optional[str] = None
     
     usuario: Optional[Users] = Relationship(back_populates="pedidos")

@@ -3,27 +3,30 @@ from pydantic import BaseModel
 
 class PedidoData(BaseModel):
     id_pedido: int
-    id_users: int
+    id_users: int              # 👈 corregido, antes estaba id_usuario
     estado: str
     total: float
     fecha_pedido: str
     fecha_entrega: Optional[str] = None
     nombre_usuario: str
     direccion: Optional[str] = None
-    productos_json: List[Dict]   # 👈 lista de diccionarios
+    productos_json: List[Dict]   # lista de diccionarios
 
 class PedidoAdminData(BaseModel):
     id_pedido: int
-    id_users: int
+    id_users: int              # 👈 corregido, antes estaba id_usuario
     nombre_usuario: str
-    estado: str
     total: float
     fecha_pedido: str
-    fecha_entrega: Optional[str] = None
-    productos_json: List[Dict] = []   # 👈 también lista
-    direccion: Optional[str] = None
-    numero: Optional[str] = None
-    departamento: Optional[str] = None
-    codigo_postal: Optional[str] = None
-    ciudad: Optional[str] = None
-    provincia: Optional[str] = None
+    productos_json: list[dict]
+    direccion: str | None = None
+    numero: str | None = None
+    departamento: str | None = None
+    codigo_postal: str | None = None
+    ciudad: str | None = None
+    provincia: str | None = None
+    estado: str
+
+    # Campos nuevos
+    talles: str | None = None
+    colores: str | None = None

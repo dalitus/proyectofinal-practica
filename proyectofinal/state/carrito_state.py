@@ -13,11 +13,21 @@ from proyectofinal.repository.conect_db import engine
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.repository.consulta_repocitory import crear_consulta_repo
 
+
 class CarritoState(rx.State):
     productos_carrito: list[dict] = []
     total: float = 0.0
     mensaje_compra: str = ""
-    
+
+    talles: str = ""
+    colores: str = ""
+
+    def set_talles(self, value: str):
+        self.talles = value
+
+    def set_colores(self, value: str):
+        self.colores = value
+
     # Estados para el modal de ubicación
     mostrar_modal_ubicacion: bool = False
     direccion: str = ""
@@ -26,7 +36,7 @@ class CarritoState(rx.State):
     codigo_postal: str = ""
     ciudad: str = ""
     provincia: str = ""
-    
+
     @rx.event
     def abrir_modal_ubicacion(self):
         """Abre el modal para solicitar datos de ubicación"""
@@ -34,12 +44,12 @@ class CarritoState(rx.State):
             self.mensaje_compra = "No hay productos en el carrito."
             return
         self.mostrar_modal_ubicacion = True
-    
+
     @rx.event
     def cerrar_modal_ubicacion(self):
         """Cierra el modal de ubicación"""
         self.mostrar_modal_ubicacion = False
-    
+
     @rx.event
     def limpiar_ubicacion(self):
         """Limpia los datos de ubicación"""
@@ -49,6 +59,8 @@ class CarritoState(rx.State):
         self.codigo_postal = ""
         self.ciudad = ""
         self.provincia = ""
+        self.talles = ""
+        self.colores = ""
 
     @rx.event
     async def finalizar_compra_con_ubicacion(self):
@@ -61,17 +73,22 @@ class CarritoState(rx.State):
         if not self.productos_carrito:
             self.mensaje_compra = "No hay productos en el carrito."
             return
-        
+
         # Validar que los datos de ubicación estén completos
         if not self.direccion or not self.ciudad or not self.provincia:
             self.mensaje_compra = "Por favor completa todos los datos de ubicación requeridos."
             return
 
-        # Registrar como consulta automática
+        # Registrar como consulta automática (usando .get para evitar KeyError)
         detalle = "\n".join(
-            f"- {p['nombre']} x{p['cantidad']} = ${p['subtotal']}" for p in self.productos_carrito
+            f"- {p.get('nombre', 'Producto')} x{p.get('cantidad', 1)} = ${float(p.get('subtotal', 0))}"
+            for p in self.productos_carrito
         )
-        mensaje = f"El usuario {user_id} realizó una compra con los siguientes productos:\n{detalle}"
+        mensaje = (
+            f"El usuario {user_id} realizó una compra con los siguientes productos:\n{detalle}\n\n"
+            f"Talles seleccionados: {self.talles}\n"
+            f"Colores seleccionados: {self.colores}"
+        )
         crear_consulta_repo(id_users=user_id, asunto="Compra realizada", mensaje=mensaje)
 
         # Crear pedido en la tabla pedidos
@@ -79,7 +96,7 @@ class CarritoState(rx.State):
             from proyectofinal.service.pedido_service import crear_pedido, obtener_productos_carrito_usuario
             from datetime import datetime
 
-            total_compra = sum(p["subtotal"] for p in self.productos_carrito)
+            total_compra = sum(float(p.get("subtotal", 0)) for p in self.productos_carrito)
             fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Obtener productos desde el carrito en BD
@@ -87,7 +104,7 @@ class CarritoState(rx.State):
 
             crear_pedido(
                 id_usuario=user_id,
-                total=total_compra,
+                total=float(total_compra),  # 👈 aseguramos float
                 fecha_pedido=fecha_actual,
                 productos_json=productos_json,
                 direccion=self.direccion,
@@ -95,7 +112,9 @@ class CarritoState(rx.State):
                 departamento=self.departamento,
                 codigo_postal=self.codigo_postal,
                 ciudad=self.ciudad,
-                provincia=self.provincia
+                provincia=self.provincia,
+                talles=self.talles,
+                colores=self.colores
             )
         except Exception as e:
             print(f"Error al crear pedido: {e}")
@@ -121,7 +140,7 @@ class CarritoState(rx.State):
             return
         with Session(engine) as db:
             self.productos_carrito = obtener_carrito_agrupado_por_usuario(db, user_id)
-            self.total = sum(p["subtotal"] for p in self.productos_carrito)
+            self.total = float(sum(p.get("subtotal", 0) for p in self.productos_carrito))
 
     @rx.event
     def cargar_carrito_detallado(self):
@@ -130,14 +149,16 @@ class CarritoState(rx.State):
             self.productos_carrito = [
                 {
                     "nombre": producto.nombre,
-                    "precio": producto.precio,
+                    "precio": float(producto.precio),
                     "id_producto": producto.id_producto,
                     "id_carrito": carrito.id_carrito,
-                    "imagen": producto.imagen
+                    "imagen": producto.imagen,
+                    "cantidad": 1,  # 👈 aseguramos que exista cantidad
+                    "subtotal": float(producto.precio)
                 }
                 for carrito, producto, usuario in resultados
             ]
-            self.total = sum(p["precio"] for p in self.productos_carrito)
+            self.total = float(sum(p["precio"] for p in self.productos_carrito))
 
     @rx.event
     def cargar_carrito(self):
@@ -165,7 +186,6 @@ class CarritoState(rx.State):
         eliminar_item_del_carrito(user_id, id_producto)
         await self.cargar_carrito_agrupado()
 
-
     @rx.event
     async def agregar_carrito_con_id(self, id_producto: int):
         user_id = await UsersState.get_user_id()
@@ -189,9 +209,9 @@ class CarritoState(rx.State):
                 agrupados.append({
                     "id_producto": pid,
                     "nombre": producto["nombre"],
-                    "precio": producto["precio"],
+                    "precio": float(producto["precio"]),
                     "imagen": producto.get("imagen", ""),
                     "cantidad": contador[pid],
-                    "subtotal": producto["precio"] * contador[pid]
+                    "subtotal": float(producto["precio"]) * contador[pid]
                 })
         return agrupados

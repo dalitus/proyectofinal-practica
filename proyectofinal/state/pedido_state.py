@@ -52,6 +52,7 @@ class PedidoState(rx.State):
                 except Exception:
                     p["productos_json"] = []
                 # Admin usa PedidoAdminData
+                # 👇 Aquí se incluyen talles y colores si existen en la BD
                 self.pedidos.append(PedidoAdminData(**p))
         except Exception as e:
             self.error_message = f"Error al obtener pedidos admin: {str(e)}"
