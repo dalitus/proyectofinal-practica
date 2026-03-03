@@ -97,44 +97,51 @@ def mostrar_productos() -> rx.Component:
 
 @rx.page(route="/catalogo", on_load=CatalogoState.cargar_productos)
 def catalogo_page() -> rx.Component:
-    return rx.hstack(
-        rx.flex(
-            PageHeader("Catálogo de Productos", "Encuentra lo que buscas rápidamente."),
-            buscar_y_botones_component(),
-            rx.cond(
-                CatalogoState.error_message != "",
-                rx.text(CatalogoState.error_message, color="red", margin_bottom="10px"),
-                rx.box()
-            ),
-            rx.cond(
-                CatalogoState.success_message != "",
-                rx.text(CatalogoState.success_message, color="green", margin_bottom="10px"),
-                rx.box()
-            ),
-            mostrar_productos(),
-            direction="column",
-            style={"width": "75%", "padding": "20px"}
-        ),
-        rx.cond(
-            UsersState.logeado,
-            rx.card(
-                rx.vstack(
-                    rx.heading("👤 Perfil", size="4"),
-                    rx.text(f"Nombre: {UsersState.perfil.get('nombre', '')} {UsersState.perfil.get('apellido', '')}"),
-                    rx.text(f"Email: {UsersState.perfil.get('email', '')}"),
-                    rx.text(f"Teléfono: {UsersState.perfil.get('telefono', '')}"),
-                    rx.button("Cerrar sesión", on_click=UsersState.logout)
+    return rx.box(
+        rx.hstack(
+            rx.flex(
+                PageHeader("Catálogo de Productos", "Encuentra lo que buscas rápidamente."),
+                buscar_y_botones_component(),
+                rx.cond(
+                    CatalogoState.error_message != "",
+                    rx.text(CatalogoState.error_message, color="red", margin_bottom="10px"),
+                    rx.box()
                 ),
-                width="25%",
-                padding="20px",
-                box_shadow="md",
-                position="sticky",
-                top="20px"
+                rx.cond(
+                    CatalogoState.success_message != "",
+                    rx.text(CatalogoState.success_message, color="green", margin_bottom="10px"),
+                    rx.box()
+                ),
+                mostrar_productos(),
+                direction="column",
+                style={"width": "75%", "padding": "20px"}
             ),
-            rx.box(
-                rx.text("No estás logeado"),
-                width="25%",
-                padding="20px"
+            rx.cond(
+                UsersState.logeado,
+                rx.card(
+                    rx.vstack(
+                        rx.heading("👤 Perfil", size="4"),
+                        rx.text(f"Nombre: {UsersState.perfil.get('nombre', '')} {UsersState.perfil.get('apellido', '')}"),
+                        rx.text(f"Email: {UsersState.perfil.get('email', '')}"),
+                        rx.text(f"Teléfono: {UsersState.perfil.get('telefono', '')}"),
+                        rx.button("Cerrar sesión", on_click=UsersState.logout)
+                    ),
+                    width="25%",
+                    padding="20px",
+                    box_shadow="md",
+                    position="sticky",
+                    top="20px"
+                ),
+                rx.box(
+                    rx.text("No estás logeado"),
+                    width="25%",
+                    padding="20px"
+                )
             )
-        )
+        ),
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )

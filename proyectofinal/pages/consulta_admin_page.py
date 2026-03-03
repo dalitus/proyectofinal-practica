@@ -97,36 +97,43 @@ def render_consulta_card(c: dict) -> rx.Component:
     )
 
 @rx.page(route="/consulta_admin", on_load=ConsultaAdminState.cargar_consultas)
-def consulta_admin_page():
-    return rx.container(
-        rx.vstack(
-            PageHeader("📬 Consultas de usuarios", "Revisá y respondé las consultas recibidas"),
-            mostrar_consultas_admin_component(),
-            rx.cond(
-                ConsultaAdminState.consulta_seleccionada is not None,
-                rx.box(
-                    rx.heading("✍️ Responder consulta", size="3"),
-                    rx.text(f"Asunto: {ConsultaAdminState.consulta_seleccionada['asunto']}"),
-                    rx.text(f"Mensaje: {ConsultaAdminState.consulta_seleccionada['mensaje']}"),
-                    rx.text_area(
-                        placeholder="Escribí tu respuesta...",
-                        value=ConsultaAdminState.respuesta,
-                        on_change=ConsultaAdminState.set_respuesta,
-                        width="100%",
-                        height="120px",
-                        margin_top="10px"
-                    ),
-                    rx.hstack(
-                        PrimaryButton("Enviar respuesta", on_click=ConsultaAdminState.enviar_respuesta),
-                        SecondaryButton("Cancelar", on_click=lambda _=None: ConsultaAdminState.seleccionar_consulta(0))
-                    ),
-                    id="responder",
-                    border="1px solid #888",
-                    border_radius="8px",
-                    padding="10px",
-                    margin_top="20px"
+def consulta_admin_page() -> rx.Component:
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                PageHeader("📬 Consultas de usuarios", "Revisá y respondé las consultas recibidas"),
+                mostrar_consultas_admin_component(),
+                rx.cond(
+                    ConsultaAdminState.consulta_seleccionada is not None,
+                    rx.box(
+                        rx.heading("✍️ Responder consulta", size="3"),
+                        rx.text(f"Asunto: {ConsultaAdminState.consulta_seleccionada['asunto']}"),
+                        rx.text(f"Mensaje: {ConsultaAdminState.consulta_seleccionada['mensaje']}"),
+                        rx.text_area(
+                            placeholder="Escribí tu respuesta...",
+                            value=ConsultaAdminState.respuesta,
+                            on_change=ConsultaAdminState.set_respuesta,
+                            width="100%",
+                            height="120px",
+                            margin_top="10px"
+                        ),
+                        rx.hstack(
+                            PrimaryButton("Enviar respuesta", on_click=ConsultaAdminState.enviar_respuesta),
+                            SecondaryButton("Cancelar", on_click=lambda _=None: ConsultaAdminState.seleccionar_consulta(0))
+                        ),
+                        id="responder",
+                        border="1px solid #888",
+                        border_radius="8px",
+                        padding="10px",
+                        margin_top="20px"
+                    )
                 )
-            )
+            ),
+            padding="20px"
         ),
-        padding="20px"
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )

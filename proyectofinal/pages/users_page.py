@@ -5,24 +5,31 @@ from proyectofinal.model.users_model import Users
 
 @rx.page(route="users", title="Users", on_load=UsersState.get_all_users)
 def users_page() -> rx.Component:
-    return rx.flex(
-        rx.heading("Usuarios", align="center"),
-        rx.hstack(
-            buscar_user_component(),
-            create_user_dialogo_component(),
-            validar_usuario_button(),
-            style={"textAlign": "center"},
+    return rx.box(
+        rx.flex(
+            rx.heading("Usuarios", align="center"),
+            rx.hstack(
+                buscar_user_component(),
+                create_user_dialogo_component(),
+                validar_usuario_button(),
+                style={"textAlign": "center"},
+            ),
+            rx.cond(
+                UsersState.error_message != "",
+                notifail_component(
+                    mensaje=UsersState.error_message,
+                    icon_notify="shield_alert",
+                    color="red"
+                )
+            ),
+            direction="column",
+            style={"width": "60vw", "margin": "auto"},
         ),
-        rx.cond(
-            UsersState.error_message != "",
-            notifail_component(
-                mensaje=UsersState.error_message,
-                icon_notify="shield_alert",
-                color="red"
-            )
-        ),
-        direction="column",
-        style={"width": "60vw", "margin": "auto"},
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )
 
 def table_users(list_user: list[Users]) -> rx.Component:

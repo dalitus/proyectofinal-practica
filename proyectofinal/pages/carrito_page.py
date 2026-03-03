@@ -123,60 +123,66 @@ def modal_ubicacion() -> rx.Component:
         on_open_change=CarritoState.cerrar_modal_ubicacion
     )
 
-
 @rx.page(route="/carrito", on_load=CarritoState.cargar_carrito_agrupado)
 def carrito_page() -> rx.Component:
-    return rx.center(
-        rx.vstack(
-            modal_ubicacion(),
-            PageHeader("🛒 Tu Carrito", "Revisa tu selección y finaliza la compra"),
-            rx.cond(
-                CarritoState.mensaje_compra != "",
-                rx.box(
-                    rx.text(CarritoState.mensaje_compra),
-                    background_color=rx.cond(
-                        CarritoState.mensaje_compra.contains("Error"),
-                        "red.100",
-                        "green.100"
+    return rx.box(
+        rx.center(
+            rx.vstack(
+                modal_ubicacion(),
+                PageHeader("🛒 Tu Carrito", "Revisa tu selección y finaliza la compra"),
+                rx.cond(
+                    CarritoState.mensaje_compra != "",
+                    rx.box(
+                        rx.text(CarritoState.mensaje_compra),
+                        background_color=rx.cond(
+                            CarritoState.mensaje_compra.contains("Error"),
+                            "red.100",
+                            "green.100"
+                        ),
+                        border=rx.cond(
+                            CarritoState.mensaje_compra.contains("Error"),
+                            "1px solid red",
+                            "1px solid green"
+                        ),
+                        border_radius="md",
+                        padding="10px",
+                        width="100%"
                     ),
-                    border=rx.cond(
-                        CarritoState.mensaje_compra.contains("Error"),
-                        "1px solid red",
-                        "1px solid green"
-                    ),
-                    border_radius="md",
-                    padding="10px",
+                    rx.box()
+                ),
+                rx.divider(),
+                rx.cond(
+                    CarritoState.productos_agrupados.length() == 0,
+                    rx.text("Tu carrito está vacío."),
+                    rx.vstack(
+                        rx.foreach(
+                            CarritoState.productos_agrupados.to(list[dict]),
+                            producto_en_carrito_card
+                        ),
+                        spacing="4",
+                        width="100%"
+                    )
+                ),
+                rx.divider(),
+                rx.hstack(
+                    rx.text(f"🧮 Total: ${CarritoState.total}", font_size="1.2em", font_weight="bold"),
+                    rx.spacer(),
+                    rx.text(f"🧺 Productos: {CarritoState.productos_agrupados.length()}", font_size="1em"),
                     width="100%"
                 ),
-                rx.box()
-            ),
-            rx.divider(),
-            rx.cond(
-                CarritoState.productos_agrupados.length() == 0,
-                rx.text("Tu carrito está vacío."),
-                rx.vstack(
-                    rx.foreach(
-                        CarritoState.productos_agrupados.to(list[dict]),
-                        producto_en_carrito_card
-                    ),
-                    spacing="4",
-                    width="100%"
-                )
-            ),
-            rx.divider(),
-            rx.hstack(
-                rx.text(f"🧮 Total: ${CarritoState.total}", font_size="1.2em", font_weight="bold"),
-                rx.spacer(),
-                rx.text(f"🧺 Productos: {CarritoState.productos_agrupados.length()}", font_size="1em"),
-                width="100%"
-            ),
-            rx.hstack(
-                DangerButton("Vaciar Carrito", on_click=CarritoState.vaciar_carrito_completo),
-                PrimaryButton("Finalizar Compra", on_click=CarritoState.abrir_modal_ubicacion),
-                spacing="4"
-            ),
-            spacing="6",
-            padding="30px",
-            width="90%"
-        )
+                rx.hstack(
+                    DangerButton("Vaciar Carrito", on_click=CarritoState.vaciar_carrito_completo),
+                    PrimaryButton("Finalizar Compra", on_click=CarritoState.abrir_modal_ubicacion),
+                    spacing="4"
+                ),
+                spacing="6",
+                padding="30px",
+                width="90%"
+            )
+        ),
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )

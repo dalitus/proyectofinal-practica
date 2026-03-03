@@ -52,38 +52,57 @@ class ConsultaUsuarioState(rx.State):
         self.mensaje = value
 
 @rx.page(route="/consulta_usuario", on_load=ConsultaUsuarioState.on_load)
-def consulta_usuario_page():
-    return rx.vstack(
-        PageHeader("Enviar consulta", "Te responderemos por email lo antes posible."),
-        rx.cond(
-            ConsultaUsuarioState.success_message != "",
-            rx.box(rx.text(ConsultaUsuarioState.success_message), background_color="green.100", padding="8px", border_radius="md"),
-            rx.box()
+def consulta_usuario_page() -> rx.Component:
+    return rx.box(
+        rx.vstack(
+            PageHeader("Enviar consulta", "Te responderemos por email lo antes posible."),
+            rx.cond(
+                ConsultaUsuarioState.success_message != "",
+                rx.box(
+                    rx.text(ConsultaUsuarioState.success_message),
+                    background_color="green.100",
+                    padding="8px",
+                    border_radius="md"
+                ),
+                rx.box()
+            ),
+            rx.cond(
+                ConsultaUsuarioState.error_message != "",
+                rx.box(
+                    rx.text(ConsultaUsuarioState.error_message),
+                    background_color="red.100",
+                    padding="8px",
+                    border_radius="md"
+                ),
+                rx.box()
+            ),
+            rx.input(
+                placeholder="Asunto",
+                value=ConsultaUsuarioState.asunto,
+                on_change=ConsultaUsuarioState.actualizar_asunto,
+                width="100%",
+            ),
+            rx.text_area(
+                placeholder="Mensaje",
+                value=ConsultaUsuarioState.mensaje,
+                on_change=ConsultaUsuarioState.actualizar_mensaje,
+                width="100%",
+            ),
+            PrimaryButton("Enviar", on_click=ConsultaUsuarioState.enviar_consulta),
+            rx.divider(),
+            rx.heading("Tus consultas"),
+            rx.foreach(
+                ConsultaUsuarioState.consultas.to(list[dict]),
+                render_consulta_usuario
+            ),
+            spacing="3",
+            style={"width": "80vw", "margin": "auto"}
         ),
-        rx.cond(
-            ConsultaUsuarioState.error_message != "",
-            rx.box(rx.text(ConsultaUsuarioState.error_message), background_color="red.100", padding="8px", border_radius="md"),
-            rx.box()
-        ),
-        rx.input(
-            placeholder="Asunto",
-            value=ConsultaUsuarioState.asunto,
-            on_change=ConsultaUsuarioState.actualizar_asunto,
-            width="100%",
-        ),
-        rx.text_area(
-            placeholder="Mensaje",
-            value=ConsultaUsuarioState.mensaje,
-            on_change=ConsultaUsuarioState.actualizar_mensaje,
-            width="100%",
-        ),
-        PrimaryButton("Enviar", on_click=ConsultaUsuarioState.enviar_consulta),
-        rx.divider(),
-        rx.heading("Tus consultas"),
-        rx.foreach(
-            ConsultaUsuarioState.consultas.to(list[dict]),
-            render_consulta_usuario
-        )
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )
 
 

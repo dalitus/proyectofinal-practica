@@ -258,25 +258,30 @@ class AdminState(rx.State):
         self.preview_data_url = f"data:{mime};base64,{b64}"
         return rx.toast(f"Imagen cargada: {os.path.basename(destino)}")
 
-
 @rx.page(route="admin_dashboard", title="Admin Dashboard", on_load=AdminState.cargar_productos)
 def admin_dashboard_page() -> rx.Component:
-    return rx.flex(
-        PageHeader("Panel de Administración de Productos", "Gestioná productos y consultas"),
-        PrimaryButton("Ir a consultas de usuarios", on_click=ir_a_consultas, width="100%"),
-        SecondaryButton("Ver Compras (Admin)", on_click=ir_a_compras, width="100%"),
-        SecondaryButton("Gestionar Pedidos", on_click=ir_a_pedidos, width="100%"),
-        crear_producto_dialog_component(),
-        table_productos(),
-        rx.cond(
-            AdminState.error_message != "",
-            rx.text(AdminState.error_message, color="red")
+    return rx.box(
+        rx.flex(
+            PageHeader("Panel de Administración de Productos", "Gestioná productos y consultas"),
+            PrimaryButton("Ir a consultas de usuarios", on_click=ir_a_consultas, width="100%"),
+            SecondaryButton("Ver Compras (Admin)", on_click=ir_a_compras, width="100%"),
+            SecondaryButton("Gestionar Pedidos", on_click=ir_a_pedidos, width="100%"),
+            crear_producto_dialog_component(),
+            table_productos(),
+            rx.cond(
+                AdminState.error_message != "",
+                rx.text(AdminState.error_message, color="red")
+            ),
+            eliminar_producto_dialog(),
+            direction="column",
+            style={"width": "70vw", "margin": "auto"}
         ),
-        eliminar_producto_dialog(),
-        direction="column",
-        style={"width": "70vw", "margin": "auto"}
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )
-
 
 def ir_a_consultas():
     return rx.redirect("/consulta_admin")

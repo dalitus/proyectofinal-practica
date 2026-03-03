@@ -88,32 +88,39 @@ def pedido_card_admin(pedido) -> rx.Component:
 
 @rx.page(route="pedidos_admin", title="Pedidos Admin", on_load=PedidoState.get_all_pedidos_admin)
 def pedidos_admin_page() -> rx.Component:
-    return rx.flex(
-        rx.heading("Pedidos (Admin)", align="center"),
-        rx.cond(
-            PedidoState.loading,
-            rx.spinner(color="blue"),
+    return rx.box(
+        rx.flex(
+            rx.heading("Pedidos (Admin)", align="center"),
             rx.cond(
-                PedidoState.pedidos.length() > 0,
-                rx.vstack(
-                    rx.foreach(PedidoState.pedidos, pedido_card_admin),
-                    width="100%",
-                    spacing="2"
-                ),
-                rx.text("No hay pedidos registrados", text_align="center", color="gray", margin_top="20px")
-            )
+                PedidoState.loading,
+                rx.spinner(color="blue"),
+                rx.cond(
+                    PedidoState.pedidos.length() > 0,
+                    rx.vstack(
+                        rx.foreach(PedidoState.pedidos, pedido_card_admin),
+                        width="100%",
+                        spacing="2"
+                    ),
+                    rx.text("No hay pedidos registrados", text_align="center", color="gray", margin_top="20px")
+                )
+            ),
+            rx.cond(
+                PedidoState.error_message != "",
+                rx.box(
+                    rx.text(PedidoState.error_message),
+                    background_color="red.100",
+                    padding="12px",
+                    border_radius="8px",
+                    color="red.900"
+                )
+            ),
+            direction="column",
+            style={"width": "70vw", "margin": "auto", "padding": "20px"},
+            spacing="4"
         ),
-        rx.cond(
-            PedidoState.error_message != "",
-            rx.box(
-                rx.text(PedidoState.error_message),
-                background_color="red.100",
-                padding="12px",
-                border_radius="8px",
-                color="red.900"
-            )
-        ),
-        direction="column",
-        style={"width": "70vw", "margin": "auto", "padding": "20px"},
-        spacing="4"
+        style={
+            "background_color": "#ADD8E6",  # celeste
+            "min_height": "100vh",          # ocupa toda la pantalla
+            "padding": "20px"
+        }
     )
