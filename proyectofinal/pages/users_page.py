@@ -8,11 +8,22 @@ def users_page() -> rx.Component:
     return rx.box(
         rx.flex(
             rx.heading("Usuarios", align="center"),
+            # Botones centrados
             rx.hstack(
-                buscar_user_component(),
                 create_user_dialogo_component(),
                 validar_usuario_button(),
-                style={"textAlign": "center"},
+                justify="center",   # centra los botones
+                width="100%",       # ocupa todo el ancho
+                spacing="4"
+            ),
+            # 👇 Título debajo de los botones
+            rx.heading(
+                "Calzado Fermín",
+                font_style="cursive",   # cursiva
+                size="9",              # mucho más grande (≈ 5 veces el texto normal)
+                text_align="center",
+                width="100%",          # ocupa toda la pantalla en ancho
+                margin_top="40px"
             ),
             rx.cond(
                 UsersState.error_message != "",
@@ -60,12 +71,26 @@ def buscar_user_component() -> rx.Component:
 def create_user_form() -> rx.Component:
     return rx.form(
         rx.vstack(
-            rx.input(placeholder="Nombre", name="nombre"),
-            rx.input(placeholder="Apellido", name="apellido"),
-            rx.input(placeholder="Email", name="email"),
-            rx.input(placeholder="Teléfono", name="telefono"),
-            rx.input(placeholder="Contraseña", name="contrasena", type="password"),
-            rx.dialog.close(rx.button("Guardar", type="submit")),
+            rx.text("Nombre", font_weight="bold"),
+            rx.input(name="nombre", width="100%"),
+            
+            rx.text("Apellido", font_weight="bold"),
+            rx.input(name="apellido", width="100%"),
+            
+            rx.text("Email", font_weight="bold"),
+            rx.input(name="email", width="100%"),
+            
+            rx.text("Teléfono", font_weight="bold"),
+            rx.input(name="telefono", width="100%"),
+            
+            rx.text("Contraseña", font_weight="bold"),
+            rx.input(name="contrasena", type="password", width="100%"),
+            
+            rx.dialog.close(
+                rx.button("Guardar", type="submit", width="100%")
+            ),
+            spacing="4",
+            width="100%"
         ),
         on_submit=UsersState.create_user,
     )
@@ -121,13 +146,23 @@ def validar_usuario_button() -> rx.Component:
             rx.form(
                 rx.vstack(
                     rx.dialog.title("Iniciar Sesión"),
-                    rx.input(placeholder="Email", name="email"),
-                    rx.input(placeholder="Contraseña", name="password", type="password"),
-                    rx.dialog.close(rx.button("Iniciar Sesión", type="submit")),
+                    
+                    # Etiqueta arriba del campo Email
+                    rx.text("Email", font_weight="bold"),
+                    rx.input(name="email", width="100%"),
+                    
+                    # Etiqueta arriba del campo Contraseña
+                    rx.text("Contraseña", font_weight="bold", margin_top="10px"),
+                    rx.input(name="password", type="password", width="100%"),
+                    
+                    rx.dialog.close(
+                        rx.button("Iniciar Sesión", type="submit", width="100%")
+                    ),
+                    spacing="4",
+                    width="100%"
                 ),
                 on_submit=UsersState.validar_usuario
             ),
-            style={"width": "400px"}
+            style={"width": "400px", "padding": "20px", "border_radius": "8px"}
         ),
     )
-
