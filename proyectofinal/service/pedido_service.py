@@ -9,21 +9,69 @@ import json
 def obtener_productos_carrito_usuario(id_usuario: int) -> str:
     """Obtener productos del carrito del usuario como JSON"""
     with Session(engine) as session:
-        # Obtener items del carrito
         items_carrito = session.exec(
-            select(Carrito, Producto).where(Carrito.id_users == id_usuario)
+            select(Carrito, Producto)
+            .where(Carrito.id_users == id_usuario)
             .join(Producto, Carrito.id_producto == Producto.id_producto)
         ).all()
         
         productos = []
         for carrito, producto in items_carrito:
             productos.append({
+                "id_producto": producto.id_producto,
                 "nombre": producto.nombre,
-                "cantidad": 1,  # La cantidad se cuenta por items en carrito
-                "subtotal": float(producto.precio) if producto.precio else 0.0
+                "cantidad": carrito.cantidad if hasattr(carrito, "cantidad") else 1,
+                "precio": float(producto.precio) if producto.precio else 0.0,
+                "subtotal": float(producto.precio) * (carrito.cantidad if hasattr(carrito, "cantidad") else 1),
+                "imagen": getattr(producto, "imagen", "")
             })
         
         return json.dumps(productos)
+
+def crear_pedido(
+    id_usuario: int,
+    total: float,
+    fecha_pedido: str,
+    productos_json: str = "",
+    direccion: str = None,
+    numero: str = None,
+    departamento: str = None,
+    codigo_postal: str = None,
+    ciudad: str = None,
+    provincia: str = None
+) -> dict:
+    """Crear un nuevo pedido con datos de ubicación"""
+    with Session(engine) as session:
+        nuevo_pedido = Pedido(
+            id_users=id_usuario,
+            estado="en espera",
+            total=total,
+            fecha_pedido=fecha_pedido,
+            productos_json=productos_json,
+            direccion=direccion,
+            numero=numero,
+            departamento=departamento,
+            codigo_postal=codigo_postal,
+            ciudad=ciudad,
+            provincia=provincia,
+        )
+        session.add(nuevo_pedido)
+        session.commit()
+        session.refresh(nuevo_pedido)
+        
+        return {
+            "id_pedido": nuevo_pedido.id_pedido,
+            "estado": nuevo_pedido.estado,
+            "total": nuevo_pedido.total,
+            "fecha_pedido": nuevo_pedido.fecha_pedido,
+            "productos_json": nuevo_pedido.productos_json,
+            "direccion": nuevo_pedido.direccion,
+            "numero": nuevo_pedido.numero,
+            "departamento": nuevo_pedido.departamento,
+            "codigo_postal": nuevo_pedido.codigo_postal,
+            "ciudad": nuevo_pedido.ciudad,
+            "provincia": nuevo_pedido.provincia,
+        }
 
 def obtener_pedidos_usuario(id_usuario: int) -> list[dict]:
     """Obtener todos los pedidos de un usuario con datos del usuario"""
@@ -90,7 +138,7 @@ def obtener_todos_pedidos() -> list[dict]:
         return resultado
 
 def obtener_pedido_por_id(id_pedido: int) -> dict | None:
-    """Obtener un pedido específico"""
+    """Obtener un pedido específico con productos y ubicación"""
     with Session(engine) as session:
         pedido = session.exec(
             select(Pedido).where(Pedido.id_pedido == id_pedido)
@@ -99,13 +147,27 @@ def obtener_pedido_por_id(id_pedido: int) -> dict | None:
         if not pedido:
             return None
         
+        # Obtener datos del usuario
+        usuario = session.exec(
+            select(Users).where(Users.id_users == pedido.id_users)
+        ).first()
+        
         return {
             "id_pedido": pedido.id_pedido,
             "id_users": pedido.id_users,
+            "nombre_usuario": f"{usuario.nombre} {usuario.apellido}" if usuario else "N/A",
+            "direccion_usuario": usuario.direccion if usuario else "N/A",
             "estado": pedido.estado,
             "total": pedido.total,
             "fecha_pedido": pedido.fecha_pedido,
             "fecha_entrega": pedido.fecha_entrega,
+            "productos_json": pedido.productos_json if pedido.productos_json else "[]",
+            "direccion": pedido.direccion,
+            "numero": pedido.numero,
+            "departamento": pedido.departamento,
+            "codigo_postal": pedido.codigo_postal,
+            "ciudad": pedido.ciudad,
+            "provincia": pedido.provincia,
         }
 
 def crear_pedido(

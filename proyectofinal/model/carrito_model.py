@@ -8,7 +8,8 @@ class Carrito(SQLModel, table=True):
 
     id_carrito: Optional[int] = Field(default=None, primary_key=True)
     id_users: int = Field(foreign_key="users.id_users")
-    id_producto: int = Field(foreign_key="productos.id_producto")  # <- corregido
+    id_producto: int = Field(foreign_key="productos.id_producto")  
+    cantidad: int = Field(default=1)
 
     usuario: Optional[Users] = Relationship(back_populates="carritos")
     producto: Optional[Producto] = Relationship(back_populates="carritos")

@@ -9,7 +9,7 @@ from proyectofinal.pages.producto_detalle_page import detalle_producto_page
 
 from proyectofinal.pages.consulta_usuario_page import consulta_usuario_page
 from proyectofinal.pages.consulta_admin_page import consulta_admin_page
-from proyectofinal.pages.compras_admin_page import compras_admin_page
+#from proyectofinal.pages.compras_admin_page import compras_admin_page
 from proyectofinal.pages.pedidos_page import pedidos_page
 from proyectofinal.pages.pedidos_admin_page import pedidos_admin_page
 
@@ -28,6 +28,6 @@ app.add_page(detalle_producto_page, route="/detalle_producto", title="Detalle Pr
 
 app.add_page(consulta_usuario_page, route="/consulta_usuario", title="Consulta Usuario")  
 app.add_page(consulta_admin_page, route="/consulta_admin", title="Consulta Admin")
-app.add_page(compras_admin_page, route="/compras_admin", title="Compras Admin")
+#app.add_page(compras_admin_page, route="/compras_admin", title="Compras Admin")
 app.add_page(pedidos_page, route="/pedidos", title="Mis Pedidos")
 app.add_page(pedidos_admin_page, route="/pedidos_admin", title="Gestión de Pedidos")

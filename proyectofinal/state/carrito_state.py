@@ -67,32 +67,24 @@ class CarritoState(rx.State):
             self.mensaje_compra = "Por favor completa todos los datos de ubicación requeridos."
             return
 
-        # Armar detalle de compra
+        # Registrar como consulta automática
         detalle = "\n".join(
             f"- {p['nombre']} x{p['cantidad']} = ${p['subtotal']}" for p in self.productos_carrito
         )
-
         mensaje = f"El usuario {user_id} realizó una compra con los siguientes productos:\n{detalle}"
+        crear_consulta_repo(id_users=user_id, asunto="Compra realizada", mensaje=mensaje)
 
-        # Registrar como consulta automática
-        crear_consulta_repo(
-            id_users=user_id,
-            asunto="Compra realizada",
-            mensaje=mensaje
-        )
-        
         # Crear pedido en la tabla pedidos
         try:
-            from proyectofinal.service.pedido_service import crear_pedido
+            from proyectofinal.service.pedido_service import crear_pedido, obtener_productos_carrito_usuario
             from datetime import datetime
-            import json
-            
+
             total_compra = sum(p["subtotal"] for p in self.productos_carrito)
             fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
-            # Convertir productos a JSON
-            productos_json = json.dumps(self.productos_carrito)
-            
+
+            # Obtener productos desde el carrito en BD
+            productos_json = obtener_productos_carrito_usuario(user_id)
+
             crear_pedido(
                 id_usuario=user_id,
                 total=total_compra,
