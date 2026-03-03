@@ -385,33 +385,60 @@ def crear_producto_dialog_component() -> rx.Component:
 def crear_producto_form() -> rx.Component:
     return rx.form(
         rx.vstack(
-            rx.input(placeholder="Nombre", name="nombre"),
-            rx.input(placeholder="Descripción", name="descripcion"),
-            rx.input(type="number", placeholder="Precio", name="precio", min="0", step="0.01"),
-            rx.input(placeholder="Marca", name="marca"),
-            rx.input(placeholder="Categoría", name="categoria"),
-            rx.input(placeholder="Talle", name="talle"),
-            rx.input(type="number", placeholder="Cantidad", name="cantidad", min="0", step="1"),
-            rx.input(placeholder="Imagen URL (opcional)", name="imagen"),
+            rx.text("Nombre", font_weight="bold"),
+            rx.input(name="nombre", width="100%"),
+            
+            rx.text("Descripción", font_weight="bold"),
+            rx.input(name="descripcion", width="100%"),
+            
+            rx.text("Precio", font_weight="bold"),
+            rx.input(type="number", name="precio", min="0", step="0.01", width="100%"),
+            
+            rx.text("Marca", font_weight="bold"),
+            rx.input(name="marca", width="100%"),
+            
+            rx.text("Categoría", font_weight="bold"),
+            rx.input(name="categoria", width="100%"),
+            
+            rx.text("Talle", font_weight="bold"),
+            rx.input(name="talle", width="100%"),
+            
+            rx.text("Cantidad", font_weight="bold"),
+            rx.input(type="number", name="cantidad", min="0", step="1", width="100%"),
+            
+            rx.text("Imagen URL (opcional)", font_weight="bold"),
+            rx.input(name="imagen", width="100%"),
+            
+            rx.text("Subir imagen desde tu PC", font_weight="bold"),
             rx.upload(
-                rx.button("Seleccionar imagen", type="button"),
+                rx.button("Seleccionar imagen", type="button", width="100%"),
                 multiple=False,
                 accept="image/*",
                 on_drop=AdminState.subir_imagen,
             ),
+            
             rx.cond(
                 AdminState.imagen_local != "",
                 rx.vstack(
                     rx.text("Imagen local lista para subir a Drive ✅"),
                     rx.cond(
                         AdminState.preview_data_url != "",
-                        rx.image(src=AdminState.preview_data_url, width="160px", height="160px", border_radius="8px"),
+                        rx.image(
+                            src=AdminState.preview_data_url,
+                            width="160px",
+                            height="160px",
+                            border_radius="8px"
+                        ),
                         rx.box()
                     )
                 ),
                 rx.box()
             ),
-            rx.button("Guardar", type="submit", color_scheme="blue") 
+            
+            # 👇 Botón unificado con el estilo de los demás
+            PrimaryButton("Guardar", type="submit", width="100%"),
+            spacing="4",
+            width="100%"
         ),
         on_submit=AdminState.crear_producto
     )
@@ -446,15 +473,47 @@ def editar_producto_dialog_component(producto: dict) -> rx.Component:
 def editar_producto_form(producto: dict) -> rx.Component:
     return rx.form(
         rx.vstack(
-            rx.input(placeholder="Nombre", name="nombre", default_value=producto.get("nombre", "")),
-            rx.input(placeholder="Descripción", name="descripcion", default_value=producto.get("descripcion", "")),
-            rx.input(type="number", placeholder="Precio", name="precio", min="0", step="0.01", default_value=str(producto.get("precio", "0.00"))),
-            rx.input(placeholder="Marca", name="marca", default_value=producto.get("marca", "")),
-            rx.input(placeholder="Categoría", name="categoria", default_value=producto.get("categoria", "")),
-            rx.input(placeholder="Talle", name="talle", default_value=producto.get("talle", "")),
-            rx.input(placeholder="Imagen URL", name="imagen", default_value=producto.get("imagen", "")),
-            rx.input(type="number", placeholder="Cantidad", name="cantidad", min="0", step="1", default_value=str(producto.get("cantidad", "0"))),
-            PrimaryButton("Guardar", type="submit") 
+            rx.text("Nombre", font_weight="bold"),
+            rx.input(name="nombre", default_value=producto.get("nombre", ""), width="100%"),
+            
+            rx.text("Descripción", font_weight="bold"),
+            rx.input(name="descripcion", default_value=producto.get("descripcion", ""), width="100%"),
+            
+            rx.text("Precio", font_weight="bold"),
+            rx.input(
+                type="number",
+                name="precio",
+                min="0",
+                step="0.01",
+                default_value=str(producto.get("precio", "0.00")),
+                width="100%"
+            ),
+            
+            rx.text("Marca", font_weight="bold"),
+            rx.input(name="marca", default_value=producto.get("marca", ""), width="100%"),
+            
+            rx.text("Categoría", font_weight="bold"),
+            rx.input(name="categoria", default_value=producto.get("categoria", ""), width="100%"),
+            
+            rx.text("Talle", font_weight="bold"),
+            rx.input(name="talle", default_value=producto.get("talle", ""), width="100%"),
+            
+            rx.text("Imagen URL", font_weight="bold"),
+            rx.input(name="imagen", default_value=producto.get("imagen", ""), width="100%"),
+            
+            rx.text("Cantidad", font_weight="bold"),
+            rx.input(
+                type="number",
+                name="cantidad",
+                min="0",
+                step="1",
+                default_value=str(producto.get("cantidad", "0")),
+                width="100%"
+            ),
+            
+            PrimaryButton("Guardar", type="submit", width="100%"),
+            spacing="4",
+            width="100%"
         ),
         on_submit=AdminState.enviar_edicion
     )
@@ -463,15 +522,47 @@ def editar_producto_form_dynamic() -> rx.Component:
     # Formulario que toma valores desde AdminState.datos_edicion
     return rx.form(
         rx.vstack(
-            rx.input(placeholder="Nombre", name="nombre", default_value=AdminState.datos_edicion.get("nombre", "")),
-            rx.input(placeholder="Descripción", name="descripcion", default_value=AdminState.datos_edicion.get("descripcion", "")),
-            rx.input(type="number", placeholder="Precio", name="precio", min="0", step="0.01", default_value=str(AdminState.datos_edicion.get("precio", "0.00"))),
-            rx.input(placeholder="Marca", name="marca", default_value=AdminState.datos_edicion.get("marca", "")),
-            rx.input(placeholder="Categoría", name="categoria", default_value=AdminState.datos_edicion.get("categoria", "")),
-            rx.input(placeholder="Talle", name="talle", default_value=AdminState.datos_edicion.get("talle", "")),
-            rx.input(placeholder="Imagen URL", name="imagen", default_value=AdminState.datos_edicion.get("imagen", "")),
-            rx.input(type="number", placeholder="Cantidad", name="cantidad", min="0", step="1", default_value=str(AdminState.datos_edicion.get("cantidad", "0"))),
-            PrimaryButton("Guardar", type="submit")
+            rx.text("Nombre", font_weight="bold"),
+            rx.input(name="nombre", default_value=AdminState.datos_edicion.get("nombre", ""), width="100%"),
+            
+            rx.text("Descripción", font_weight="bold"),
+            rx.input(name="descripcion", default_value=AdminState.datos_edicion.get("descripcion", ""), width="100%"),
+            
+            rx.text("Precio", font_weight="bold"),
+            rx.input(
+                type="number",
+                name="precio",
+                min="0",
+                step="0.01",
+                default_value=str(AdminState.datos_edicion.get("precio", "0.00")),
+                width="100%"
+            ),
+            
+            rx.text("Marca", font_weight="bold"),
+            rx.input(name="marca", default_value=AdminState.datos_edicion.get("marca", ""), width="100%"),
+            
+            rx.text("Categoría", font_weight="bold"),
+            rx.input(name="categoria", default_value=AdminState.datos_edicion.get("categoria", ""), width="100%"),
+            
+            rx.text("Talle", font_weight="bold"),
+            rx.input(name="talle", default_value=AdminState.datos_edicion.get("talle", ""), width="100%"),
+            
+            rx.text("Imagen URL", font_weight="bold"),
+            rx.input(name="imagen", default_value=AdminState.datos_edicion.get("imagen", ""), width="100%"),
+            
+            rx.text("Cantidad", font_weight="bold"),
+            rx.input(
+                type="number",
+                name="cantidad",
+                min="0",
+                step="1",
+                default_value=str(AdminState.datos_edicion.get("cantidad", "0")),
+                width="100%"
+            ),
+            
+            PrimaryButton("Guardar", type="submit", width="100%"),
+            spacing="4",
+            width="100%"
         ),
         on_submit=AdminState.enviar_edicion
     )
