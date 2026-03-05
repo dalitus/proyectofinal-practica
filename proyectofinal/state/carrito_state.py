@@ -1,6 +1,5 @@
 import reflex as rx
 from sqlmodel import Session
-from collections import Counter
 from proyectofinal.repository.carrito_repository import (
     get_items_por_usuario,
     agregar_item_al_carrito,
@@ -12,6 +11,7 @@ from proyectofinal.repository.carrito_repository import (
 from proyectofinal.repository.conect_db import engine
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.repository.consulta_repocitory import crear_consulta_repo
+from datetime import datetime
 
 
 class CarritoState(rx.State):
@@ -22,12 +22,6 @@ class CarritoState(rx.State):
     talles: str = ""
     colores: str = ""
 
-    def set_talles(self, value: str):
-        self.talles = value
-
-    def set_colores(self, value: str):
-        self.colores = value
-
     # Estados para el modal de ubicación
     mostrar_modal_ubicacion: bool = False
     direccion: str = ""
@@ -37,9 +31,14 @@ class CarritoState(rx.State):
     ciudad: str = ""
     provincia: str = ""
 
+    def set_talles(self, value: str):
+        self.talles = value
+
+    def set_colores(self, value: str):
+        self.colores = value
+
     @rx.event
     def abrir_modal_ubicacion(self):
-        """Abre el modal para solicitar datos de ubicación"""
         if not self.productos_carrito:
             self.mensaje_compra = "No hay productos en el carrito."
             return
@@ -47,12 +46,10 @@ class CarritoState(rx.State):
 
     @rx.event
     def cerrar_modal_ubicacion(self):
-        """Cierra el modal de ubicación"""
         self.mostrar_modal_ubicacion = False
 
     @rx.event
     def limpiar_ubicacion(self):
-        """Limpia los datos de ubicación"""
         self.direccion = ""
         self.numero = ""
         self.departamento = ""
@@ -64,7 +61,6 @@ class CarritoState(rx.State):
 
     @rx.event
     async def finalizar_compra_con_ubicacion(self):
-        """Finaliza la compra con los datos de ubicación"""
         user_id = await UsersState.get_user_id()
         if not user_id:
             self.mensaje_compra = "Debes iniciar sesión para finalizar la compra."
@@ -74,12 +70,10 @@ class CarritoState(rx.State):
             self.mensaje_compra = "No hay productos en el carrito."
             return
 
-        # Validar que los datos de ubicación estén completos
         if not self.direccion or not self.ciudad or not self.provincia:
             self.mensaje_compra = "Por favor completa todos los datos de ubicación requeridos."
             return
 
-        # Registrar como consulta automática (usando .get para evitar KeyError)
         detalle = "\n".join(
             f"- {p.get('nombre', 'Producto')} x{p.get('cantidad', 1)} = ${float(p.get('subtotal', 0))}"
             for p in self.productos_carrito
@@ -91,20 +85,17 @@ class CarritoState(rx.State):
         )
         crear_consulta_repo(id_users=user_id, asunto="Compra realizada", mensaje=mensaje)
 
-        # Crear pedido en la tabla pedidos
         try:
             from proyectofinal.service.pedido_service import crear_pedido, obtener_productos_carrito_usuario
-            from datetime import datetime
 
             total_compra = sum(float(p.get("subtotal", 0)) for p in self.productos_carrito)
             fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # Obtener productos desde el carrito en BD
             productos_json = obtener_productos_carrito_usuario(user_id)
 
             crear_pedido(
                 id_usuario=user_id,
-                total=float(total_compra),  # 👈 aseguramos float
+                total=float(total_compra),
                 fecha_pedido=fecha_actual,
                 productos_json=productos_json,
                 direccion=self.direccion,
@@ -121,7 +112,6 @@ class CarritoState(rx.State):
             self.mensaje_compra = f"Error al procesar el pedido: {e}"
             return
 
-        # Vaciar carrito y mostrar mensaje
         vaciar_carrito(user_id)
         self.productos_carrito = []
         self.total = 0.0
@@ -131,7 +121,6 @@ class CarritoState(rx.State):
 
     @rx.event
     async def cargar_carrito_agrupado(self):
-        # Limpiar mensajes previos al cargar
         self.mensaje_compra = ""
         user_id = await UsersState.get_user_id()
         if not user_id:
@@ -153,16 +142,15 @@ class CarritoState(rx.State):
                     "id_producto": producto.id_producto,
                     "id_carrito": carrito.id_carrito,
                     "imagen": producto.imagen,
-                    "cantidad": 1,  # 👈 aseguramos que exista cantidad
-                    "subtotal": float(producto.precio)
+                    "cantidad": carrito.cantidad,  # 👈 usar cantidad real
+                    "subtotal": float(producto.precio) * carrito.cantidad
                 }
                 for carrito, producto, usuario in resultados
             ]
-            self.total = float(sum(p["precio"] for p in self.productos_carrito))
+            self.total = float(sum(p["subtotal"] for p in self.productos_carrito))
 
     @rx.event
     def cargar_carrito(self):
-        # Limpiar mensajes cuando se carga el carrito
         self.mensaje_compra = ""
         self.productos_carrito = get_items_por_usuario(self.user_id)
 
@@ -198,7 +186,6 @@ class CarritoState(rx.State):
 
     @rx.var
     def productos_agrupados(self) -> list[dict]:
-        contador = Counter(p["id_producto"] for p in self.productos_carrito)
         agrupados = []
         vistos = set()
 
@@ -211,7 +198,7 @@ class CarritoState(rx.State):
                     "nombre": producto["nombre"],
                     "precio": float(producto["precio"]),
                     "imagen": producto.get("imagen", ""),
-                    "cantidad": contador[pid],
-                    "subtotal": float(producto["precio"]) * contador[pid]
+                    "cantidad": producto["cantidad"],  # 👈 usar cantidad real
+                    "subtotal": float(producto["precio"]) * producto["cantidad"]
                 })
         return agrupados

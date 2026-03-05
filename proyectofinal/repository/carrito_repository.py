@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from proyectofinal.model.carrito_model import Carrito
 from proyectofinal.model.product_model import Producto
-from proyectofinal.model import Users
+from proyectofinal.model.users_model import Users   # 👈 corregido
 from proyectofinal.repository.conect_db import engine
 
 # 🔍 Obtener carrito agrupado por producto
@@ -35,7 +35,15 @@ def get_items_por_usuario(user_id: int) -> list[dict]:
         resultados = session.exec(
             select(Carrito).where(Carrito.id_users == user_id)
         ).all()
-        return [r.dict() for r in resultados]
+        return [
+            {
+                "id_carrito": r.id_carrito,
+                "id_users": r.id_users,
+                "id_producto": r.id_producto,
+                "cantidad": r.cantidad
+            }
+            for r in resultados
+        ]
 
 # ✅ Agregar producto al carrito
 def agregar_item_al_carrito(id_users: int, id_producto: int) -> None:

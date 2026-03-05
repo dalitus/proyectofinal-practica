@@ -19,7 +19,10 @@ def producto_en_carrito_card(p: dict) -> rx.Component:
                 rx.text(f"Precio unitario: ${p['precio']}"),
                 rx.text(f"Cantidad: {p['cantidad']}"),
                 rx.text(f"Subtotal: ${p['subtotal']}"),
-                SecondaryButton("🗑️ Eliminar uno", on_click=CarritoState.eliminar_producto(p["id_producto"])),
+                SecondaryButton(
+                    "🗑️ Eliminar uno",
+                    on_click=lambda: CarritoState.eliminar_producto(p["id_producto"])
+                ),
                 spacing="2"
             ),
             spacing="4",
@@ -100,7 +103,6 @@ def modal_ubicacion() -> rx.Component:
                                 width="100%"
                             )
                         ),
-                        
                         # 👇 Campos nuevos para talles y colores
                         rx.vstack(
                             rx.text("Talles deseados *"),
@@ -120,7 +122,6 @@ def modal_ubicacion() -> rx.Component:
                                 width="100%"
                             )
                         ),
-                        
                         spacing="4",
                         width="100%"
                     ),
@@ -143,6 +144,7 @@ def modal_ubicacion() -> rx.Component:
         open=CarritoState.mostrar_modal_ubicacion,
         on_open_change=CarritoState.cerrar_modal_ubicacion
     )
+
 
 @rx.page(route="/carrito", on_load=CarritoState.cargar_carrito_detallado)
 def carrito_page() -> rx.Component:
@@ -176,10 +178,7 @@ def carrito_page() -> rx.Component:
                     CarritoState.productos_agrupados.length() == 0,
                     rx.text("Tu carrito está vacío."),
                     rx.vstack(
-                        rx.foreach(
-                            CarritoState.productos_agrupados.to(list[dict]),
-                            producto_en_carrito_card
-                        ),
+                        rx.foreach(CarritoState.productos_agrupados, producto_en_carrito_card),
                         spacing="4",
                         width="100%"
                     )
