@@ -51,6 +51,7 @@ class ConsultaUsuarioState(rx.State):
     def actualizar_mensaje(self, value: str):
         self.mensaje = value
 
+
 @rx.page(route="/consulta_usuario", on_load=ConsultaUsuarioState.on_load)
 def consulta_usuario_page() -> rx.Component:
     return rx.box(
@@ -91,8 +92,9 @@ def consulta_usuario_page() -> rx.Component:
             PrimaryButton("Enviar", on_click=ConsultaUsuarioState.enviar_consulta),
             rx.divider(),
             rx.heading("Tus consultas"),
+            # 👇 Usamos rx.foreach directamente, y filtramos en render_consulta_usuario
             rx.foreach(
-                ConsultaUsuarioState.consultas.to(list[dict]),
+                ConsultaUsuarioState.consultas,
                 render_consulta_usuario
             ),
             spacing="3",
@@ -107,13 +109,17 @@ def consulta_usuario_page() -> rx.Component:
 
 
 def render_consulta_usuario(c: dict) -> rx.Component:
-    return rx.box(
-        rx.text(f"Asunto: {c.get('asunto', 'Sin asunto')}"),
-        rx.text(f"Mensaje: {c.get('mensaje', '')}"),
-        rx.cond(
-            c.get("respuesta"),
-            rx.text(f"Respuesta: {c['respuesta']}"),
-            rx.text("Respuesta: Sin respuesta")
-        ),
-        rx.divider()
+    return rx.cond(
+        c["asunto"] == "Compra realizada",
+        rx.box(),  # si es automática de compra, no mostramos nada
+        rx.box(
+            rx.text(f"Asunto: {c.get('asunto', 'Sin asunto')}"),
+            rx.text(f"Mensaje: {c.get('mensaje', '')}"),
+            rx.cond(
+                c.get("respuesta"),
+                rx.text(f"Respuesta: {c['respuesta']}"),
+                rx.text("Respuesta: Sin respuesta")
+            ),
+            rx.divider()
+        )
     )

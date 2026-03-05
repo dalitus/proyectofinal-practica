@@ -55,45 +55,61 @@ def mostrar_consultas_admin_component():
         spacing="4",
     )
 
-
 def render_consulta_card(c: dict) -> rx.Component:
-    # tarjeta por consulta
-    return rx.card(
-        rx.vstack(
-            rx.hstack(
-                rx.vstack(
-                    rx.text(f"🧑 Usuario ID: {c.get('id_users', '')}", font_weight="bold"),
-                    rx.text(f"📌 Asunto: {c.get('asunto', 'Sin asunto')}")
-                ),
-                rx.spacer(),
-                rx.vstack(
-                    rx.text(f"📅 {c.get('fecha_creacion', 'Desconocida')}", font_size="sm"),
-                    rx.hstack(
-                        rx.cond(
-                            c.get("respuesta"),
-                            rx.badge("Respondida", color_scheme="green"),
-                            rx.badge("Pendiente", color_scheme="yellow")
-                        ),
-                        DangerButton("🗑️", on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.eliminar_consulta(cid), variant="ghost"),
-                        rx.cond(
-                            ~c.get("respuesta"),
-                            SecondaryButton("✍️ Responder", on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.seleccionar_consulta(cid), color_scheme="blue"),
-                            rx.box()
+    # 👇 Usamos rx.cond para ocultar las consultas automáticas de compra
+    return rx.cond(
+        c["asunto"] == "Compra realizada",
+        rx.box(),  # no mostramos nada si es una consulta de compra
+        rx.card(
+            rx.vstack(
+                rx.hstack(
+                    rx.vstack(
+                        rx.text(f"🧑 Usuario ID: {c.get('id_users', '')}", font_weight="bold"),
+                        rx.text(f"📌 Asunto: {c.get('asunto', 'Sin asunto')}")
+                    ),
+                    rx.spacer(),
+                    rx.vstack(
+                        rx.text(f"📅 {c.get('fecha_creacion', 'Desconocida')}", font_size="sm"),
+                        rx.hstack(
+                            rx.cond(
+                                c.get("respuesta"),
+                                rx.badge("Respondida", color_scheme="green"),
+                                rx.badge("Pendiente", color_scheme="yellow")
+                            ),
+                            DangerButton(
+                                "🗑️",
+                                on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.eliminar_consulta(cid),
+                                variant="ghost"
+                            ),
+                            rx.cond(
+                                c.get("respuesta") == None,
+                                SecondaryButton(
+                                    "✍️ Responder",
+                                    on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.seleccionar_consulta(cid),
+                                    color_scheme="blue"
+                                ),
+                                rx.box()
+                            )
                         )
                     )
-                )
+                ),
+                rx.box(rx.text(c.get('mensaje', ''), style={"whiteSpace": "pre-wrap"})),
+                rx.cond(
+                    c.get('respuesta'),
+                    rx.box(
+                        rx.text(f"✅ Respuesta: {c.get('respuesta', '')}"),
+                        background_color="gray.50",
+                        padding="8px",
+                        border_radius="6px"
+                    ),
+                    rx.box()
+                ),
+                spacing="3"
             ),
-            rx.box(rx.text(c.get('mensaje', ''), style={"whiteSpace": "pre-wrap"})),
-            rx.cond(
-                c.get('respuesta'),
-                rx.box(rx.text(f"✅ Respuesta: {c.get('respuesta', '')}"), background_color="gray.50", padding="8px", border_radius="6px"),
-                rx.box()
-            ),
-            spacing="3"
-        ),
-        padding="10px",
-        margin_y="6px",
-        box_shadow="sm"
+            padding="10px",
+            margin_y="6px",
+            box_shadow="sm"
+        )
     )
 
 @rx.page(route="/consulta_admin", on_load=ConsultaAdminState.cargar_consultas)
