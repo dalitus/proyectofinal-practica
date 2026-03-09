@@ -7,6 +7,7 @@ from proyectofinal.repository.conect_db import engine
 import json
 
 
+
 def obtener_productos_carrito_usuario(id_usuario: int) -> str:
     """Obtener productos del carrito del usuario como JSON"""
     with Session(engine) as session:
@@ -128,6 +129,11 @@ def obtener_todos_pedidos() -> list[dict]:
                 select(Users).where(Users.id_users == p.id_users)
             ).first()
 
+            # 👇 Parsear productos_json si existe
+            try:
+                productos = json.loads(p.productos_json) if p.productos_json else []
+            except Exception:
+                productos = []
             resultado.append({
                 "id_pedido": p.id_pedido,
                 "id_users": p.id_users,
@@ -137,7 +143,7 @@ def obtener_todos_pedidos() -> list[dict]:
                 "total": p.total,
                 "fecha_pedido": p.fecha_pedido,
                 "fecha_entrega": p.fecha_entrega,
-                "productos_json": p.productos_json if p.productos_json else "[]",
+                "productos_json": productos,   # 👈 ahora es lista, no string
                 "direccion": p.direccion,
                 "numero": p.numero,
                 "departamento": p.departamento,
@@ -148,6 +154,8 @@ def obtener_todos_pedidos() -> list[dict]:
                 "colores": p.colores,
             })
         return resultado
+
+
 
 
 def obtener_pedido_por_id(id_pedido: int) -> dict | None:

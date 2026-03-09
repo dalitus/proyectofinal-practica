@@ -3,15 +3,33 @@ import reflex as rx
 from proyectofinal.state.pedido_state import PedidoState
 from proyectofinal.state.data import PedidoAdminData
 
-def mostrar_productos(productos: list) -> rx.Component:
+import reflex as rx
+from proyectofinal.service.pedido_service import obtener_todos_pedidos
+from proyectofinal.pages.ui_helpers import PageHeader
+
+class PedidosAdminState(rx.State):
+    pedidos: list[dict] = []
+    estado_filtro: str = "todos"   # valores: "todos", "en espera", "enviado", "cancelado", "entregado"
+    producto_filtro: str = ""
+
+    @rx.event
+    def cargar_pedidos(self):
+        pedidos_obj = obtener_todos_pedidos()
+        self.pedidos = pedidos_obj
+
+    @rx.event
+    def set_estado_filtro(self, value: str):
+        self.estado_filtro = value
+
+def mostrar_productos(productos) -> rx.Component:
     return rx.cond(
-        productos.length() > 0,
+        productos.length() > 0,   # 👈 usar .length()
         rx.foreach(
             productos,
-            lambda p: rx.hstack(
-                rx.text(f"{p['nombre']} x{p['cantidad']}", font_size="sm"),
+            lambda prod: rx.hstack(
+                rx.text(f"{prod['nombre']} x{prod['cantidad']}", font_size="sm"),
                 rx.spacer(),
-                rx.text(f"${p['subtotal']:.2f}", font_size="sm", font_weight="bold"),
+                rx.text(f"${prod['subtotal']:.2f}", font_size="sm", font_weight="bold"),
                 width="100%",
                 spacing="2"
             )
@@ -43,7 +61,7 @@ def pedido_card_admin(pedido) -> rx.Component:
             rx.cond(pedido.ciudad != None, rx.text(f"Ciudad: {pedido.ciudad}"), rx.text("Ciudad: N/A")),
             rx.cond(pedido.provincia != None, rx.text(f"Provincia: {pedido.provincia}"), rx.text("Provincia: N/A")),
 
-            # 👇 Mostrar talles y colores seleccionados
+            # Talles y colores
             rx.cond(pedido.talles != None, rx.text(f"Talles: {pedido.talles}"), rx.text("Talles: N/A")),
             rx.cond(pedido.colores != None, rx.text(f"Colores: {pedido.colores}"), rx.text("Colores: N/A")),
 
@@ -58,7 +76,7 @@ def pedido_card_admin(pedido) -> rx.Component:
             # Total
             rx.text(f"Total: ${pedido.total:.2f}", font_weight="bold"),
 
-            # Botones de gestión de estado
+            # 👇 Botones de gestión de estado
             rx.hstack(
                 rx.button(
                     "En Espera",
@@ -76,6 +94,18 @@ def pedido_card_admin(pedido) -> rx.Component:
                     "Entregado",
                     on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "entregado"),
                     color_scheme="green",
+                    size="3"
+                ),
+                rx.button(
+                    "Cancelado",
+                    on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "cancelado"),
+                    color_scheme="red",
+                    size="3"
+                ),
+                rx.button(
+                    "Reservado",
+                    on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "reservado"),
+                    color_scheme="purple",
                     size="3"
                 ),
                 spacing="2"
@@ -105,6 +135,7 @@ def table_pedidos_admin(pedidos: list[PedidoAdminData]) -> rx.Component:
                 rx.table.cell("Talles", font_weight="bold"),
                 rx.table.cell("Colores", font_weight="bold"),
                 rx.table.cell("Estado", font_weight="bold"),
+                rx.table.cell("Acciones", font_weight="bold"),   # 👈 nueva columna
             )
         ),
         rx.table.body(
@@ -121,13 +152,93 @@ def table_pedidos_admin(pedidos: list[PedidoAdminData]) -> rx.Component:
                     rx.table.cell(rx.cond(pedido.talles != None, pedido.talles, "N/A")),
                     rx.table.cell(rx.cond(pedido.colores != None, pedido.colores, "N/A")),
                     rx.table.cell(pedido.estado),
+                    # 👇 botones de gestión en la tabla
+                    rx.table.cell(
+                        rx.hstack(
+                            rx.button(
+                                "En Espera",
+                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "en espera"),
+                                color_scheme="orange",
+                                size="2"
+                            ),
+                            rx.button(
+                                "Enviado",
+                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "enviado"),
+                                color_scheme="blue",
+                                size="2"
+                            ),
+                            rx.button(
+                                "Entregado",
+                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "entregado"),
+                                color_scheme="green",
+                                size="2"
+                            ),
+                            rx.button(
+                                "Cancelado",
+                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "cancelado"),
+                                color_scheme="red",
+                                size="2"
+                            ),
+                            rx.button(
+                                "Reservado",
+                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "reservado"),
+                                color_scheme="purple",
+                                size="2"
+                            ),
+                            spacing="2"
+                        )
+                    )
                 )
             )
         ),
         width="100%",
-        variant="surface",   # 👈 usar 'surface' o 'ghost'
+        variant="surface",
         size="2",
         margin_y="20px"
+    )
+
+def render_pedido_card(p: dict) -> rx.Component:
+    return rx.cond(
+        (PedidosAdminState.estado_filtro == "todos") | (p["estado"] == PedidosAdminState.estado_filtro),
+        rx.card(
+            rx.vstack(
+                rx.text(f"👤 Usuario: {p.get('nombre_usuario', 'N/A')}"),
+                rx.text(f"📌 Estado: {p.get('estado', 'N/A')}"),
+                rx.text(f"💰 Total: ${p.get('total', 0)}"),
+                rx.text(f"📅 Fecha pedido: {p.get('fecha_pedido', '')}"),
+                rx.text("📦 Productos:", font_weight="bold"),
+                mostrar_productos(p.get("productos_json", [])),
+
+                # 👇 Botones de gestión de estado (solo los válidos)
+                rx.hstack(
+                    rx.button(
+                        "En Espera",
+                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "en espera"),
+                        color_scheme="orange",
+                        size="2"
+                    ),
+                    rx.button(
+                        "Enviado",
+                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "enviado"),
+                        color_scheme="blue",
+                        size="2"
+                    ),
+                    rx.button(
+                        "Entregado",
+                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "entregado"),
+                        color_scheme="green",
+                        size="2"
+                    ),
+                    spacing="2"
+                ),
+
+                spacing="4"
+            ),
+            padding="10px",
+            margin_y="6px",
+            box_shadow="sm"
+        ),
+        rx.box()
     )
 
 @rx.page(route="pedidos_admin", title="Pedidos Admin", on_load=PedidoState.get_all_pedidos_admin)
@@ -135,21 +246,35 @@ def pedidos_admin_page() -> rx.Component:
     return rx.box(
         rx.flex(
             rx.heading("Pedidos (Admin)", align="center"),
+
+            # 👇 Controles de filtrado
+            rx.select(
+                ["todos", "en espera", "enviado", "entregado", "cancelado"],
+                value=PedidosAdminState.estado_filtro,
+                on_change=PedidosAdminState.set_estado_filtro,
+                placeholder="Filtrar por estado",
+                width="200px"
+            ),
+
             rx.cond(
                 PedidoState.loading,
                 rx.spinner(color="blue"),
                 rx.cond(
                     PedidoState.pedidos.length() > 0,
                     rx.vstack(
-                        # 👇 Podés elegir mostrar tarjetas o tabla
                         rx.heading("Vista en Tarjetas", size="5"),
-                        rx.foreach(PedidoState.pedidos, pedido_card_admin),
+                        rx.foreach(PedidoState.pedidos, render_pedido_card),
                         rx.heading("Vista en Tabla", size="5", margin_top="20px"),
                         table_pedidos_admin(PedidoState.pedidos),
                         width="100%",
                         spacing="2"
                     ),
-                    rx.text("No hay pedidos registrados", text_align="center", color="gray", margin_top="20px")
+                    rx.text(
+                        "No hay pedidos registrados",
+                        text_align="center",
+                        color="gray",
+                        margin_top="20px"
+                    )
                 )
             ),
             rx.cond(
@@ -167,8 +292,8 @@ def pedidos_admin_page() -> rx.Component:
             spacing="4"
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
-            "min_height": "100vh",          # ocupa toda la pantalla
+            "background_color": "#ADD8E6",
+            "min_height": "100vh",
             "padding": "20px"
         }
     )
