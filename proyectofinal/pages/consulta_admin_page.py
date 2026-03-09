@@ -11,6 +11,12 @@ class ConsultaAdminState(rx.State):
     respuesta: str = ""
     consulta_seleccionada: dict | None = None
 
+    estado_filtro: str = "todos"   # valores: "todos", "pendiente", "respondida"
+
+    @rx.event
+    def set_estado_filtro(self, value: str):
+        self.estado_filtro = value
+
     @rx.event
     def cargar_consultas(self):
         # Obtener todas las consultas desde el servicio y convertir a dicts
@@ -51,7 +57,16 @@ class ConsultaAdminState(rx.State):
 
 def mostrar_consultas_admin_component():
     return rx.vstack(
-        rx.foreach(ConsultaAdminState.consultas, render_consulta_card),
+        rx.foreach(
+            ConsultaAdminState.consultas,
+            lambda c: rx.cond(
+                (ConsultaAdminState.estado_filtro == "todos") |
+                ((ConsultaAdminState.estado_filtro == "respondida") & (c.get("respuesta") is not None)) |
+                ((ConsultaAdminState.estado_filtro == "pendiente") & (c.get("respuesta") is None)),
+                render_consulta_card(c),
+                rx.box()
+            )
+        ),
         spacing="4",
     )
 
@@ -118,6 +133,16 @@ def consulta_admin_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 PageHeader("📬 Consultas de usuarios", "Revisá y respondé las consultas recibidas"),
+                rx.hstack(
+                    rx.select(
+                        ["todos", "pendiente", "respondida"],
+                        value=ConsultaAdminState.estado_filtro,
+                        on_change=ConsultaAdminState.set_estado_filtro,
+                        placeholder="Filtrar por estado",
+                        width="200px"
+                    ),
+                    margin_bottom="20px"
+                ),
                 mostrar_consultas_admin_component(),
                 rx.cond(
                     ConsultaAdminState.consulta_seleccionada is not None,
@@ -148,8 +173,8 @@ def consulta_admin_page() -> rx.Component:
             padding="20px"
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
-            "min_height": "100vh",          # ocupa toda la pantalla
+            "background_color": "#ADD8E6",
+            "min_height": "100vh",
             "padding": "20px"
         }
     )
