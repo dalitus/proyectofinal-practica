@@ -11,6 +11,7 @@ class PedidoData(BaseModel):
     nombre_usuario: str
     direccion: Optional[str] = None
     productos_json: List[Dict]   # lista de diccionarios
+    
 
 class PedidoAdminData(BaseModel):
     id_pedido: int

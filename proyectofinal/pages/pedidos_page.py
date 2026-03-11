@@ -1,7 +1,8 @@
+# proyectofinal/pages/pedidos_page.py
 import reflex as rx
 from proyectofinal.state.pedido_state import PedidoState
 
-def mostrar_productos(productos: list) -> rx.Component:
+def mostrar_productos(productos) -> rx.Component:
     return rx.cond(
         productos.length() > 0,
         rx.foreach(
@@ -21,7 +22,9 @@ def estado_badge(estado: str) -> rx.Component:
     color_map = {
         "en espera": "orange",
         "enviado": "blue",
-        "entregado": "green"
+        "entregado": "green",
+        "cancelado": "red",
+        "reservado": "purple",
     }
     color = color_map.get(estado, "gray")
     return rx.badge(estado.upper(), color_scheme=color, variant="solid")
@@ -29,10 +32,8 @@ def estado_badge(estado: str) -> rx.Component:
 def pedido_card_usuario(pedido) -> rx.Component:
     return rx.card(
         rx.vstack(
-            # Encabezado
             rx.text(f"Pedido #{pedido.id_pedido}", font_weight="bold", font_size="1.2em"),
 
-            # Dirección completa
             rx.cond(pedido.direccion != None, rx.text(f"Calle: {pedido.direccion}"), rx.text("Calle: N/A")),
             rx.cond(pedido.numero != None, rx.text(f"Número: {pedido.numero}"), rx.text("Número: N/A")),
             rx.cond(pedido.departamento != None, rx.text(f"Departamento: {pedido.departamento}"), rx.text("Departamento: N/A")),
@@ -40,19 +41,15 @@ def pedido_card_usuario(pedido) -> rx.Component:
             rx.cond(pedido.ciudad != None, rx.text(f"Ciudad: {pedido.ciudad}"), rx.text("Ciudad: N/A")),
             rx.cond(pedido.provincia != None, rx.text(f"Provincia: {pedido.provincia}"), rx.text("Provincia: N/A")),
 
-            # 👇 Mostrar talles y colores seleccionados
             rx.cond(pedido.talles != None, rx.text(f"Talles: {pedido.talles}"), rx.text("Talles: N/A")),
             rx.cond(pedido.colores != None, rx.text(f"Colores: {pedido.colores}"), rx.text("Colores: N/A")),
 
-            # Fecha y estado
             rx.text(f"Fecha: {pedido.fecha_pedido}"),
             estado_badge(pedido.estado),
 
-            # Productos
             rx.text("Productos:", font_weight="bold"),
             mostrar_productos(pedido.productos_json),
 
-            # Total
             rx.text(f"Total: ${pedido.total:.2f}", font_weight="bold"),
 
             spacing="4",
@@ -65,7 +62,7 @@ def pedido_card_usuario(pedido) -> rx.Component:
         border_radius="10px"
     )
 
-@rx.page(route="pedidos", title="Mis Pedidos", on_load=lambda: PedidoState.get_all_pedidos(id_usuario=9))
+@rx.page(route="pedidos", title="Mis Pedidos", on_load=PedidoState.cargar_pedidos_usuario)
 def pedidos_page() -> rx.Component:
     return rx.box(
         rx.flex(
@@ -74,9 +71,9 @@ def pedidos_page() -> rx.Component:
                 PedidoState.loading,
                 rx.spinner(color="blue"),
                 rx.cond(
-                    PedidoState.pedidos.length() > 0,
+                    PedidoState.pedidos_usuario.length() > 0,
                     rx.vstack(
-                        rx.foreach(PedidoState.pedidos, pedido_card_usuario),
+                        rx.foreach(PedidoState.pedidos_usuario, pedido_card_usuario),
                         width="100%",
                         spacing="2"
                     ),
@@ -98,8 +95,8 @@ def pedidos_page() -> rx.Component:
             spacing="4"
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
-            "min_height": "100vh",          # ocupa toda la pantalla
+            "background_color": "#ADD8E6",
+            "min_height": "100vh",
             "padding": "20px"
         }
     )
