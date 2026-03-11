@@ -173,18 +173,6 @@ def table_pedidos_admin(pedidos: list[PedidoAdminData]) -> rx.Component:
                                 color_scheme="green",
                                 size="2"
                             ),
-                            rx.button(
-                                "Cancelado",
-                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "cancelado"),
-                                color_scheme="red",
-                                size="2"
-                            ),
-                            rx.button(
-                                "Reservado",
-                                on_click=lambda: PedidoState.cambiar_estado_pedido(pedido.id_pedido, "reservado"),
-                                color_scheme="purple",
-                                size="2"
-                            ),
                             spacing="2"
                         )
                     )
@@ -197,41 +185,48 @@ def table_pedidos_admin(pedidos: list[PedidoAdminData]) -> rx.Component:
         margin_y="20px"
     )
 
-def render_pedido_card(p: dict) -> rx.Component:
+def render_pedido_card(p: PedidoAdminData) -> rx.Component:
     return rx.cond(
-        (PedidosAdminState.estado_filtro == "todos") | (p["estado"] == PedidosAdminState.estado_filtro),
+        (PedidosAdminState.estado_filtro == "todos") | (p.estado == PedidosAdminState.estado_filtro),
         rx.card(
             rx.vstack(
-                rx.text(f"👤 Usuario: {p.get('nombre_usuario', 'N/A')}"),
-                rx.text(f"📌 Estado: {p.get('estado', 'N/A')}"),
-                rx.text(f"💰 Total: ${p.get('total', 0)}"),
-                rx.text(f"📅 Fecha pedido: {p.get('fecha_pedido', '')}"),
-                rx.text("📦 Productos:", font_weight="bold"),
-                mostrar_productos(p.get("productos_json", [])),
+                rx.text(f"👤 Usuario: {p.nombre_usuario}", font_weight="bold"),
 
-                # 👇 Botones de gestión de estado (solo los válidos)
+                rx.cond(p.direccion != None,
+                        rx.text(f"📍 Dirección: {p.direccion} {p.numero if p.numero is not None else ''}"),
+                        rx.text("📍 Dirección: N/A")),
+                rx.cond(p.departamento != None,
+                        rx.text(f"🏢 Departamento: {p.departamento}"),
+                        rx.text("🏢 Departamento: N/A")),
+                rx.cond(p.codigo_postal != None,
+                        rx.text(f"📮 Código Postal: {p.codigo_postal}"),
+                        rx.text("📮 Código Postal: N/A")),
+                rx.cond(p.ciudad != None,
+                        rx.text(f"🏙️ Ciudad: {p.ciudad}"),
+                        rx.text("🏙️ Ciudad: N/A")),
+                rx.cond(p.provincia != None,
+                        rx.text(f"🌍 Provincia: {p.provincia}"),
+                        rx.text("🌍 Provincia: N/A")),
+                rx.cond(p.talles != None,
+                        rx.text(f"👟 Talles: {p.talles}"),
+                        rx.text("👟 Talles: N/A")),
+                rx.cond(p.colores != None,
+                        rx.text(f"🎨 Colores: {p.colores}"),
+                        rx.text("🎨 Colores: N/A")),
+
+                rx.text(f"📌 Estado: {p.estado}"),
+                rx.text(f"💰 Total: ${p.total:.2f}"),
+                rx.text(f"📅 Fecha pedido: {p.fecha_pedido}"),
+
+                rx.text("📦 Productos:", font_weight="bold"),
+                mostrar_productos(p.productos_json),
+
                 rx.hstack(
-                    rx.button(
-                        "En Espera",
-                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "en espera"),
-                        color_scheme="orange",
-                        size="2"
-                    ),
-                    rx.button(
-                        "Enviado",
-                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "enviado"),
-                        color_scheme="blue",
-                        size="2"
-                    ),
-                    rx.button(
-                        "Entregado",
-                        on_click=lambda: PedidoState.cambiar_estado_pedido(p["id_pedido"], "entregado"),
-                        color_scheme="green",
-                        size="2"
-                    ),
+                    rx.button("En Espera", on_click=lambda: PedidoState.cambiar_estado_pedido(p.id_pedido, "en espera"), color_scheme="orange", size="2"),
+                    rx.button("Enviado", on_click=lambda: PedidoState.cambiar_estado_pedido(p.id_pedido, "enviado"), color_scheme="blue", size="2"),
+                    rx.button("Entregado", on_click=lambda: PedidoState.cambiar_estado_pedido(p.id_pedido, "entregado"), color_scheme="green", size="2"),
                     spacing="2"
                 ),
-
                 spacing="4"
             ),
             padding="10px",
@@ -249,7 +244,7 @@ def pedidos_admin_page() -> rx.Component:
 
             # 👇 Controles de filtrado
             rx.select(
-                ["todos", "en espera", "enviado", "entregado", "cancelado"],
+                ["todos", "en espera", "enviado", "entregado"],
                 value=PedidosAdminState.estado_filtro,
                 on_change=PedidosAdminState.set_estado_filtro,
                 placeholder="Filtrar por estado",
