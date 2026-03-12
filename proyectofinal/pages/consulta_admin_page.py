@@ -60,9 +60,11 @@ def mostrar_consultas_admin_component():
         rx.foreach(
             ConsultaAdminState.consultas,
             lambda c: rx.cond(
-                (ConsultaAdminState.estado_filtro == "todos") |
-                ((ConsultaAdminState.estado_filtro == "respondida") & (c.get("respuesta") is not None)) |
-                ((ConsultaAdminState.estado_filtro == "pendiente") & (c.get("respuesta") is None)),
+                (
+                    (ConsultaAdminState.estado_filtro == "todos")
+                    | ((ConsultaAdminState.estado_filtro == "respondida") & (c.get("respuesta") != None))
+                    | ((ConsultaAdminState.estado_filtro == "pendiente") & (c.get("respuesta") == None))
+                ),
                 render_consulta_card(c),
                 rx.box()
             )
