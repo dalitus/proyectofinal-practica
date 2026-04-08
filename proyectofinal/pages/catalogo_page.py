@@ -11,11 +11,38 @@ def buscar_y_botones_component() -> rx.Component:
             width="300px"
         ),
         PrimaryButton("Buscar", on_click=CatalogoState.buscar),
-        SecondaryButton("Ver Carrito", on_click=CatalogoState.ir_a_carrito),
-        SecondaryButton("Mis Pedidos", on_click=lambda: rx.redirect("/pedidos")),
+
+        # Carrito solo si está logeado
+        rx.cond(
+            UsersState.logeado,
+            SecondaryButton("Ver Carrito", on_click=CatalogoState.ir_a_carrito),
+            rx.box()
+        ),
+
+        # Pedidos solo si está logeado
+        rx.cond(
+            UsersState.logeado,
+            SecondaryButton("Mis Pedidos", on_click=lambda: rx.redirect("/pedidos")),
+            rx.box()
+        ),
+
+        # Ubicación siempre visible
         SecondaryButton("Ubicarme", on_click=CatalogoState.ir_a_ubicacion),
-        SecondaryButton("Hacer Consulta", on_click=CatalogoState.ir_a_consulta),
-        SecondaryButton("Logearse", on_click=CatalogoState.ir_a_login),
+
+        # Consulta solo si está logeado
+        rx.cond(
+            UsersState.logeado,
+            SecondaryButton("Hacer Consulta", on_click=CatalogoState.ir_a_consulta),
+            rx.box()
+        ),
+
+        # Botón de login solo si NO está logeado
+        rx.cond(
+            ~UsersState.logeado,
+            SecondaryButton("Logearse", on_click=CatalogoState.ir_a_login),
+            rx.box()
+        ),
+
         spacing="3",
         justify_content="flex-start",
         margin_bottom="20px"

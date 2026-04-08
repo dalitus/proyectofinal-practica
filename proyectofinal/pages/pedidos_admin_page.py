@@ -70,8 +70,6 @@ def pedido_card_admin(pedido) -> rx.Component:
                 rx.button("En Espera", on_click=PedidoState.cambiar_estado_pedido(pedido.id_pedido, "en espera"), color_scheme="orange", size="3"),
                 rx.button("Enviado", on_click=PedidoState.cambiar_estado_pedido(pedido.id_pedido, "enviado"), color_scheme="blue", size="3"),
                 rx.button("Entregado", on_click=PedidoState.cambiar_estado_pedido(pedido.id_pedido, "entregado"), color_scheme="green", size="3"),
-                rx.button("Cancelado", on_click=PedidoState.cambiar_estado_pedido(pedido.id_pedido, "cancelado"), color_scheme="red", size="3"),
-                rx.button("Reservado", on_click=PedidoState.cambiar_estado_pedido(pedido.id_pedido, "reservado"), color_scheme="purple", size="3"),
                 spacing="2"
             ),
 
@@ -150,7 +148,7 @@ def pedidos_admin_page() -> rx.Component:
             rx.heading("Pedidos (Admin)", align="center"),
 
             rx.select(
-                ["todos", "en espera", "enviado", "entregado", "cancelado", "reservado"],
+                ["todos", "en espera", "enviado", "entregado"],
                 value=PedidosAdminState.estado_filtro,
                 on_change=PedidosAdminState.set_estado_filtro,
                 placeholder="Filtrar por estado",
