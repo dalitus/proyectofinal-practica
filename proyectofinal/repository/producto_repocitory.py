@@ -10,10 +10,11 @@ def get_producto_by_id(producto_id: int) -> Producto | None:
         return session.get(Producto, producto_id)
 
 # Obtener todos los productos
+
 def get_all_productos() -> list[Producto]:
     with get_session() as session:
-        # Eager-load the stock relationship so cantidad is available without extra queries
-        return session.exec(select(Producto).options(selectinload(Producto.stock))).all()
+        # Eager-load the stocks relationship so cantidad is available without extra queries
+        return session.exec(select(Producto).options(selectinload(Producto.stocks))).all()
 
 # Crear producto
 def create_producto(producto: Producto) -> Producto:

@@ -8,6 +8,9 @@ from proyectofinal.service.producto_servicio import (
     editar_producto
 )
 from proyectofinal.pages.ui_helpers import PrimaryButton, SecondaryButton, DangerButton, PageHeader
+from proyectofinal.repository.catalogo_repository import get_all_productos
+from proyectofinal.service.servicio_stock import obtener_stocks_por_producto
+from proyectofinal.service.servicio_stock import editar_stock, crear_stock, obtener_stocks_por_producto
 
 class AdminState(rx.State):
     productos: list[dict] = []
@@ -20,19 +23,45 @@ class AdminState(rx.State):
     modal_crear_abierto: bool = False
     modal_editar_abierto: bool = False
 
+    colores: list[dict] = []
+    cantidad_total: int = 0
+
+    def agregar_color(self):
+        # Agregar un nuevo color vacío con cantidad 0
+        self.colores = self.colores + [{"color": "", "cantidad": 0}]
+        # Recalcular el total
+        self.actualizar_total()
+        # 👇 Mantener el modal abierto
+        self.modal_editar_abierto = True
+
+    def actualizar_color(self, index: int, nuevo_color: str):
+        self.colores[index]["color"] = nuevo_color
+        self.colores = self.colores[:]
+
+    def actualizar_cantidad(self, index: int, nueva_cantidad: str):
+        try:
+            self.colores[index]["cantidad"] = int(nueva_cantidad)
+        except ValueError:
+            self.colores[index]["cantidad"] = 0
+        self.colores = self.colores[:]
+        self.actualizar_total()
+
+    def actualizar_total(self):
+        self.cantidad_total = sum(c.get("cantidad", 0) for c in self.colores)
+
     @rx.event
     def cargar_productos(self):
         productos = []
-        for p in obtener_productos():
+        for p in get_all_productos():
             d = p.dict()
-            # agregar cantidad desde stock si existe
-            try:
-                cantidad = 0
-                if getattr(p, 'stock', None):
-                    cantidad = getattr(p.stock, 'cantidad_disponible', 0)
-                d['cantidad'] = cantidad
-            except Exception:
-                d['cantidad'] = 0
+            d["cantidad_total"] = p.cantidad_total
+            d["stocks"] = [s.dict() for s in p.stocks]
+            # 👇 preparar campos ya formateados como texto
+            d["precio_text"] = f"${p.precio}"
+            d["cantidad_total_text"] = str(p.cantidad_total)
+            d["stocks_text"] = "\n".join(
+                [f"{s['color']}: {s['cantidad_disponible']}" for s in d["stocks"]]
+            )
             productos.append(d)
         self.productos = productos
 
@@ -59,6 +88,22 @@ class AdminState(rx.State):
         self.imagen_local = ""
         self.preview_data_url = ""
 
+        # 👇 Cargar los stocks actuales del producto
+        try:
+            stocks = obtener_stocks_por_producto(producto_id)
+            self.colores = [
+                {
+                    "id_stock": s.id_stock,
+                    "color": s.color,
+                    "cantidad": s.cantidad_disponible
+                }
+                for s in stocks
+            ]
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            self.colores = []
+
     @rx.event
     def cerrar_modal_editar(self):
         self.modal_editar_abierto = False
@@ -83,12 +128,14 @@ class AdminState(rx.State):
             imagen_entrada = data.get("imagen")
             if (not imagen_entrada or imagen_entrada.strip() == "") and self.imagen_local:
                 imagen_entrada = self.imagen_local
+
             # Validaciones mínimas
             if not data.get("nombre") or not data.get("precio"):
                 self.error_message = "Nombre y precio son obligatorios"
                 return
 
-            # Validar formato de campos con regex (evitar inputs vacíos o con caracteres no permitidos)
+            # Validar formato de campos con regex
+            import re
             pat = re.compile(r'^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü\s\-_,\.]{1,100}$')
             for campo in ("nombre", "marca", "categoria", "talle"):
                 val = (data.get(campo) or "").strip()
@@ -97,34 +144,43 @@ class AdminState(rx.State):
                 if not pat.match(val):
                     self.error_message = f"{campo.capitalize()} contiene caracteres inválidos"
                     return
+
             try:
                 precio_val = float(data["precio"])
             except Exception:
                 self.error_message = "Precio inválido"
                 return
-            cantidad_val = None
-            if data.get("cantidad") is not None and data.get("cantidad") != "":
-                try:
-                    cantidad_val = int(data.get("cantidad"))
-                except Exception:
-                    cantidad_val = None
 
-            crear_producto(
+            # Crear producto en la tabla productos
+            nuevo = crear_producto(
                 nombre=data["nombre"],
-                descripcion=data["descripcion"],
+                descripcion=data.get("descripcion", ""),
                 precio=precio_val,
-                marca=data["marca"],
-                categoria=data["categoria"],
-                talle=data["talle"],
+                marca=data.get("marca", ""),
+                categoria=data.get("categoria", ""),
+                talle=data.get("talle", ""),
                 imagen=imagen_entrada,
-                cantidad=cantidad_val,
             )
+
+            # Guardar colores en Stocks
+            from proyectofinal.service.servicio_stock import crear_stock
+            for c in self.colores:
+                if c["color"].strip() != "":
+                    crear_stock(
+                        id_producto=nuevo.id_producto,
+                        color=c["color"],
+                        cantidad_disponible=int(c["cantidad"])
+                    )
+
+            # Refrescar lista de productos
             self.cargar_productos()
             self.error_message = ""
             self.imagen_local = ""
             self.preview_data_url = ""
+            self.colores = []  # limpiar lista
             self.modal_crear_abierto = False
-            return rx.toast(" Producto creado correctamente")
+            return rx.toast("Producto creado correctamente")
+
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -141,6 +197,13 @@ class AdminState(rx.State):
     @rx.event
     def eliminar_producto(self, producto_id: int):
         try:
+            # eliminar stocks asociados primero
+            from proyectofinal.service.servicio_stock import obtener_stocks_por_producto, eliminar_stock
+            stocks = obtener_stocks_por_producto(producto_id)
+            for s in stocks:
+                eliminar_stock(s.id_stock)
+
+            # luego eliminar el producto
             if eliminar_producto(producto_id):
                 self.cargar_productos()
                 self.error_message = ""
@@ -164,46 +227,59 @@ class AdminState(rx.State):
 
     @rx.event
     def editar_producto(self, producto_id: int, data: dict):
-
         try:
-            # Normalizar y filtrar valores vacíos sin asumir que todos son str
+            # Normalizar y filtrar valores vacíos
             cleaned: dict = {}
             for k, v in (data or {}).items():
                 if v is None:
                     continue
-                # intentamos limpiar strings, si no es string lo convertimos
                 try:
                     s = v.strip()
                 except Exception:
                     s = str(v).strip()
                 if s != "":
-                    # Guardar el valor original (no la cadena) para campos numéricos
                     cleaned[k] = v
-
             data = cleaned
-            if "imagen" not in data and self.imagen_local:
-                data["imagen"] = self.imagen_local
-            # Validar campos editados con misma regex que creación
-            pat = re.compile(r'^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü\s\-_,\.]{1,100}$')
-            for campo in ("nombre", "marca", "categoria", "talle"):
-                if campo in data:
-                    val = (data.get(campo) or "").strip()
-                    if val != "" and not pat.match(val):
-                        self.error_message = f"{campo.capitalize()} contiene caracteres inválidos"
-                        return
 
+            # 👇 Manejo de imagen: si hay imagen_local, usarla
+            if self.imagen_local:
+                data["imagen_url"] = self.imagen_local
+            elif "imagen" in data:
+                # renombrar campo para que coincida con lo que muestra la tabla
+                data["imagen_url"] = data.pop("imagen")
+
+            # Actualizar campos del producto
+            from proyectofinal.service.producto_servicio import editar_producto
             actualizado = editar_producto(producto_id, data)
-            if actualizado:
-                self.cargar_productos()
-                self.error_message = ""
-                self.modal_editar_abierto = False
-                return rx.toast(" Producto actualizado correctamente")
-            else:
-                self.error_message = " Producto no encontrado"
+            if not actualizado:
+                self.error_message = "Producto no encontrado"
+                return
+
+            # Actualizar o crear stocks asociados
+            from proyectofinal.service.servicio_stock import editar_stock, crear_stock, obtener_stocks_por_producto
+            for c in self.colores:
+                if "id_stock" in c:
+                    editar_stock(c["id_stock"], {
+                        "color": c["color"],
+                        "cantidad_disponible": int(c["cantidad"])
+                    })
+                else:
+                    crear_stock(producto_id, c["color"], int(c["cantidad"]))
+
+            # Recalcular el total de stock
+            total = sum(s.cantidad_disponible for s in obtener_stocks_por_producto(producto_id))
+            self.datos_edicion["cantidad_total"] = total
+
+            # Refrescar lista de productos
+            self.cargar_productos()
+            self.error_message = ""
+            self.modal_editar_abierto = False
+            return rx.toast("Producto actualizado correctamente")
+
         except Exception as e:
             import traceback
             traceback.print_exc()
-            self.error_message = f" Error al editar producto: {e}"
+            self.error_message = f"Error al editar producto: {e}"
         finally:
             self.imagen_local = ""
             self.preview_data_url = ""
@@ -212,51 +288,6 @@ class AdminState(rx.State):
     def enviar_edicion(self, data: dict):
         # usar el producto seleccionado actualmente
         self.editar_producto(self.producto_id_a_editar, data)
-
-    @rx.event
-    async def subir_imagen(self, files):
-        import os, tempfile, base64, mimetypes, time
-        if not files:
-            return
-        archivo = files[0]
-        filename = getattr(archivo, "filename", None)
-        # Obtener contenido según tipo entregado por Reflex
-        if hasattr(archivo, "read"):
-            contenido = await archivo.read()
-        elif isinstance(archivo, (bytes, bytearray)):
-            contenido = bytes(archivo)
-            if not filename:
-                filename = f"imagen_{int(time.time())}.bin"
-        else:
-            # último recurso: intentar acceder a 'file' o 'content'
-            posible = getattr(archivo, "content", None)
-            if isinstance(posible, (bytes, bytearray)):
-                contenido = bytes(posible)
-            else:
-                # no soportado
-                self.toast("No se pudo leer el archivo subido")
-                return
-            if not filename:
-                filename = getattr(archivo, "name", f"imagen_{int(time.time())}.bin")
-
-        # Asegurar nombre de archivo y extensión
-        if not filename:
-            filename = f"imagen_{int(time.time())}.jpg"
-        else:
-            base, ext = os.path.splitext(filename)
-            if not ext:
-                filename = f"{base}.jpg"
-
-        destino = os.path.join(tempfile.gettempdir(), filename)
-        with open(destino, "wb") as f:
-            f.write(contenido)
-        self.imagen_local = destino
-        # generar data URL para previsualización
-        mime, _ = mimetypes.guess_type(filename)
-        mime = mime or "image/jpeg"
-        b64 = base64.b64encode(contenido).decode("ascii")
-        self.preview_data_url = f"data:{mime};base64,{b64}"
-        return rx.toast(f"Imagen cargada: {os.path.basename(destino)}")
 
 @rx.page(route="admin_dashboard", title="Admin Dashboard", on_load=AdminState.cargar_productos)
 def admin_dashboard_page() -> rx.Component:
@@ -293,53 +324,53 @@ def ir_a_compras():
 def ir_a_pedidos():
     return rx.redirect("/pedidos_admin")
 
+def render_fila_producto(p: dict) -> rx.Component:
+    return rx.table.row(
+        rx.table.cell(rx.text(p["id_producto"])),          # ID
+        rx.table.cell(rx.text(p["nombre"])),               # Nombre
+        rx.table.cell(
+            rx.cond(
+                p.get("imagen_url"),
+                rx.image(src=p.get("imagen_url"), width="50px"),
+                rx.image(src=p.get("imagen", ""), width="50px")
+            )
+        ),
+        rx.table.cell(rx.text(p["precio_text"])),          # Precio
+        rx.table.cell(rx.text(p["marca"])),                # Marca
+        rx.table.cell(rx.text(p["talle"])),                # Talle
+        rx.table.cell(rx.text(p["cantidad_total_text"])),  # Cantidad total
+        rx.table.cell(rx.text(p["stocks_text"])),          # Stocks por color
+        rx.table.cell(
+            rx.hstack(
+                rx.button(
+                    "Eliminar",
+                    color_scheme="red",
+                    on_click=lambda _: AdminState.set_producto_a_eliminar(p["id_producto"])
+                ),
+                editar_producto_dialog_component(p)
+            )
+        )
+    )
 
 def table_productos() -> rx.Component:
     return rx.table.root(
         rx.table.header(
             rx.table.row(
-                rx.table.column_header_cell("ID"),
-                rx.table.column_header_cell("Nombre"),
-                rx.table.column_header_cell("Imagen"),
-                rx.table.column_header_cell("Precio"),
-                rx.table.column_header_cell("Marca"),
-                rx.table.column_header_cell("Talle"),
-                rx.table.column_header_cell("Cantidad"),
-                rx.table.column_header_cell("Acciones")
+                rx.table.cell(rx.text("ID")),
+                rx.table.cell(rx.text("Nombre")),
+                rx.table.cell(rx.text("Imagen")),
+                rx.table.cell(rx.text("Precio")),
+                rx.table.cell(rx.text("Marca")),
+                rx.table.cell(rx.text("Talle")),
+                rx.table.cell(rx.text("Cantidad")),
+                rx.table.cell(rx.text("Stocks")),
+                rx.table.cell(rx.text("Acciones")),
             )
         ),
         rx.table.body(
             rx.foreach(AdminState.productos, render_fila_producto)
         )
     )
-
-
-def render_fila_producto(p: dict) -> rx.Component:
-    return rx.table.row(
-        rx.table.cell(p["id_producto"]),
-        rx.table.cell(p["nombre"]),
-        rx.table.cell(
-            rx.image(
-                src=p.get("imagen", ""),
-                alt=p.get("nombre", ""),
-                width="56px",
-                height="56px",
-                border_radius="6px",
-                object_fit="cover",
-            )
-        ),
-        rx.table.cell(f"${p['precio']}"),
-        rx.table.cell(p["marca"]),
-        rx.table.cell(p.get("talle", "")),
-        rx.table.cell(p.get("cantidad", 0)),
-        rx.table.cell(
-            rx.hstack(
-                DangerButton("Eliminar", on_click=lambda _=None, pid=p["id_producto"]: AdminState.set_producto_a_eliminar(pid)),
-                editar_producto_dialog_component(p)
-            )
-        )
-    )
-
 
 def eliminar_producto_dialog() -> rx.Component:
     return rx.alert_dialog.root(
@@ -380,61 +411,53 @@ def crear_producto_dialog_component() -> rx.Component:
         on_open_change=AdminState.set_modal_crear_abierto
     )
 
-
+#edit 
 def crear_producto_form() -> rx.Component:
     return rx.form(
         rx.vstack(
             rx.text("Nombre", font_weight="bold"),
-            rx.input(name="nombre", width="100%"),
+            rx.input(name="nombre", placeholder="Nombre del producto", width="100%"),
             
             rx.text("Descripción", font_weight="bold"),
-            rx.input(name="descripcion", width="100%"),
+            rx.input(name="descripcion", placeholder="Descripción", width="100%"),
             
             rx.text("Precio", font_weight="bold"),
-            rx.input(type="number", name="precio", min="0", step="0.01", width="100%"),
+            rx.input(name="precio", type="number", step="0.01", placeholder="Precio", width="100%"),
             
             rx.text("Marca", font_weight="bold"),
-            rx.input(name="marca", width="100%"),
+            rx.input(name="marca", placeholder="Marca", width="100%"),
             
             rx.text("Categoría", font_weight="bold"),
-            rx.input(name="categoria", width="100%"),
+            rx.input(name="categoria", placeholder="Categoría", width="100%"),
             
             rx.text("Talle", font_weight="bold"),
-            rx.input(name="talle", width="100%"),
+            rx.input(name="talle", placeholder="Talle", width="100%"),
             
-            rx.text("Cantidad", font_weight="bold"),
-            rx.input(type="number", name="cantidad", min="0", step="1", width="100%"),
+            # 👇 Campo de imagen consistente
+            rx.text("Imagen URL", font_weight="bold"),
+            rx.input(name="imagen_url", placeholder="URL de la imagen", width="100%"),
             
-            rx.text("Imagen URL (opcional)", font_weight="bold"),
-            rx.input(name="imagen", width="100%"),
-            
-            rx.text("Subir imagen desde tu PC", font_weight="bold"),
-            rx.upload(
-                rx.button("Seleccionar imagen", type="button", width="100%"),
-                multiple=False,
-                accept="image/*",
-                on_drop=AdminState.subir_imagen,
-            ),
-            
-            rx.cond(
-                AdminState.imagen_local != "",
-                rx.vstack(
-                    rx.text("Imagen local lista para subir a Drive ✅"),
-                    rx.cond(
-                        AdminState.preview_data_url != "",
-                        rx.image(
-                            src=AdminState.preview_data_url,
-                            width="160px",
-                            height="160px",
-                            border_radius="8px"
-                        ),
-                        rx.box()
+            rx.text("Colores y stock", font_weight="bold"),
+            rx.foreach(
+                AdminState.colores,
+                lambda c, i: rx.hstack(
+                    rx.input(
+                        placeholder="Color",
+                        value=c.get("color", ""),
+                        on_change=lambda v: AdminState.actualizar_color(i, v),
+                    ),
+                    rx.input(
+                        type="number",
+                        placeholder="Cantidad",
+                        value=str(c.get("cantidad", 0)),
+                        on_change=lambda v: AdminState.actualizar_cantidad(i, v),
                     )
-                ),
-                rx.box()
+                )
             ),
-            
-            # 👇 Botón unificado con el estilo de los demás
+            rx.button("Agregar color", type="button", on_click=AdminState.agregar_color),
+
+            rx.text(f"Cantidad total: {AdminState.cantidad_total}", font_weight="bold"),
+
             PrimaryButton("Guardar", type="submit", width="100%"),
             spacing="4",
             width="100%"
@@ -442,11 +465,11 @@ def crear_producto_form() -> rx.Component:
         on_submit=AdminState.crear_producto
     )
 
-
 def editar_producto_dialog_component(producto: dict) -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
-            SecondaryButton("Editar", on_click=lambda _=None, pid=producto["id_producto"], prod=producto: AdminState.abrir_modal_editar(pid, prod))
+            rx.button("Editar", color_scheme="blue", 
+                      on_click=lambda _: AdminState.abrir_modal_editar(producto["id_producto"], producto))
         ),
         rx.dialog.content(
             rx.flex(
@@ -457,108 +480,63 @@ def editar_producto_dialog_component(producto: dict) -> rx.Component:
                 direction="column"
             ),
             rx.flex(
-                SecondaryButton("Cancelar", on_click=AdminState.cerrar_modal_editar),
+                rx.button("Cancelar", on_click=AdminState.cerrar_modal_editar),
                 spacing="3",
                 margin_top="16px",
                 justify="center"
             ),
             style={"width": "400px"}
         ),
-        # Abrir sólo el diálogo del producto seleccionado
-        open=(AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id_producto"])),
+        open=AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id_producto"]),
         on_open_change=AdminState.set_modal_editar_abierto
     )
 
-def editar_producto_form(producto: dict) -> rx.Component:
-    return rx.form(
-        rx.vstack(
-            rx.text("Nombre", font_weight="bold"),
-            rx.input(name="nombre", default_value=producto.get("nombre", ""), width="100%"),
-            
-            rx.text("Descripción", font_weight="bold"),
-            rx.input(name="descripcion", default_value=producto.get("descripcion", ""), width="100%"),
-            
-            rx.text("Precio", font_weight="bold"),
-            rx.input(
-                type="number",
-                name="precio",
-                min="0",
-                step="0.01",
-                default_value=str(producto.get("precio", "0.00")),
-                width="100%"
-            ),
-            
-            rx.text("Marca", font_weight="bold"),
-            rx.input(name="marca", default_value=producto.get("marca", ""), width="100%"),
-            
-            rx.text("Categoría", font_weight="bold"),
-            rx.input(name="categoria", default_value=producto.get("categoria", ""), width="100%"),
-            
-            rx.text("Talle", font_weight="bold"),
-            rx.input(name="talle", default_value=producto.get("talle", ""), width="100%"),
-            
-            rx.text("Imagen URL", font_weight="bold"),
-            rx.input(name="imagen", default_value=producto.get("imagen", ""), width="100%"),
-            
-            rx.text("Cantidad", font_weight="bold"),
-            rx.input(
-                type="number",
-                name="cantidad",
-                min="0",
-                step="1",
-                default_value=str(producto.get("cantidad", "0")),
-                width="100%"
-            ),
-            
-            PrimaryButton("Guardar", type="submit", width="100%"),
-            spacing="4",
-            width="100%"
-        ),
-        on_submit=AdminState.enviar_edicion
-    )
-
 def editar_producto_form_dynamic() -> rx.Component:
-    # Formulario que toma valores desde AdminState.datos_edicion
     return rx.form(
         rx.vstack(
             rx.text("Nombre", font_weight="bold"),
-            rx.input(name="nombre", default_value=AdminState.datos_edicion.get("nombre", ""), width="100%"),
+            rx.input(name="nombre", value=AdminState.datos_edicion.get("nombre", ""), width="100%"),
             
             rx.text("Descripción", font_weight="bold"),
-            rx.input(name="descripcion", default_value=AdminState.datos_edicion.get("descripcion", ""), width="100%"),
+            rx.input(name="descripcion", value=AdminState.datos_edicion.get("descripcion", ""), width="100%"),
             
             rx.text("Precio", font_weight="bold"),
-            rx.input(
-                type="number",
-                name="precio",
-                min="0",
-                step="0.01",
-                default_value=str(AdminState.datos_edicion.get("precio", "0.00")),
-                width="100%"
-            ),
+            rx.input(name="precio", type="number", step="0.01", value=AdminState.datos_edicion.get("precio", ""), width="100%"),
             
             rx.text("Marca", font_weight="bold"),
-            rx.input(name="marca", default_value=AdminState.datos_edicion.get("marca", ""), width="100%"),
+            rx.input(name="marca", value=AdminState.datos_edicion.get("marca", ""), width="100%"),
             
             rx.text("Categoría", font_weight="bold"),
-            rx.input(name="categoria", default_value=AdminState.datos_edicion.get("categoria", ""), width="100%"),
+            rx.input(name="categoria", value=AdminState.datos_edicion.get("categoria", ""), width="100%"),
             
             rx.text("Talle", font_weight="bold"),
-            rx.input(name="talle", default_value=AdminState.datos_edicion.get("talle", ""), width="100%"),
+            rx.input(name="talle", value=AdminState.datos_edicion.get("talle", ""), width="100%"),
             
+            # 👇 Campo de imagen consistente
             rx.text("Imagen URL", font_weight="bold"),
-            rx.input(name="imagen", default_value=AdminState.datos_edicion.get("imagen", ""), width="100%"),
+            rx.input(name="imagen_url", value=AdminState.datos_edicion.get("imagen_url", ""), width="100%"),
             
-            rx.text("Cantidad", font_weight="bold"),
-            rx.input(
-                type="number",
-                name="cantidad",
-                min="0",
-                step="1",
-                default_value=str(AdminState.datos_edicion.get("cantidad", "0")),
-                width="100%"
+            rx.text("Colores y stock", font_weight="bold"),
+            rx.foreach(
+                AdminState.colores,
+                lambda c, i: rx.hstack(
+                    rx.input(
+                        placeholder="Color",
+                        value=c.get("color", ""),
+                        on_change=lambda v: AdminState.actualizar_color(i, v),
+                    ),
+                    rx.input(
+                        type="number",
+                        placeholder="Cantidad",
+                        value=str(c.get("cantidad", 0)),
+                        on_change=lambda v: AdminState.actualizar_cantidad(i, v),
+                    )
+                )
             ),
-            
+            rx.button("Agregar color", type="button", on_click=AdminState.agregar_color),
+
+            rx.text(f"Cantidad total: {AdminState.datos_edicion.get('cantidad_total', 0)}", font_weight="bold"),
+
             PrimaryButton("Guardar", type="submit", width="100%"),
             spacing="4",
             width="100%"
