@@ -6,7 +6,10 @@ class Pedido(SQLModel, table=True):
     __tablename__ = "pedidos"
     
     id_pedido: Optional[int] = Field(default=None, primary_key=True)
-    id_users: int = Field(foreign_key="users.id_users")
+
+    # Foreign key normalizada
+    usuario_id: int = Field(foreign_key="users.id")   # antes id_users
+
     estado: str = Field(default="en espera")  # "en espera", "enviado", "entregado"
     total: float
     fecha_pedido: str
@@ -21,8 +24,9 @@ class Pedido(SQLModel, table=True):
     ciudad: Optional[str] = None
     provincia: Optional[str] = None
 
-    # 👇 nuevos campos
+    # Campos adicionales
     talles: Optional[str] = None
     colores: Optional[str] = None
     
+    # Relación con Users
     usuario: Optional[Users] = Relationship(back_populates="pedidos")

@@ -13,8 +13,8 @@ def obtener_productos() -> list[Producto]:
     return producto_repocitory.get_all_productos()
 
 # Obtener producto por ID
-def obtener_producto_por_id(id_producto: int) -> Producto | None:
-    return producto_repocitory.get_producto_by_id(id_producto)
+def obtener_producto_por_id(producto_id: int) -> Producto | None:
+    return producto_repocitory.get_producto_by_id(producto_id)
 
 # Crear nuevo producto
 def crear_producto(
@@ -83,8 +83,8 @@ def editar_producto(producto_id: int, data: dict) -> bool:
     return True
 
 # Eliminar producto por ID
-def eliminar_producto(id_producto: int) -> bool:
-    return producto_repocitory.delete_producto(id_producto)
+def eliminar_producto(producto_id: int) -> bool:
+    return producto_repocitory.delete_producto(producto_id)
 
 # Buscar productos por nombre
 def buscar_productos(nombre: str) -> list[Producto]:

@@ -72,15 +72,23 @@ def producto_card(p: dict) -> rx.Component:
                 p.get("nombre", ""),
                 font_size="lg",
                 font_weight="bold",
-                style={"whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis", "width": "100%"}
+                style={
+                    "whiteSpace": "nowrap",
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "width": "100%"
+                }
             ),
             rx.text(f"Talle: {p.get('talle', '')}", font_size="sm"),
             rx.text(f"Precio: ${p.get('precio', '')}", font_size="md"),
             rx.text(f"Marca: {p.get('marca', '')}", font_size="sm"),
+            rx.text(f"Disponibles: {p.get('cantidad', 0)}", font_size="sm", color="green"),
+
             rx.vstack(
                 PrimaryButton(
                     "Agregar al Carrito",
-                    on_click=lambda _=None, pid=p["id_producto"]: CatalogoState.agregar_carrito_con_id(pid),
+                    # 👇 Usa la clave correcta según tu catálogo
+                    on_click=lambda _=None, prod=p: CatalogoState.agregar_carrito_con_id(prod["id"]),
                     width="100%",
                 ),
                 SecondaryButton(
@@ -101,7 +109,7 @@ def producto_card(p: dict) -> rx.Component:
         margin="10px",
         min_width="200px",
         width="220px",
-        height="360px",
+        height="380px",
         text_align="center",
         box_shadow="0px 2px 5px rgba(0,0,0,0.06)",
         background_color="white",
@@ -110,13 +118,10 @@ def producto_card(p: dict) -> rx.Component:
 
 def mostrar_productos() -> rx.Component:
     return rx.cond(
-        CatalogoState.productos.length() == 0,
+        CatalogoState.productos == [],
         rx.spinner(color="blue", thickness="4px", size="3"),
         rx.hstack(
-            rx.foreach(
-                CatalogoState.productos.to(list[dict]),
-                producto_card
-            ),
+            rx.foreach(CatalogoState.productos, producto_card),
             flex_wrap="wrap",
             justify_content="center"
         )

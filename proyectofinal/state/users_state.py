@@ -1,5 +1,6 @@
 import reflex as rx
 import re
+from proyectofinal.state import app_globals
 from proyectofinal.model.users_model import Users
 from proyectofinal.service.users_service import (
     select_all_users_service,
@@ -17,66 +18,58 @@ class UsersState(rx.State):
     users: list[Users] = []
     user_buscar: str = ""
     error_message: str = ""
-    user_id: int | None = None
     perfil: dict = {}
     logeado: bool = False
 
-    @staticmethod
-    async def get_user_id() -> int:
-        """Devuelve el ID del usuario logueado o 0 si no hay sesión."""
-        try:
-            return int(UsersState.user_id or 0)
-        except Exception:
-            return 0
+    id: int | None = None        # reactivo
+    id_value: int | None = None  # 👈 declarar aquí el valor crudo
+
+
+    @rx.event
+    def set_perfil(self, perfil: dict):
+        self.perfil = perfil
+        self.logeado = True
+        app_globals.current_user_id = int(perfil.get("id")) if perfil and perfil.get("id") else None
+        self.id = app_globals.current_user_id
 
     @rx.event
     def login(self, usuario_id: int):
-        """Inicia sesión y carga perfil + estados dependientes."""
-        self.user_id = usuario_id
-        self.perfil = select_by_id_service(usuario_id)
+        user = select_by_id_service(usuario_id)
+        if isinstance(user, Users):
+            self.perfil = user.dict()
+        elif isinstance(user, dict):
+            self.perfil = user
+        else:
+            self.perfil = {"id": usuario_id}
         self.logeado = True
-
-        # Actualizar estados dependientes
-        from proyectofinal.state.catalogo_state import CatalogoState
-        CatalogoState.user_id = usuario_id
-        CatalogoState.cargar_productos()
-
-        from proyectofinal.state.carrito_state import CarritoState
-        CarritoState.user_id = usuario_id
-        CarritoState.cargar_carrito()
+        app_globals.current_user_id = int(self.perfil.get("id")) if self.perfil.get("id") else None
+        self.id = app_globals.current_user_id
+        print("Perfil guardado:", self.perfil)
 
     @rx.event
     def logout(self):
-        """Cierra sesión y limpia estados dependientes."""
-        self.user_id = None
         self.perfil = {}
         self.logeado = False
-
-        # Limpiar estados dependientes
-        from proyectofinal.state.catalogo_state import CatalogoState
-        CatalogoState.user_id = None
-        CatalogoState.productos = []
-
-        from proyectofinal.state.carrito_state import CarritoState
-        CarritoState.user_id = None
-        CarritoState.items = []
-
+        app_globals.current_user_id = None
+        self.id = None
         return rx.redirect("/users")
 
     @rx.event
     def validar_usuario(self, data: dict):
-        """Valida credenciales de usuario o administrador."""
         email = data["email"]
         password = data["password"]
 
-        # Primero validar administrador
+        # Validar administrador
         try:
             admin = validar_admin_service(email=email, contrasenia=password)
         except Exception:
             admin = None
         if admin:
-            self.user_id = admin.id_gerente
+            self.perfil = {"id": admin.id_gerente}
             self.logeado = True
+            self.id_value = int(admin.id_gerente)
+            self.id = self.id_value
+            app_globals.current_user_id = self.id_value   # 👈 actualizar global
             return rx.redirect("/admin_dashboard")
 
         # Validar usuario regular
@@ -87,7 +80,17 @@ class UsersState(rx.State):
             return notifail_component(self.error_message, "red")
 
         if user:
-            self.login(user.id_users)
+            if isinstance(user, Users):
+                self.perfil = user.dict()
+            elif isinstance(user, dict):
+                self.perfil = user
+            else:
+                self.perfil = {"id": getattr(user, "id", None)}
+            self.logeado = True
+            self.id_value = int(self.perfil.get("id")) if self.perfil.get("id") else None
+            self.id = self.id_value
+            app_globals.current_user_id = self.id_value   # 👈 actualizar global
+            print("Perfil guardado:", self.perfil)
             return rx.redirect("/catalogo")
 
         self.error_message = "Credenciales inválidas. Intenta nuevamente."
@@ -108,7 +111,6 @@ class UsersState(rx.State):
     @rx.event
     def create_user(self, data: dict):
         try:
-            # Validaciones básicas
             name_pat = re.compile(r'^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s\-]{1,80}$')
             email_pat = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
             phone_pat = re.compile(r'^[0-9\s\+\-()]{6,20}$')
@@ -142,5 +144,3 @@ class UsersState(rx.State):
     def delete_user(self, email: str):
         delete_user_service(email)
         self.users = select_all_users_service()
-
-

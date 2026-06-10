@@ -7,27 +7,31 @@ from proyectofinal.repository.carrito_repository import (
 from proyectofinal.repository.conect_db import engine
 from sqlmodel import Session
 
-# 🔍 Cargar carrito completo con productos y subtotales
-def cargar_carrito_service(id_users: int) -> list[dict]:
-    if not id_users:
+
+def cargar_carrito_service(usuario_id: int | None) -> list[dict]:
+    print("👉 cargar_carrito_service recibió usuario_id:", usuario_id)  # Depuración
+    if usuario_id is None or usuario_id == 0:
         raise ValueError("El ID de usuario no puede ser nulo al cargar el carrito.")
     with Session(engine) as session:
-        return obtener_carrito_agrupado_por_usuario(session, id_users)
+        return obtener_carrito_agrupado_por_usuario(session, usuario_id)
 
-# ✅ Agregar producto al carrito
-def agregar_producto_service(id_users: int, id_producto: int) -> None:
-    if not id_users:
+
+def agregar_producto_service(usuario_id: int | None, producto_id: int) -> None:
+    print("👉 agregar_producto_service recibió usuario_id:", usuario_id, "producto:", producto_id)  # Depuración
+    if usuario_id is None or usuario_id == 0:
         raise ValueError("El ID de usuario no puede ser nulo al agregar productos.")
-    agregar_item_al_carrito(id_users, id_producto)
+    agregar_item_al_carrito(usuario_id, producto_id)
 
-# 🗑️ Eliminar producto del carrito
-def eliminar_producto_service(id_users: int, id_producto: int) -> None:
-    if not id_users:
+
+def eliminar_producto_service(usuario_id: int | None, producto_id: int) -> None:
+    print("👉 eliminar_producto_service recibió usuario_id:", usuario_id, "producto:", producto_id)  # Depuración
+    if usuario_id is None or usuario_id == 0:
         raise ValueError("El ID de usuario no puede ser nulo al eliminar productos.")
-    eliminar_item_del_carrito(id_users, id_producto)
+    eliminar_item_del_carrito(usuario_id, producto_id)
 
-# 🧹 Finalizar compra (vaciar carrito)
-def finalizar_compra_service(id_users: int) -> None:
-    if not id_users:
+
+def finalizar_compra_service(usuario_id: int | None) -> None:
+    print("👉 finalizar_compra_service recibió usuario_id:", usuario_id)  # Depuración
+    if usuario_id is None or usuario_id == 0:
         raise ValueError("El ID de usuario no puede ser nulo al finalizar la compra.")
-    vaciar_carrito(id_users)
+    vaciar_carrito(usuario_id)

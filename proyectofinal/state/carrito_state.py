@@ -5,13 +5,13 @@ from proyectofinal.repository.carrito_repository import (
     agregar_item_al_carrito,
     eliminar_item_del_carrito,
     vaciar_carrito,
-    obtener_carrito_agrupado_por_usuario,
     obtener_carrito_completo_por_usuario
 )
 from proyectofinal.repository.conect_db import engine
-from proyectofinal.state.users_state import UsersState
 from proyectofinal.repository.consulta_repocitory import crear_consulta_repo
 from datetime import datetime
+from proyectofinal.service.carrito_service import agregar_producto_service
+from proyectofinal.state import app_globals
 
 
 class CarritoState(rx.State):
@@ -22,7 +22,6 @@ class CarritoState(rx.State):
     talles: str = ""
     colores: str = ""
 
-    # Estados para el modal de ubicación
     mostrar_modal_ubicacion: bool = False
     direccion: str = ""
     numero: str = ""
@@ -60,9 +59,36 @@ class CarritoState(rx.State):
         self.colores = ""
 
     @rx.event
+    async def cargar_carrito_detallado(self):
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        if user_id is None:
+            self.productos_carrito = []
+            self.total = 0.0
+            self.mensaje_compra = "Debes iniciar sesión para ver el carrito."
+            return
+
+        with Session(engine) as db:
+            resultados = obtener_carrito_completo_por_usuario(db, user_id)
+            self.productos_carrito = [
+                {
+                    "nombre": producto.nombre,
+                    "precio": float(producto.precio),
+                    "id_producto": producto.id,   # 👈 usar el campo real del modelo
+                    "id_carrito": carrito.id_carrito,
+                    "imagen": producto.imagen,
+                    "cantidad": carrito.cantidad,
+                    "subtotal": float(producto.precio) * carrito.cantidad,
+                }
+                for carrito, producto, usuario in resultados
+            ]
+            self.total = sum(p["subtotal"] for p in self.productos_carrito)
+
+    @rx.event
     async def finalizar_compra_con_ubicacion(self):
-        user_id = await UsersState.get_user_id()
-        if not user_id:
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        print("👉 User ID en finalizar_compra_con_ubicacion:", user_id)
+
+        if user_id is None:
             self.mensaje_compra = "Debes iniciar sesión para finalizar la compra."
             return
 
@@ -83,7 +109,9 @@ class CarritoState(rx.State):
             f"Talles seleccionados: {self.talles}\n"
             f"Colores seleccionados: {self.colores}"
         )
-        crear_consulta_repo(id_users=user_id, asunto="Compra realizada", mensaje=mensaje)
+
+        # 👇 corregido: usar usuario_id en lugar de id_users
+        crear_consulta_repo(usuario_id=user_id, asunto="Compra realizada", mensaje=mensaje)
 
         try:
             from proyectofinal.service.pedido_service import crear_pedido, obtener_productos_carrito_usuario
@@ -94,7 +122,7 @@ class CarritoState(rx.State):
             productos_json = obtener_productos_carrito_usuario(user_id)
 
             crear_pedido(
-                id_usuario=user_id,
+                id_usuario=user_id,   # 👈 este valor debe venir del login
                 total=float(total_compra),
                 fecha_pedido=fecha_actual,
                 productos_json=productos_json,
@@ -120,44 +148,22 @@ class CarritoState(rx.State):
         self.mensaje_compra = "✅ Compra finalizada correctamente. Gracias por tu pedido."
 
     @rx.event
-    async def cargar_carrito_agrupado(self):
+    async def cargar_carrito(self):
         self.mensaje_compra = ""
-        user_id = await UsersState.get_user_id()
-        if not user_id:
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        if user_id is None:
             self.productos_carrito = []
             self.total = 0.0
+            self.mensaje_compra = "Debes iniciar sesión para ver el carrito."
             return
-        with Session(engine) as db:
-            self.productos_carrito = obtener_carrito_agrupado_por_usuario(db, user_id)
-            self.total = float(sum(p.get("subtotal", 0) for p in self.productos_carrito))
+
+        self.productos_carrito = get_items_por_usuario(user_id)
+        self.total = float(sum(p.get("subtotal", 0) for p in self.productos_carrito))
 
     @rx.event
-    def cargar_carrito_detallado(self):
-        with Session(engine) as db:
-            resultados = obtener_carrito_completo_por_usuario(db, self.user_id)
-            self.productos_carrito = [
-                {
-                    "nombre": producto.nombre,
-                    "precio": float(producto.precio),
-                    "id_producto": producto.id_producto,
-                    "id_carrito": carrito.id_carrito,
-                    "imagen": producto.imagen,
-                    "cantidad": carrito.cantidad,  # 👈 usar cantidad real
-                    "subtotal": float(producto.precio) * carrito.cantidad
-                }
-                for carrito, producto, usuario in resultados
-            ]
-            self.total = float(sum(p["subtotal"] for p in self.productos_carrito))
-
-    @rx.event
-    def cargar_carrito(self):
-        self.mensaje_compra = ""
-        self.productos_carrito = get_items_por_usuario(self.user_id)
-
-    @rx.event
-    async def vaciar_carrito_completo(self):
-        user_id = await UsersState.get_user_id()
-        if not user_id:
+    def vaciar_carrito_completo(self):
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        if user_id is None:
             self.mensaje_compra = "Debes iniciar sesión para vaciar el carrito."
             return
         vaciar_carrito(user_id)
@@ -167,22 +173,30 @@ class CarritoState(rx.State):
 
     @rx.event
     async def eliminar_producto(self, id_producto: int):
-        user_id = await UsersState.get_user_id()
-        if not user_id:
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        if user_id is None:
             self.mensaje_compra = "Debes iniciar sesión para eliminar productos."
             return
         eliminar_item_del_carrito(user_id, id_producto)
-        await self.cargar_carrito_agrupado()
+        await self.cargar_carrito_detallado()   # 👈 corregido
 
     @rx.event
-    async def agregar_carrito_con_id(self, id_producto: int):
-        user_id = await UsersState.get_user_id()
-        if not user_id:
-            self.mensaje_compra = "Debes iniciar sesión para agregar productos."
+    def agregar_carrito_con_id(self, producto_id: int):
+        user_id = app_globals.current_user_id   # 👈 fuente recomendada
+        print("👉 User ID en CatalogoState:", user_id)
+
+        if user_id is None:
+            self.error_message = "Debes iniciar sesión para agregar al carrito."
+            self.success_message = ""
             return
-        agregar_item_al_carrito(user_id, id_producto)
-        await self.cargar_carrito_agrupado()
-        self.mensaje_compra = "Producto agregado al carrito."
+
+        try:
+            agregar_producto_service(user_id, producto_id)
+            self.success_message = "Producto agregado al carrito ✅"
+            self.error_message = ""
+        except Exception as e:
+            self.error_message = f"Error al agregar producto: {e}"
+            self.success_message = ""
 
     @rx.var
     def productos_agrupados(self) -> list[dict]:
@@ -198,7 +212,7 @@ class CarritoState(rx.State):
                     "nombre": producto["nombre"],
                     "precio": float(producto["precio"]),
                     "imagen": producto.get("imagen", ""),
-                    "cantidad": producto["cantidad"],  # 👈 usar cantidad real
+                    "cantidad": producto["cantidad"],
                     "subtotal": float(producto["precio"]) * producto["cantidad"]
                 })
         return agrupados

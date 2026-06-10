@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Producto(SQLModel, table=True):
     __tablename__ = "productos"
 
-    id_producto: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)   # 👈 ahora coincide con la base
     nombre: str
     descripcion: str
     precio: Decimal
@@ -21,7 +21,6 @@ class Producto(SQLModel, table=True):
     stocks: List["Stocks"] = Relationship(back_populates="producto")
     carritos: List["Carrito"] = Relationship(back_populates="producto")
 
-    # 👇 cantidad total calculada
     @property
     def cantidad_total(self) -> int:
         return sum(s.cantidad_disponible for s in self.stocks)

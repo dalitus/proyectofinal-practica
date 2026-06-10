@@ -3,14 +3,13 @@ import re
 from proyectofinal.model.product_model import Producto
 from proyectofinal.service.producto_servicio import (
     obtener_productos,
-    crear_producto,
-    eliminar_producto,
-    editar_producto
+    crear_producto as crear_producto_service,
+    eliminar_producto as eliminar_producto_service,
+    editar_producto as editar_producto_service,
 )
 from proyectofinal.pages.ui_helpers import PrimaryButton, SecondaryButton, DangerButton, PageHeader
 from proyectofinal.repository.catalogo_repository import get_all_productos
 from proyectofinal.service.servicio_stock import obtener_stocks_por_producto
-from proyectofinal.service.servicio_stock import editar_stock, crear_stock, obtener_stocks_por_producto
 
 class AdminState(rx.State):
     productos: list[dict] = []
@@ -27,11 +26,8 @@ class AdminState(rx.State):
     cantidad_total: int = 0
 
     def agregar_color(self):
-        # Agregar un nuevo color vacío con cantidad 0
         self.colores = self.colores + [{"color": "", "cantidad": 0}]
-        # Recalcular el total
         self.actualizar_total()
-        # 👇 Mantener el modal abierto
         self.modal_editar_abierto = True
 
     def actualizar_color(self, index: int, nuevo_color: str):
@@ -52,11 +48,10 @@ class AdminState(rx.State):
     @rx.event
     def cargar_productos(self):
         productos = []
-        for p in get_all_productos():
+        for p in obtener_productos():
             d = p.dict()
             d["cantidad_total"] = p.cantidad_total
             d["stocks"] = [s.dict() for s in p.stocks]
-            # 👇 preparar campos ya formateados como texto
             d["precio_text"] = f"${p.precio}"
             d["cantidad_total_text"] = str(p.cantidad_total)
             d["stocks_text"] = "\n".join(
@@ -87,19 +82,13 @@ class AdminState(rx.State):
         self.error_message = ""
         self.imagen_local = ""
         self.preview_data_url = ""
-
-        # 👇 Cargar los stocks actuales del producto
         try:
             stocks = obtener_stocks_por_producto(producto_id)
             self.colores = [
-                {
-                    "id_stock": s.id_stock,
-                    "color": s.color,
-                    "cantidad": s.cantidad_disponible
-                }
+                {"id_stock": s.id_stock, "color": s.color, "cantidad": s.cantidad_disponible}
                 for s in stocks
             ]
-        except Exception as e:
+        except Exception:
             import traceback
             traceback.print_exc()
             self.colores = []
@@ -114,34 +103,20 @@ class AdminState(rx.State):
         self.preview_data_url = ""
 
     @rx.event
-    def set_modal_crear_abierto(self, abierto: bool):
-        self.modal_crear_abierto = abierto
-
-    @rx.event
-    def set_modal_editar_abierto(self, abierto: bool):
-        self.modal_editar_abierto = abierto
-
-    @rx.event
     def crear_producto(self, data: dict):
         try:
-            print("Datos recibidos:", data)
             imagen_entrada = data.get("imagen")
             if (not imagen_entrada or imagen_entrada.strip() == "") and self.imagen_local:
                 imagen_entrada = self.imagen_local
 
-            # Validaciones mínimas
             if not data.get("nombre") or not data.get("precio"):
                 self.error_message = "Nombre y precio son obligatorios"
                 return
 
-            # Validar formato de campos con regex
-            import re
             pat = re.compile(r'^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü\s\-_,\.]{1,100}$')
             for campo in ("nombre", "marca", "categoria", "talle"):
                 val = (data.get(campo) or "").strip()
-                if val == "":
-                    continue
-                if not pat.match(val):
+                if val and not pat.match(val):
                     self.error_message = f"{campo.capitalize()} contiene caracteres inválidos"
                     return
 
@@ -151,8 +126,7 @@ class AdminState(rx.State):
                 self.error_message = "Precio inválido"
                 return
 
-            # Crear producto en la tabla productos
-            nuevo = crear_producto(
+            nuevo = crear_producto_service(
                 nombre=data["nombre"],
                 descripcion=data.get("descripcion", ""),
                 precio=precio_val,
@@ -162,22 +136,20 @@ class AdminState(rx.State):
                 imagen=imagen_entrada,
             )
 
-            # Guardar colores en Stocks
             from proyectofinal.service.servicio_stock import crear_stock
             for c in self.colores:
                 if c["color"].strip() != "":
                     crear_stock(
-                        id_producto=nuevo.id_producto,
+                        producto_id=nuevo.id,
                         color=c["color"],
                         cantidad_disponible=int(c["cantidad"])
                     )
 
-            # Refrescar lista de productos
             self.cargar_productos()
             self.error_message = ""
             self.imagen_local = ""
             self.preview_data_url = ""
-            self.colores = []  # limpiar lista
+            self.colores = []
             self.modal_crear_abierto = False
             return rx.toast("Producto creado correctamente")
 
@@ -192,19 +164,18 @@ class AdminState(rx.State):
 
     @rx.event
     def confirmar_eliminacion(self):
-        self.eliminar_producto(self.producto_id_a_eliminar)
+        if self.producto_id_a_eliminar:
+            self.eliminar_producto(self.producto_id_a_eliminar)
 
     @rx.event
     def eliminar_producto(self, producto_id: int):
         try:
-            # eliminar stocks asociados primero
             from proyectofinal.service.servicio_stock import obtener_stocks_por_producto, eliminar_stock
             stocks = obtener_stocks_por_producto(producto_id)
             for s in stocks:
                 eliminar_stock(s.id_stock)
 
-            # luego eliminar el producto
-            if eliminar_producto(producto_id):
+            if eliminar_producto_service(producto_id):
                 self.cargar_productos()
                 self.error_message = ""
             else:
@@ -217,45 +188,23 @@ class AdminState(rx.State):
             self.producto_id_a_eliminar = 0
 
     @rx.event
-    def set_edicion(self, producto_id: int, data: dict):
-        self.producto_id_a_editar = producto_id
-        self.datos_edicion = data
-
-    @rx.event
     def confirmar_edicion(self):
         self.editar_producto(self.producto_id_a_editar, self.datos_edicion)
 
     @rx.event
     def editar_producto(self, producto_id: int, data: dict):
         try:
-            # Normalizar y filtrar valores vacíos
-            cleaned: dict = {}
-            for k, v in (data or {}).items():
-                if v is None:
-                    continue
-                try:
-                    s = v.strip()
-                except Exception:
-                    s = str(v).strip()
-                if s != "":
-                    cleaned[k] = v
-            data = cleaned
-
-            # 👇 Manejo de imagen: si hay imagen_local, usarla
+            cleaned = {k: v for k, v in (data or {}).items() if str(v).strip() != ""}
             if self.imagen_local:
-                data["imagen_url"] = self.imagen_local
-            elif "imagen" in data:
-                # renombrar campo para que coincida con lo que muestra la tabla
-                data["imagen_url"] = data.pop("imagen")
+                cleaned["imagen_url"] = self.imagen_local
+            elif "imagen" in cleaned:
+                cleaned["imagen_url"] = cleaned.pop("imagen")
 
-            # Actualizar campos del producto
-            from proyectofinal.service.producto_servicio import editar_producto
-            actualizado = editar_producto(producto_id, data)
+            actualizado = editar_producto_service(producto_id, cleaned)
             if not actualizado:
                 self.error_message = "Producto no encontrado"
                 return
 
-            # Actualizar o crear stocks asociados
             from proyectofinal.service.servicio_stock import editar_stock, crear_stock, obtener_stocks_por_producto
             for c in self.colores:
                 if "id_stock" in c:
@@ -266,11 +215,9 @@ class AdminState(rx.State):
                 else:
                     crear_stock(producto_id, c["color"], int(c["cantidad"]))
 
-            # Recalcular el total de stock
             total = sum(s.cantidad_disponible for s in obtener_stocks_por_producto(producto_id))
             self.datos_edicion["cantidad_total"] = total
 
-            # Refrescar lista de productos
             self.cargar_productos()
             self.error_message = ""
             self.modal_editar_abierto = False
@@ -326,8 +273,8 @@ def ir_a_pedidos():
 
 def render_fila_producto(p: dict) -> rx.Component:
     return rx.table.row(
-        rx.table.cell(rx.text(p["id_producto"])),          # ID
-        rx.table.cell(rx.text(p["nombre"])),               # Nombre
+        rx.table.cell(rx.text(p["id"])),          # 👈 usar id
+        rx.table.cell(rx.text(p["nombre"])),      # Nombre
         rx.table.cell(
             rx.cond(
                 p.get("imagen_url"),
@@ -345,7 +292,7 @@ def render_fila_producto(p: dict) -> rx.Component:
                 rx.button(
                     "Eliminar",
                     color_scheme="red",
-                    on_click=lambda _: AdminState.set_producto_a_eliminar(p["id_producto"])
+                    on_click=lambda _: AdminState.set_producto_a_eliminar(p["id"])  # 👈 usar id
                 ),
                 editar_producto_dialog_component(p)
             )
@@ -468,12 +415,15 @@ def crear_producto_form() -> rx.Component:
 def editar_producto_dialog_component(producto: dict) -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.button("Editar", color_scheme="blue", 
-                      on_click=lambda _: AdminState.abrir_modal_editar(producto["id_producto"], producto))
+            rx.button(
+                "Editar",
+                color_scheme="blue",
+                on_click=lambda _: AdminState.abrir_modal_editar(producto["id"], producto)  # 👈 usar id
+            )
         ),
         rx.dialog.content(
             rx.flex(
-                rx.dialog.title(f"Editar Producto ID {producto['id_producto']}"),
+                rx.dialog.title(f"Editar Producto ID {producto['id']}"),  # 👈 usar id
                 editar_producto_form_dynamic(),
                 justify="center",
                 align="center",
@@ -487,10 +437,9 @@ def editar_producto_dialog_component(producto: dict) -> rx.Component:
             ),
             style={"width": "400px"}
         ),
-        open=AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id_producto"]),
+        open=AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id"]),  # 👈 usar id
         on_open_change=AdminState.set_modal_editar_abierto
     )
-
 def editar_producto_form_dynamic() -> rx.Component:
     return rx.form(
         rx.vstack(
@@ -512,7 +461,6 @@ def editar_producto_form_dynamic() -> rx.Component:
             rx.text("Talle", font_weight="bold"),
             rx.input(name="talle", value=AdminState.datos_edicion.get("talle", ""), width="100%"),
             
-            # 👇 Campo de imagen consistente
             rx.text("Imagen URL", font_weight="bold"),
             rx.input(name="imagen_url", value=AdminState.datos_edicion.get("imagen_url", ""), width="100%"),
             

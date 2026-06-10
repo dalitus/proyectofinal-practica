@@ -1,10 +1,12 @@
 import reflex as rx
 from proyectofinal.service.gerente_service import validar_admin_service
+from proyectofinal.state import app_globals
 
 
 class AdminLoginState(rx.State):
     error_message: str = ""
 
+    @rx.event
     def validar_admin(self, data: dict):
         try:
             admin = validar_admin_service(
@@ -12,9 +14,12 @@ class AdminLoginState(rx.State):
                 contrasenia=data["contrasenia"]
             )
             print("Admin logueado:", admin.nombre)
+            # 👇 Guardar el id del gerente en la variable global
+            app_globals.current_user_id = int(admin.id_gerente)
             return rx.redirect("/admin_dashboard")
         except ValueError as e:
             self.error_message = str(e)
+
 
 @rx.page(route="/admin_login", title="Login Admin")
 def admin_login_page():

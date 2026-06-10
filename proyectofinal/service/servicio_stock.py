@@ -5,10 +5,10 @@ from proyectofinal.model.stock_model import Stocks
 from proyectofinal.repository.conect_db import engine
 
 # Crear un registro de stock (color + cantidad)
-def crear_stock(id_producto: int, color: str, cantidad_disponible: int) -> Stocks:
+def crear_stock(producto_id: int, color: str, cantidad_disponible: int) -> Stocks:
     with Session(engine) as session:
         nuevo = Stocks(
-            id_producto=id_producto,
+            producto_id=producto_id,   # 👈 coincide con la FK en Stocks
             color=color,
             cantidad_disponible=cantidad_disponible
         )
@@ -18,9 +18,9 @@ def crear_stock(id_producto: int, color: str, cantidad_disponible: int) -> Stock
         return nuevo
 
 # Obtener todos los stocks de un producto
-def obtener_stocks_por_producto(id_producto: int) -> list[Stocks]:
+def obtener_stocks_por_producto(producto_id: int) -> list[Stocks]:
     with Session(engine) as session:
-        statement = select(Stocks).where(Stocks.id_producto == id_producto)
+        statement = select(Stocks).where(Stocks.producto_id == producto_id)
         results = session.exec(statement).all()
         return results
 

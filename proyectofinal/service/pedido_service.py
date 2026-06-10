@@ -7,14 +7,13 @@ from proyectofinal.repository.conect_db import engine
 import json
 
 
-
 def obtener_productos_carrito_usuario(id_usuario: int) -> str:
     """Obtener productos del carrito del usuario como JSON"""
     with Session(engine) as session:
         items_carrito = session.exec(
             select(Carrito, Producto)
-            .where(Carrito.id_users == id_usuario)
-            .join(Producto, Carrito.id_producto == Producto.id_producto)
+            .where(Carrito.usuario_id == id_usuario)              # 👈 corregido
+            .join(Producto, Carrito.producto_id == Producto.id)   # 👈 corregido
         ).all()
 
         productos = []
@@ -22,7 +21,7 @@ def obtener_productos_carrito_usuario(id_usuario: int) -> str:
             cantidad = getattr(carrito, "cantidad", 1)
             precio = float(producto.precio) if producto.precio else 0.0
             productos.append({
-                "id_producto": producto.id_producto,
+                "id_producto": producto.id,                       # 👈 corregido
                 "nombre": producto.nombre,
                 "cantidad": cantidad,
                 "precio": precio,
@@ -44,13 +43,13 @@ def crear_pedido(
     codigo_postal: str = None,
     ciudad: str = None,
     provincia: str = None,
-    talles: str = None,     # 👈 nuevo campo
-    colores: str = None     # 👈 nuevo campo
+    talles: str = None,
+    colores: str = None
 ) -> dict:
     """Crear un nuevo pedido con datos de ubicación"""
     with Session(engine) as session:
         nuevo_pedido = Pedido(
-            id_users=id_usuario,
+            id_usuario=id_usuario,          # 👈 corregido
             estado="en espera",
             total=total,
             fecha_pedido=fecha_pedido,
@@ -61,8 +60,8 @@ def crear_pedido(
             codigo_postal=codigo_postal,
             ciudad=ciudad,
             provincia=provincia,
-            talles=talles,       # 👈 guardar talles
-            colores=colores      # 👈 guardar colores
+            talles=talles,
+            colores=colores
         )
         session.add(nuevo_pedido)
         session.commit()
@@ -89,17 +88,17 @@ def obtener_pedidos_usuario(id_usuario: int) -> list[dict]:
     """Obtener todos los pedidos de un usuario con datos del usuario"""
     with Session(engine) as session:
         pedidos = session.exec(
-            select(Pedido).where(Pedido.id_users == id_usuario)
+            select(Pedido).where(Pedido.id_usuario == id_usuario)   # 👈 corregido
         ).all()
         resultado = []
         for p in pedidos:
             usuario = session.exec(
-                select(Users).where(Users.id_users == p.id_users)
+                select(Users).where(Users.id == p.id_usuario)       # 👈 corregido
             ).first()
 
             resultado.append({
                 "id_pedido": p.id_pedido,
-                "id_users": p.id_users,
+                "id_usuario": p.id_usuario,                        # 👈 corregido
                 "nombre_usuario": f"{usuario.nombre} {usuario.apellido}" if usuario else "N/A",
                 "direccion_usuario": usuario.direccion if usuario else "N/A",
                 "estado": p.estado,
@@ -126,24 +125,23 @@ def obtener_todos_pedidos() -> list[dict]:
         resultado = []
         for p in pedidos:
             usuario = session.exec(
-                select(Users).where(Users.id_users == p.id_users)
+                select(Users).where(Users.id == p.id_usuario)       # 👈 corregido
             ).first()
 
-            # 👇 Parsear productos_json si existe
             try:
                 productos = json.loads(p.productos_json) if p.productos_json else []
             except Exception:
                 productos = []
             resultado.append({
                 "id_pedido": p.id_pedido,
-                "id_users": p.id_users,
+                "id_usuario": p.id_usuario,                        # 👈 corregido
                 "nombre_usuario": f"{usuario.nombre} {usuario.apellido}" if usuario else "N/A",
                 "direccion_usuario": usuario.direccion if usuario else "N/A",
                 "estado": p.estado,
                 "total": p.total,
                 "fecha_pedido": p.fecha_pedido,
                 "fecha_entrega": p.fecha_entrega,
-                "productos_json": productos,   # 👈 ahora es lista, no string
+                "productos_json": productos,
                 "direccion": p.direccion,
                 "numero": p.numero,
                 "departamento": p.departamento,
@@ -154,8 +152,6 @@ def obtener_todos_pedidos() -> list[dict]:
                 "colores": p.colores,
             })
         return resultado
-
-
 
 
 def obtener_pedido_por_id(id_pedido: int) -> dict | None:
@@ -169,12 +165,12 @@ def obtener_pedido_por_id(id_pedido: int) -> dict | None:
             return None
 
         usuario = session.exec(
-            select(Users).where(Users.id_users == pedido.id_users)
+            select(Users).where(Users.id == pedido.id_usuario)      # 👈 corregido
         ).first()
 
         return {
             "id_pedido": pedido.id_pedido,
-            "id_users": pedido.id_users,
+            "id_usuario": pedido.id_usuario,                        # 👈 corregido
             "nombre_usuario": f"{usuario.nombre} {usuario.apellido}" if usuario else "N/A",
             "direccion_usuario": usuario.direccion if usuario else "N/A",
             "estado": pedido.estado,

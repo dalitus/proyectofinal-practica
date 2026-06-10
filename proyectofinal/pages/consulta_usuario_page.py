@@ -1,13 +1,13 @@
 import reflex as rx
 from proyectofinal.service.consulta_service import crear_consulta, listar_consultas_usuario
-from proyectofinal.state.carrito_state import CarritoState
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.pages.ui_helpers import PrimaryButton, PageHeader
+
 
 class ConsultaUsuarioState(rx.State):
     asunto: str = ""
     mensaje: str = ""
-    id_users: int = 1
+    usuario_id: int = 1   # 👈 corregido
     consultas: list[dict] = []
     success_message: str = ""
     error_message: str = ""
@@ -16,9 +16,9 @@ class ConsultaUsuarioState(rx.State):
     def on_load(self):
         # Usar el usuario logeado si existe
         try:
-            self.id_users = UsersState.user_id or 1
+            self.usuario_id = UsersState.id or 1   # 👈 usar el id del usuario logeado
         except Exception:
-            self.id_users = 1
+            self.usuario_id = 1
         self.cargar_consultas()
 
     @rx.event
@@ -28,7 +28,7 @@ class ConsultaUsuarioState(rx.State):
                 self.error_message = "El mensaje no puede estar vacío."
                 self.success_message = ""
                 return
-            crear_consulta(self.id_users, self.asunto.strip(), self.mensaje.strip())
+            crear_consulta(self.usuario_id, self.asunto.strip(), self.mensaje.strip())   # 👈 corregido
             self.asunto = ""
             self.mensaje = ""
             self.success_message = "Consulta enviada correctamente."
@@ -40,7 +40,7 @@ class ConsultaUsuarioState(rx.State):
 
     @rx.event
     def cargar_consultas(self):
-        consultas_obj = listar_consultas_usuario(self.id_users)
+        consultas_obj = listar_consultas_usuario(self.usuario_id)   # 👈 corregido
         self.consultas = [c.dict() for c in consultas_obj]
 
     @rx.event

@@ -1,16 +1,16 @@
 from sqlmodel import Session, select
 from proyectofinal.model.carrito_model import Carrito
 from proyectofinal.model.product_model import Producto
-from proyectofinal.model.users_model import Users   # 👈 corregido
+from proyectofinal.model.users_model import Users
 from proyectofinal.repository.conect_db import engine
 
 # 🔍 Obtener carrito agrupado por producto
-def obtener_carrito_agrupado_por_usuario(db: Session, id_users: int) -> list[dict]:
-    resultados = obtener_carrito_completo_por_usuario(db, id_users)
+def obtener_carrito_agrupado_por_usuario(db: Session, usuario_id: int) -> list[dict]:
+    resultados = obtener_carrito_completo_por_usuario(db, usuario_id)
     agrupados = []
     for carrito, producto, usuario in resultados:
         agrupados.append({
-            "id_producto": producto.id_producto,
+            "id_producto": producto.id,   # 👈 usar producto.id
             "nombre": producto.nombre,
             "precio": float(producto.precio),
             "imagen": producto.imagen,
@@ -20,57 +20,57 @@ def obtener_carrito_agrupado_por_usuario(db: Session, id_users: int) -> list[dic
     return agrupados
 
 # 🔍 Obtener carrito completo con joins
-def obtener_carrito_completo_por_usuario(db: Session, id_users: int):
+def obtener_carrito_completo_por_usuario(db: Session, usuario_id: int):
     return (
         db.query(Carrito, Producto, Users)
-        .join(Producto, Carrito.id_producto == Producto.id_producto)
-        .join(Users, Carrito.id_users == Users.id_users)
-        .filter(Carrito.id_users == id_users)
+        .join(Producto, Carrito.producto_id == Producto.id)   # 👈 corregido
+        .join(Users, Carrito.usuario_id == Users.id)
+        .filter(Carrito.usuario_id == usuario_id)
         .all()
     )
 
 # 🔍 Obtener items sin joins (solo IDs)
-def get_items_por_usuario(user_id: int) -> list[dict]:
+def get_items_por_usuario(usuario_id: int) -> list[dict]:
     with Session(engine) as session:
         resultados = session.exec(
-            select(Carrito).where(Carrito.id_users == user_id)
+            select(Carrito).where(Carrito.usuario_id == usuario_id)
         ).all()
         return [
             {
                 "id_carrito": r.id_carrito,
-                "id_users": r.id_users,
-                "id_producto": r.id_producto,
+                "usuario_id": r.usuario_id,
+                "producto_id": r.producto_id,
                 "cantidad": r.cantidad
             }
             for r in resultados
         ]
 
 # ✅ Agregar producto al carrito
-def agregar_item_al_carrito(id_users: int, id_producto: int) -> None:
-    if id_users is None:
-        raise ValueError("id_users no puede ser None al agregar al carrito.")
+def agregar_item_al_carrito(usuario_id: int, producto_id: int) -> None:
+    if usuario_id is None:
+        raise ValueError("usuario_id no puede ser None al agregar al carrito.")
     with Session(engine) as session:
         item = session.exec(
             select(Carrito).where(
-                Carrito.id_users == id_users,
-                Carrito.id_producto == id_producto
+                Carrito.usuario_id == usuario_id,
+                Carrito.producto_id == producto_id
             )
         ).first()
         if item:
             item.cantidad += 1
             session.add(item)
         else:
-            item = Carrito(id_users=id_users, id_producto=id_producto, cantidad=1)
+            item = Carrito(usuario_id=usuario_id, producto_id=producto_id, cantidad=1)
             session.add(item)
         session.commit()
 
 # 🗑️ Eliminar un producto del carrito
-def eliminar_item_del_carrito(id_users: int, id_producto: int) -> None:
+def eliminar_item_del_carrito(usuario_id: int, producto_id: int) -> None:
     with Session(engine) as session:
         item = session.exec(
             select(Carrito).where(
-                Carrito.id_users == id_users,
-                Carrito.id_producto == id_producto
+                Carrito.usuario_id == usuario_id,
+                Carrito.producto_id == producto_id
             )
         ).first()
         if item:
@@ -82,9 +82,9 @@ def eliminar_item_del_carrito(id_users: int, id_producto: int) -> None:
             session.commit()
 
 # 🧹 Vaciar todo el carrito
-def vaciar_carrito(id_users: int) -> None:
+def vaciar_carrito(usuario_id: int) -> None:
     with Session(engine) as session:
-        query = select(Carrito).where(Carrito.id_users == id_users)
+        query = select(Carrito).where(Carrito.usuario_id == usuario_id)
         items = session.exec(query).all()
         for item in items:
             session.delete(item)
