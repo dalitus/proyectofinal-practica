@@ -1,5 +1,6 @@
 # proyectofinal/pages/pedidos_page.py
 import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.state.pedido_state import PedidoState
 
 def mostrar_productos(productos) -> rx.Component:
@@ -58,7 +59,8 @@ def pedido_card_usuario(pedido) -> rx.Component:
         width="100%",
         padding="15px",
         margin_y="10px",
-        box_shadow="md",
+        background_color=COLORS["card"],
+        border=f"1px solid {COLORS['border']}",
         border_radius="10px"
     )
 
@@ -95,7 +97,7 @@ def pedidos_page() -> rx.Component:
             spacing="4"
         ),
         style={
-            "background_color": "#ADD8E6",
+            "background_color": COLORS["page"],
             "min_height": "100vh",
             "padding": "20px"
         }

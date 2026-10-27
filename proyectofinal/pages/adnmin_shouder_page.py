@@ -1,4 +1,5 @@
-import reflex as rx
+﻿import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 import re
 from proyectofinal.model.product_model import Producto
 from proyectofinal.service.producto_servicio import (
@@ -25,6 +26,14 @@ class AdminState(rx.State):
     colores: list[dict] = []
     cantidad_total: int = 0
 
+    @rx.event
+    def set_modal_crear_abierto(self, value: bool):
+        self.modal_crear_abierto = value
+
+    @rx.event
+    def set_modal_editar_abierto(self, value: bool):
+        self.modal_editar_abierto = value
+
     def agregar_color(self):
         self.colores = self.colores + [{"color": "", "cantidad": 0}]
         self.actualizar_total()
@@ -49,9 +58,9 @@ class AdminState(rx.State):
     def cargar_productos(self):
         productos = []
         for p in obtener_productos():
-            d = p.dict()
+            d = p.model_dump()
             d["cantidad_total"] = p.cantidad_total
-            d["stocks"] = [s.dict() for s in p.stocks]
+            d["stocks"] = [s.model_dump() for s in p.stocks]
             d["precio_text"] = f"${p.precio}"
             d["cantidad_total_text"] = str(p.cantidad_total)
             d["stocks_text"] = "\n".join(
@@ -113,17 +122,17 @@ class AdminState(rx.State):
                 self.error_message = "Nombre y precio son obligatorios"
                 return
 
-            pat = re.compile(r'^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñÜü\s\-_,\.]{1,100}$')
+            pat = re.compile(r'^[A-Za-z0-9ÃÃ‰ÃÃ“ÃšÃ¡Ã©Ã­Ã³ÃºÃ‘Ã±ÃœÃ¼\s\-_,\.]{1,100}$')
             for campo in ("nombre", "marca", "categoria", "talle"):
                 val = (data.get(campo) or "").strip()
                 if val and not pat.match(val):
-                    self.error_message = f"{campo.capitalize()} contiene caracteres inválidos"
+                    self.error_message = f"{campo.capitalize()} contiene caracteres invÃ¡lidos"
                     return
 
             try:
                 precio_val = float(data["precio"])
             except Exception:
-                self.error_message = "Precio inválido"
+                self.error_message = "Precio invÃ¡lido"
                 return
 
             nuevo = crear_producto_service(
@@ -240,7 +249,7 @@ class AdminState(rx.State):
 def admin_dashboard_page() -> rx.Component:
     return rx.box(
         rx.flex(
-            PageHeader("Panel de Administración de Productos", "Gestioná productos y consultas"),
+            PageHeader("Panel de AdministraciÃ³n de Productos", "GestionÃ¡ productos y consultas"),
             PrimaryButton("Ir a consultas de usuarios", on_click=ir_a_consultas, width="100%"),
             SecondaryButton("Gestionar Pedidos", on_click=ir_a_pedidos, width="100%"),
             crear_producto_dialog_component(),
@@ -254,7 +263,7 @@ def admin_dashboard_page() -> rx.Component:
             style={"width": "70vw", "margin": "auto"}
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }
@@ -273,7 +282,7 @@ def ir_a_pedidos():
 
 def render_fila_producto(p: dict) -> rx.Component:
     return rx.table.row(
-        rx.table.cell(rx.text(p["id"])),          # 👈 usar id
+        rx.table.cell(rx.text(p["id"])),          # ðŸ‘ˆ usar id
         rx.table.cell(rx.text(p["nombre"])),      # Nombre
         rx.table.cell(
             rx.cond(
@@ -292,7 +301,7 @@ def render_fila_producto(p: dict) -> rx.Component:
                 rx.button(
                     "Eliminar",
                     color_scheme="red",
-                    on_click=lambda _: AdminState.set_producto_a_eliminar(p["id"])  # 👈 usar id
+                    on_click=lambda _: AdminState.set_producto_a_eliminar(p["id"])  # ðŸ‘ˆ usar id
                 ),
                 editar_producto_dialog_component(p)
             )
@@ -323,9 +332,9 @@ def eliminar_producto_dialog() -> rx.Component:
     return rx.alert_dialog.root(
         rx.alert_dialog.trigger(rx.fragment()),  # invisible trigger
         rx.alert_dialog.content(
-            rx.text("¿Eliminar producto? Esta acción no se puede deshacer."),
+            rx.text("Â¿Eliminar producto? Esta acciÃ³n no se puede deshacer."),
             rx.hstack(
-                # Al cancelar, limpiar el id a eliminar para cerrar el diálogo controlado por estado
+                # Al cancelar, limpiar el id a eliminar para cerrar el diÃ¡logo controlado por estado
                 rx.alert_dialog.cancel(rx.button("Cancelar", on_click=lambda _=None: AdminState.set_producto_a_eliminar(0))),
                 rx.alert_dialog.action(rx.button("Confirmar", on_click=lambda _=None: AdminState.confirmar_eliminacion()))
             )
@@ -365,8 +374,8 @@ def crear_producto_form() -> rx.Component:
             rx.text("Nombre", font_weight="bold"),
             rx.input(name="nombre", placeholder="Nombre del producto", width="100%"),
             
-            rx.text("Descripción", font_weight="bold"),
-            rx.input(name="descripcion", placeholder="Descripción", width="100%"),
+            rx.text("DescripciÃ³n", font_weight="bold"),
+            rx.input(name="descripcion", placeholder="DescripciÃ³n", width="100%"),
             
             rx.text("Precio", font_weight="bold"),
             rx.input(name="precio", type="number", step="0.01", placeholder="Precio", width="100%"),
@@ -374,13 +383,13 @@ def crear_producto_form() -> rx.Component:
             rx.text("Marca", font_weight="bold"),
             rx.input(name="marca", placeholder="Marca", width="100%"),
             
-            rx.text("Categoría", font_weight="bold"),
-            rx.input(name="categoria", placeholder="Categoría", width="100%"),
+            rx.text("CategorÃ­a", font_weight="bold"),
+            rx.input(name="categoria", placeholder="CategorÃ­a", width="100%"),
             
             rx.text("Talle", font_weight="bold"),
             rx.input(name="talle", placeholder="Talle", width="100%"),
             
-            # 👇 Campo de imagen consistente
+            # ðŸ‘‡ Campo de imagen consistente
             rx.text("Imagen URL", font_weight="bold"),
             rx.input(name="imagen_url", placeholder="URL de la imagen", width="100%"),
             
@@ -418,12 +427,12 @@ def editar_producto_dialog_component(producto: dict) -> rx.Component:
             rx.button(
                 "Editar",
                 color_scheme="blue",
-                on_click=lambda _: AdminState.abrir_modal_editar(producto["id"], producto)  # 👈 usar id
+                on_click=lambda _: AdminState.abrir_modal_editar(producto["id"], producto)  # ðŸ‘ˆ usar id
             )
         ),
         rx.dialog.content(
             rx.flex(
-                rx.dialog.title(f"Editar Producto ID {producto['id']}"),  # 👈 usar id
+                rx.dialog.title(f"Editar Producto ID {producto['id']}"),  # ðŸ‘ˆ usar id
                 editar_producto_form_dynamic(),
                 justify="center",
                 align="center",
@@ -437,7 +446,7 @@ def editar_producto_dialog_component(producto: dict) -> rx.Component:
             ),
             style={"width": "400px"}
         ),
-        open=AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id"]),  # 👈 usar id
+        open=AdminState.modal_editar_abierto & (AdminState.producto_id_a_editar == producto["id"]),  # ðŸ‘ˆ usar id
         on_open_change=AdminState.set_modal_editar_abierto
     )
 def editar_producto_form_dynamic() -> rx.Component:
@@ -446,7 +455,7 @@ def editar_producto_form_dynamic() -> rx.Component:
             rx.text("Nombre", font_weight="bold"),
             rx.input(name="nombre", value=AdminState.datos_edicion.get("nombre", ""), width="100%"),
             
-            rx.text("Descripción", font_weight="bold"),
+            rx.text("DescripciÃ³n", font_weight="bold"),
             rx.input(name="descripcion", value=AdminState.datos_edicion.get("descripcion", ""), width="100%"),
             
             rx.text("Precio", font_weight="bold"),
@@ -455,7 +464,7 @@ def editar_producto_form_dynamic() -> rx.Component:
             rx.text("Marca", font_weight="bold"),
             rx.input(name="marca", value=AdminState.datos_edicion.get("marca", ""), width="100%"),
             
-            rx.text("Categoría", font_weight="bold"),
+            rx.text("CategorÃ­a", font_weight="bold"),
             rx.input(name="categoria", value=AdminState.datos_edicion.get("categoria", ""), width="100%"),
             
             rx.text("Talle", font_weight="bold"),

@@ -1,12 +1,13 @@
 import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.state.catalogo_state import CatalogoState
 
-@rx.page(route="/detalle_producto/[producto_id]")
-def detalle_producto_page(producto_id: int = 0) -> rx.Component:
+@rx.page(route="/detalle_producto", title="Detalle Producto")
+def detalle_producto_page() -> rx.Component:
     return rx.box(
         rx.center(
             rx.cond(
-                CatalogoState.producto_seleccionado.get("id_producto", 0) == 0,
+                CatalogoState.producto_seleccionado.get("id", 0) == 0,
                 rx.text("❌ Producto no disponible"),
                 rx.card(
                     rx.vstack(
@@ -17,7 +18,7 @@ def detalle_producto_page(producto_id: int = 0) -> rx.Component:
                             height="360px",
                             border_radius="10px",
                             object_fit="contain",
-                            style={"background_color": "#fafafa"}
+                            style={"background_color": COLORS["surface"]}
                         ),
                         rx.heading(CatalogoState.producto_seleccionado.get("nombre", ""), size="5"),
                         rx.text(f"Marca: {CatalogoState.producto_seleccionado.get('marca', '')}", font_size="md"),
@@ -27,19 +28,21 @@ def detalle_producto_page(producto_id: int = 0) -> rx.Component:
                         rx.text(CatalogoState.producto_seleccionado.get("descripcion", ""), font_size="sm"),
                         rx.button(
                             "🛒 Agregar al Carrito",
-                            on_click=lambda _=None, pid=CatalogoState.producto_seleccionado.get("id_producto", 0): CatalogoState.agregar_carrito_con_id(pid)
+                            on_click=lambda _=None, pid=CatalogoState.producto_seleccionado.get("id", 0): CatalogoState.agregar_carrito_con_id(pid)
                         ),
                         rx.button("← Volver al Catálogo", on_click=rx.redirect("/catalogo"))
                     ),
                     padding="30px",
-                    box_shadow="xl",
+                    background_color=COLORS["card"],
+                    border=f"1px solid {COLORS['border']}",
+                    border_radius="10px",
                     style={"maxWidth": "900px", "width": "90%"},
                     spacing="4"
                 )
             )
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }

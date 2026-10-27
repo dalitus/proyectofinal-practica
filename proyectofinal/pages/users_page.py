@@ -1,4 +1,5 @@
 import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.service.notifail import notifail_component
 from proyectofinal.model.users_model import Users
@@ -37,7 +38,7 @@ def users_page() -> rx.Component:
             style={"width": "60vw", "margin": "auto"},
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }

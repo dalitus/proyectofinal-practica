@@ -1,6 +1,7 @@
 from ..repository.users_repository import select_all, select_by_email, create_user, delete_user_by_email, validar_usuario
 import re
 from ..model.users_model import Users
+from .security import hash_password
 
 from proyectofinal.repository.users_repository import get_user_by_id
 
@@ -41,7 +42,7 @@ def create_user_service(nombre: str, apellido: str, contrasena: str, email: str,
         user_save = Users(
             nombre=nombre,
             apellido=apellido,
-            contrasena=contrasena,
+            contrasena=hash_password(contrasena),
             email=email,
             telefono=telefono,
             es_admin=es_admin,

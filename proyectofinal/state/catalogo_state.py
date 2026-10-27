@@ -48,7 +48,7 @@ class CatalogoState(rx.State):
     def seleccionar_producto(self, producto: dict):
         """Guarda el producto seleccionado y redirige a su detalle."""
         self.producto_seleccionado = producto
-        return rx.redirect(f"/detalle_producto/{producto['id_producto']}")
+        return rx.redirect("/detalle_producto")
 
     @rx.event
     def agregar_carrito_con_id(self, producto_id: int | None):

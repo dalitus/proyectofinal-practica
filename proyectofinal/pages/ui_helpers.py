@@ -1,5 +1,7 @@
 import reflex as rx
 
+from proyectofinal.ui.tokens import COLORS, RADIUS
+
 # Reusable styled buttons and card wrappers to keep UI consistent
 
 def PrimaryButton(label: str, on_click=None, **props) -> rx.Component:
@@ -36,7 +38,14 @@ def DangerButton(label: str, on_click=None, **props) -> rx.Component:
 
 
 def Card(content, **props) -> rx.Component:
-    return rx.box(content, padding="12px", border="1px solid #e6e6e6", border_radius="10px", box_shadow="sm", background_color="white", **props)
+    return rx.box(
+        content,
+        padding="12px",
+        border=f"1px solid {COLORS['border']}",
+        border_radius=RADIUS["card"],
+        background_color=COLORS["card"],
+        **props,
+    )
 
 
 def PageHeader(title: str, subtitle: str = "") -> rx.Component:

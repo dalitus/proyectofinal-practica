@@ -1,4 +1,5 @@
 import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.state.carrito_state import CarritoState
 from proyectofinal.pages.ui_helpers import PrimaryButton, SecondaryButton, DangerButton, Card, PageHeader
 
@@ -31,7 +32,8 @@ def producto_en_carrito_card(p: dict) -> rx.Component:
         width="100%",
         padding="15px",
         margin_y="10px",
-        box_shadow="md",
+        background_color=COLORS["card"],
+        border=f"1px solid {COLORS['border']}",
         border_radius="10px"
     )
 
@@ -146,7 +148,7 @@ def modal_ubicacion() -> rx.Component:
     )
 
 
-@rx.page(route="/carrito", on_load=CarritoState.cargar_carrito_detallado)
+@rx.page(route="/carrito", title="Carrito de Compra", on_load=CarritoState.cargar_carrito_detallado)
 def carrito_page() -> rx.Component:
     return rx.box(
         rx.center(
@@ -215,7 +217,7 @@ def carrito_page() -> rx.Component:
             )
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }

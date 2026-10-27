@@ -1,10 +1,30 @@
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
+
+# Cargar DATABASE_URL desde .env: Alembic y la app usan la misma base.
+load_dotenv()
+
+# Importar todos los modelos registra sus tablas en SQLModel.metadata,
+# para que las migraciones se generen a partir del esquema completo.
+from proyectofinal.model import (  # noqa: E402,F401
+    carrito_model,
+    consulta_model,
+    detalle_model,
+    envio_model,
+    gerente_model,
+    pedido_model,
+    presupuesto_model,
+    product_model,
+    solicitan_model,
+    stock_model,
+    ubicacion_model,
+    users_model,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -15,23 +35,12 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from proyectofinal.model.product_model import Producto
-from proyectofinal.model.users_model import Users
-from proyectofinal.model.gerente_model import Gerente
-from proyectofinal.model.carrito_model import Carrito
-from proyectofinal.model.consulta_model import Consulta
-from proyectofinal.model.stock_model import Stocks
+# Priorizar DATABASE_URL del entorno sobre el valor fijo de alembic.ini.
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)
+
 target_metadata = SQLModel.metadata
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:

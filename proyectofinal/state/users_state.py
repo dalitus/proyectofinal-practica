@@ -1,4 +1,4 @@
-import reflex as rx
+﻿import reflex as rx
 import re
 from proyectofinal.state import app_globals
 from proyectofinal.model.users_model import Users
@@ -22,7 +22,7 @@ class UsersState(rx.State):
     logeado: bool = False
 
     id: int | None = None        # reactivo
-    id_value: int | None = None  # 👈 declarar aquí el valor crudo
+    id_value: int | None = None  # ðŸ‘ˆ declarar aquÃ­ el valor crudo
 
 
     @rx.event
@@ -36,7 +36,7 @@ class UsersState(rx.State):
     def login(self, usuario_id: int):
         user = select_by_id_service(usuario_id)
         if isinstance(user, Users):
-            self.perfil = user.dict()
+            self.perfil = user.model_dump()
         elif isinstance(user, dict):
             self.perfil = user
         else:
@@ -69,19 +69,19 @@ class UsersState(rx.State):
             self.logeado = True
             self.id_value = int(admin.id_gerente)
             self.id = self.id_value
-            app_globals.current_user_id = self.id_value   # 👈 actualizar global
+            app_globals.current_user_id = self.id_value   # ðŸ‘ˆ actualizar global
             return rx.redirect("/admin_dashboard")
 
         # Validar usuario regular
         try:
             user = validar_usuario_service(email=email, password=password)
         except Exception as e:
-            self.error_message = str(e) or "Credenciales inválidas. Intenta nuevamente."
+            self.error_message = str(e) or "Credenciales invÃ¡lidas. Intenta nuevamente."
             return notifail_component(self.error_message, "red")
 
         if user:
             if isinstance(user, Users):
-                self.perfil = user.dict()
+                self.perfil = user.model_dump()
             elif isinstance(user, dict):
                 self.perfil = user
             else:
@@ -89,11 +89,11 @@ class UsersState(rx.State):
             self.logeado = True
             self.id_value = int(self.perfil.get("id")) if self.perfil.get("id") else None
             self.id = self.id_value
-            app_globals.current_user_id = self.id_value   # 👈 actualizar global
+            app_globals.current_user_id = self.id_value   # ðŸ‘ˆ actualizar global
             print("Perfil guardado:", self.perfil)
             return rx.redirect("/catalogo")
 
-        self.error_message = "Credenciales inválidas. Intenta nuevamente."
+        self.error_message = "Credenciales invÃ¡lidas. Intenta nuevamente."
         return notifail_component(self.error_message, "red")
 
     @rx.event
@@ -111,25 +111,25 @@ class UsersState(rx.State):
     @rx.event
     def create_user(self, data: dict):
         try:
-            name_pat = re.compile(r'^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s\-]{1,80}$')
+            name_pat = re.compile(r'^[A-Za-zÃÃ‰ÃÃ“ÃšÃ¡Ã©Ã­Ã³ÃºÃ‘Ã±ÃœÃ¼\s\-]{1,80}$')
             email_pat = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
             phone_pat = re.compile(r'^[0-9\s\+\-()]{6,20}$')
             pwd = (data.get("contrasena") or "").strip()
 
             if not data.get("nombre") or not name_pat.match(data.get("nombre")):
-                self.error_message = "Nombre inválido"
+                self.error_message = "Nombre invÃ¡lido"
                 return
             if not data.get("apellido") or not name_pat.match(data.get("apellido")):
-                self.error_message = "Apellido inválido"
+                self.error_message = "Apellido invÃ¡lido"
                 return
             if not data.get("email") or not email_pat.match(data.get("email")):
-                self.error_message = "Email inválido"
+                self.error_message = "Email invÃ¡lido"
                 return
             if data.get("telefono") and not phone_pat.match(data.get("telefono")):
-                self.error_message = "Teléfono inválido"
+                self.error_message = "TelÃ©fono invÃ¡lido"
                 return
             if not pwd or len(pwd) < 6:
-                self.error_message = "La contraseña debe tener al menos 6 caracteres"
+                self.error_message = "La contraseÃ±a debe tener al menos 6 caracteres"
                 return
 
             create_user_service(**data)

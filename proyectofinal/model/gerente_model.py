@@ -8,4 +8,4 @@ class Gerente(SQLModel, table=True):
     nombre: str
     email: str
     contrasenia: str
-    telefono: int
+    telefono: str

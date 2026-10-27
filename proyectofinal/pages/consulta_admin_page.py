@@ -1,4 +1,5 @@
-import reflex as rx
+﻿import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.service.consulta_service import (
     responder_consulta,
     listar_todas_consultas,
@@ -20,8 +21,8 @@ class ConsultaAdminState(rx.State):
     @rx.event
     def cargar_consultas(self):
         # Obtener todas las consultas desde el servicio y convertir a dicts
-        consultas = [c.dict() for c in listar_todas_consultas()]
-        # Ordenar: pendientes primero, respondidas al final (así al responder quedan abajo)
+        consultas = [c.model_dump() for c in listar_todas_consultas()]
+        # Ordenar: pendientes primero, respondidas al final (asÃ­ al responder quedan abajo)
         consultas.sort(key=lambda x: bool(x.get("respuesta")))
         self.consultas = consultas
 
@@ -31,7 +32,7 @@ class ConsultaAdminState(rx.State):
             (c for c in self.consultas if c["id_consulta"] == consulta_id), None
         )
         self.respuesta = ""
-        # Si se seleccionó una consulta válida, navegar al ancla del formulario
+        # Si se seleccionÃ³ una consulta vÃ¡lida, navegar al ancla del formulario
         try:
             if consulta_id and int(consulta_id) > 0:
                 return rx.redirect("/consulta_admin#responder")
@@ -73,7 +74,7 @@ def mostrar_consultas_admin_component():
     )
 
 def render_consulta_card(c: dict) -> rx.Component:
-    # 👇 Usamos rx.cond para ocultar las consultas automáticas de compra
+    # ðŸ‘‡ Usamos rx.cond para ocultar las consultas automÃ¡ticas de compra
     return rx.cond(
         c["asunto"] == "Compra realizada",
         rx.box(),  # no mostramos nada si es una consulta de compra
@@ -81,12 +82,12 @@ def render_consulta_card(c: dict) -> rx.Component:
             rx.vstack(
                 rx.hstack(
                     rx.vstack(
-                        rx.text(f"🧑 Usuario ID: {c.get('id_users', '')}", font_weight="bold"),
-                        rx.text(f"📌 Asunto: {c.get('asunto', 'Sin asunto')}")
+                        rx.text(f"ðŸ§‘ Usuario ID: {c.get('id_users', '')}", font_weight="bold"),
+                        rx.text(f"ðŸ“Œ Asunto: {c.get('asunto', 'Sin asunto')}")
                     ),
                     rx.spacer(),
                     rx.vstack(
-                        rx.text(f"📅 {c.get('fecha_creacion', 'Desconocida')}", font_size="sm"),
+                        rx.text(f"ðŸ“… {c.get('fecha_creacion', 'Desconocida')}", font_size="sm"),
                         rx.hstack(
                             rx.cond(
                                 c.get("respuesta"),
@@ -94,14 +95,14 @@ def render_consulta_card(c: dict) -> rx.Component:
                                 rx.badge("Pendiente", color_scheme="yellow")
                             ),
                             DangerButton(
-                                "🗑️",
+                                "ðŸ—‘ï¸",
                                 on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.eliminar_consulta(cid),
                                 variant="ghost"
                             ),
                             rx.cond(
                                 c.get("respuesta") == None,
                                 SecondaryButton(
-                                    "✍️ Responder",
+                                    "âœï¸ Responder",
                                     on_click=lambda _=None, cid=c.get("id_consulta"): ConsultaAdminState.seleccionar_consulta(cid),
                                     color_scheme="blue"
                                 ),
@@ -114,7 +115,7 @@ def render_consulta_card(c: dict) -> rx.Component:
                 rx.cond(
                     c.get('respuesta'),
                     rx.box(
-                        rx.text(f"✅ Respuesta: {c.get('respuesta', '')}"),
+                        rx.text(f"âœ… Respuesta: {c.get('respuesta', '')}"),
                         background_color="gray.50",
                         padding="8px",
                         border_radius="6px"
@@ -125,16 +126,17 @@ def render_consulta_card(c: dict) -> rx.Component:
             ),
             padding="10px",
             margin_y="6px",
-            box_shadow="sm"
+            background_color=COLORS["card"],
+            border=f"1px solid {COLORS['border']}"
         )
     )
 
-@rx.page(route="/consulta_admin", on_load=ConsultaAdminState.cargar_consultas)
+@rx.page(route="/consulta_admin", title="Consulta Admin", on_load=ConsultaAdminState.cargar_consultas)
 def consulta_admin_page() -> rx.Component:
     return rx.box(
         rx.container(
             rx.vstack(
-                PageHeader("📬 Consultas de usuarios", "Revisá y respondé las consultas recibidas"),
+                PageHeader("ðŸ“¬ Consultas de usuarios", "RevisÃ¡ y respondÃ© las consultas recibidas"),
                 rx.hstack(
                     rx.select(
                         ["todos", "pendiente", "respondida"],
@@ -149,11 +151,11 @@ def consulta_admin_page() -> rx.Component:
                 rx.cond(
                     ConsultaAdminState.consulta_seleccionada is not None,
                     rx.box(
-                        rx.heading("✍️ Responder consulta", size="3"),
+                        rx.heading("âœï¸ Responder consulta", size="3"),
                         rx.text(f"Asunto: {ConsultaAdminState.consulta_seleccionada['asunto']}"),
                         rx.text(f"Mensaje: {ConsultaAdminState.consulta_seleccionada['mensaje']}"),
                         rx.text_area(
-                            placeholder="Escribí tu respuesta...",
+                            placeholder="EscribÃ­ tu respuesta...",
                             value=ConsultaAdminState.respuesta,
                             on_change=ConsultaAdminState.set_respuesta,
                             width="100%",
@@ -175,7 +177,7 @@ def consulta_admin_page() -> rx.Component:
             padding="20px"
         ),
         style={
-            "background_color": "#ADD8E6",
+            "background_color": COLORS["page"],
             "min_height": "100vh",
             "padding": "20px"
         }

@@ -1,4 +1,5 @@
 import reflex as rx
+from proyectofinal.ui.tokens import COLORS, RADIUS
 from proyectofinal.state.catalogo_state import CatalogoState
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.pages.ui_helpers import PrimaryButton, SecondaryButton, Card, PageHeader
@@ -66,7 +67,7 @@ def producto_card(p: dict) -> rx.Component:
                 align_items="center",
                 justify_content="center",
                 overflow="hidden",
-                style={"background_color": "#fafafa"}
+                style={"background_color": COLORS["surface"]}
             ),
             rx.text(
                 p.get("nombre", ""),
@@ -104,16 +105,15 @@ def producto_card(p: dict) -> rx.Component:
             justify_content="space-between",
             style={"height": "100%"}
         ),
-        border_radius="10px",
+        border_radius=RADIUS["card"],
         padding="12px",
         margin="10px",
         min_width="200px",
         width="220px",
         height="380px",
         text_align="center",
-        box_shadow="0px 2px 5px rgba(0,0,0,0.06)",
-        background_color="white",
-        border="1px solid #f0f0f0",
+        background_color=COLORS["card"],
+        border=f"1px solid {COLORS['border']}",
     )
 
 def mostrar_productos() -> rx.Component:
@@ -127,7 +127,7 @@ def mostrar_productos() -> rx.Component:
         )
     )
 
-@rx.page(route="/catalogo", on_load=CatalogoState.cargar_productos)
+@rx.page(route="/catalogo", title="Catalogo", on_load=CatalogoState.cargar_productos)
 def catalogo_page() -> rx.Component:
     return rx.box(
         rx.hstack(
@@ -160,7 +160,9 @@ def catalogo_page() -> rx.Component:
                     ),
                     width="25%",
                     padding="20px",
-                    box_shadow="md",
+                    background_color=COLORS["card"],
+                    border=f"1px solid {COLORS['border']}",
+                    border_radius="10px",
                     position="sticky",
                     top="20px"
                 ),
@@ -172,7 +174,7 @@ def catalogo_page() -> rx.Component:
             )
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }

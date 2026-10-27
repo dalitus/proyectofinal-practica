@@ -37,6 +37,30 @@ class CarritoState(rx.State):
         self.colores = value
 
     @rx.event
+    def set_direccion(self, value: str):
+        self.direccion = value
+
+    @rx.event
+    def set_numero(self, value: str):
+        self.numero = value
+
+    @rx.event
+    def set_departamento(self, value: str):
+        self.departamento = value
+
+    @rx.event
+    def set_codigo_postal(self, value: str):
+        self.codigo_postal = value
+
+    @rx.event
+    def set_ciudad(self, value: str):
+        self.ciudad = value
+
+    @rx.event
+    def set_provincia(self, value: str):
+        self.provincia = value
+
+    @rx.event
     def abrir_modal_ubicacion(self):
         if not self.productos_carrito:
             self.mensaje_compra = "No hay productos en el carrito."

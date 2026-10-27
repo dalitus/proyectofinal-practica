@@ -1,10 +1,20 @@
-sqlalchemy
-pymysql
-#reflex==0.7.12
-cryptography
-reflex==0.8.4
+# Dependencias del proyecto (instalar con: pip install -r requirements.txt)
+# Versiones fijadas a las del entorno virtual que funciona actualmente.
 
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
-python-dotenv
+reflex==0.10.1
+pydantic>=2.12,<3.0
+sqlmodel==0.0.30
+SQLAlchemy==2.0.46
+alembic==1.18.1
+
+# Base de datos MySQL
+PyMySQL==1.1.2
+cryptography==46.0.3
+
+# Variables de entorno
+python-dotenv==1.2.1
+
+# Integracion con Google Drive
+google-api-python-client==2.188.0
+google-auth-httplib2==0.3.0
+google-auth-oauthlib==1.2.4

@@ -1,4 +1,5 @@
-import reflex as rx
+﻿import reflex as rx
+from proyectofinal.ui.tokens import COLORS
 from proyectofinal.service.consulta_service import crear_consulta, listar_consultas_usuario
 from proyectofinal.state.users_state import UsersState
 from proyectofinal.pages.ui_helpers import PrimaryButton, PageHeader
@@ -7,7 +8,7 @@ from proyectofinal.pages.ui_helpers import PrimaryButton, PageHeader
 class ConsultaUsuarioState(rx.State):
     asunto: str = ""
     mensaje: str = ""
-    usuario_id: int = 1   # 👈 corregido
+    usuario_id: int = 1   # ðŸ‘ˆ corregido
     consultas: list[dict] = []
     success_message: str = ""
     error_message: str = ""
@@ -16,7 +17,7 @@ class ConsultaUsuarioState(rx.State):
     def on_load(self):
         # Usar el usuario logeado si existe
         try:
-            self.usuario_id = UsersState.id or 1   # 👈 usar el id del usuario logeado
+            self.usuario_id = UsersState.id or 1   # ðŸ‘ˆ usar el id del usuario logeado
         except Exception:
             self.usuario_id = 1
         self.cargar_consultas()
@@ -25,10 +26,10 @@ class ConsultaUsuarioState(rx.State):
     def enviar_consulta(self):
         try:
             if not self.mensaje.strip():
-                self.error_message = "El mensaje no puede estar vacío."
+                self.error_message = "El mensaje no puede estar vacÃ­o."
                 self.success_message = ""
                 return
-            crear_consulta(self.usuario_id, self.asunto.strip(), self.mensaje.strip())   # 👈 corregido
+            crear_consulta(self.usuario_id, self.asunto.strip(), self.mensaje.strip())   # ðŸ‘ˆ corregido
             self.asunto = ""
             self.mensaje = ""
             self.success_message = "Consulta enviada correctamente."
@@ -40,8 +41,8 @@ class ConsultaUsuarioState(rx.State):
 
     @rx.event
     def cargar_consultas(self):
-        consultas_obj = listar_consultas_usuario(self.usuario_id)   # 👈 corregido
-        self.consultas = [c.dict() for c in consultas_obj]
+        consultas_obj = listar_consultas_usuario(self.usuario_id)   # ðŸ‘ˆ corregido
+        self.consultas = [c.model_dump() for c in consultas_obj]
 
     @rx.event
     def actualizar_asunto(self, value: str):
@@ -52,7 +53,7 @@ class ConsultaUsuarioState(rx.State):
         self.mensaje = value
 
 
-@rx.page(route="/consulta_usuario", on_load=ConsultaUsuarioState.on_load)
+@rx.page(route="/consulta_usuario", title="Consulta Usuario", on_load=ConsultaUsuarioState.on_load)
 def consulta_usuario_page() -> rx.Component:
     return rx.box(
         rx.vstack(
@@ -92,7 +93,7 @@ def consulta_usuario_page() -> rx.Component:
             PrimaryButton("Enviar", on_click=ConsultaUsuarioState.enviar_consulta),
             rx.divider(),
             rx.heading("Tus consultas"),
-            # 👇 Usamos rx.foreach directamente, y filtramos en render_consulta_usuario
+            # ðŸ‘‡ Usamos rx.foreach directamente, y filtramos en render_consulta_usuario
             rx.foreach(
                 ConsultaUsuarioState.consultas,
                 render_consulta_usuario
@@ -101,7 +102,7 @@ def consulta_usuario_page() -> rx.Component:
             style={"width": "80vw", "margin": "auto"}
         ),
         style={
-            "background_color": "#ADD8E6",  # celeste
+            "background_color": COLORS["page"],
             "min_height": "100vh",          # ocupa toda la pantalla
             "padding": "20px"
         }
@@ -111,7 +112,7 @@ def consulta_usuario_page() -> rx.Component:
 def render_consulta_usuario(c: dict) -> rx.Component:
     return rx.cond(
         c["asunto"] == "Compra realizada",
-        rx.box(),  # si es automática de compra, no mostramos nada
+        rx.box(),  # si es automÃ¡tica de compra, no mostramos nada
         rx.box(
             rx.text(f"Asunto: {c.get('asunto', 'Sin asunto')}"),
             rx.text(f"Mensaje: {c.get('mensaje', '')}"),

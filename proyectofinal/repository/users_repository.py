@@ -1,7 +1,7 @@
 from proyectofinal.model.users_model import Users
 from proyectofinal.repository.conect_db import get_session
+from proyectofinal.service.security import verify_password
 from sqlmodel import select
-from sqlalchemy import and_
 
 
 from proyectofinal.model.users_model import Users
@@ -38,8 +38,10 @@ def delete_user_by_email(email: str):
 # Validar login
 def validar_usuario(email: str, contrasena: str):
     with get_session() as session:
-        query = select(Users).where(and_(Users.email == email, Users.contrasena == contrasena))
-        return session.exec(query).one_or_none()
+        user = session.exec(select(Users).where(Users.email == email)).one_or_none()
+        if user and verify_password(contrasena, user.contrasena):
+            return user
+        return None
     
 
 # Buscar usuario por ID
