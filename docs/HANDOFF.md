@@ -27,7 +27,7 @@ Arquitectura: `model → repository → service → state → pages`.
 | `model/__init__.py` | **Registra los 12 modelos legacy** | incluye `Detalles`, `Envios`, `Presupuestos`, `Solicitan` |
 | UI | Solo `ui/tokens.py` (4 diccionarios) | sin componentes ni shell |
 | Tests | **No hay `tests/`** | T-070 sin empezar |
-| Árbol de trabajo | ~24 archivos modificados + nuevos sin commitear | `git status` |
+| Árbol de trabajo | **Limpio**, en rama `wip/baseline` | commit `fd090f7` (2026-10-27) |
 
 Conclusión: el **upgrade está hecho**, la **arquitectura de datos no**. El trabajo pendiente no es
 "migrar Reflex", es **rediseñar el esquema y la identidad** y después reconstruir la UI sobre eso.
@@ -45,9 +45,8 @@ gate verificable; no se pasa a la siguiente sin cumplirlo.
 
 ### Fase 0 · Baseline y secreto (30 min)
 
-1. `git switch -c wip/baseline` y commit de todo lo que está sin commitear. Hoy hay trabajo real
-   en el árbol (docs, `ui/`, `seed.py`, `run.ps1`, migración) y cualquier rename o migración lo
-   puede pisar.
+1. ✅ **Hecho** (2026-10-27): rama `wip/baseline` + commit `fd090f7` con todo el trabajo real
+   (docs, `ui/`, `seed.py`, `run.ps1`, migración, `AGENTS.md` corregido a Reflex 0.10.1).
 2. **T-073**: rotar la clave de MySQL, cargarla en `.env`, vaciar `alembic.ini`.
 
 **Gate:** `git grep` del secreto viejo no devuelve nada en archivos actuales; la app sigue

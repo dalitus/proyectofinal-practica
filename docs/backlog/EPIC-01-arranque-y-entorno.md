@@ -7,7 +7,7 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-001 · La app no arranca en producción (`@rx.event`)
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
+- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 01
 - **Archivos:** `proyectofinal/state/users_state.py:28`, `run_log.txt`, `requirements.txt`
 - **Problema:** `reflex run --env prod` termina con `TypeError: 'module' object is not callable`
   en el decorador `@rx.event`. En dev el compile fue exitoso. El venv tiene `reflex 0.8.4` y
@@ -19,6 +19,15 @@ sin secretos en el repo y sin versiones sorpresa.
   - [ ] El error de `@rx.event` no se reproduce en dev ni en prod.
   - [ ] Versiones de `reflex`, `pydantic`, `sqlmodel` y `alembic` fijadas y documentadas.
   - [x] El diagnóstico y la versión elegida quedan en `DECISIONS.md` (D-007, D-016).
+- **Verificación (2026-10-27):**
+  - Prod sobre Reflex 0.10.1 responde **200** en `/`, `/catalogo`, `/detalle_producto`,
+    `/carrito`, `/ubicacion`, `/admin_dashboard`, `/admin_login`, `/pedidos`, `/pedidos_admin`,
+    `/users`, `/consulta_admin`. El `TypeError: 'module' object is not callable` en `@rx.event`
+    **no se reproduce**.
+  - `/producto/[id]` devuelve **404**: esa ruta no existe. El detalle vive en `/detalle_producto`
+    y lee el producto del estado, no de la URL. Ese AC depende de **T-031**.
+  - Falta la prueba en **dev**: con Node v22.15.0 (`< 22.22.0`, mínimo de Reflex 0.10.1) el
+    frontend no se puede compilar ni relanzar.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-016 (camino de upgrade) y D-024 (rutas canónicas).
 - **Depende de:** T-006
@@ -111,7 +120,7 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-005 · Limpieza de archivos muertos y scripts sueltos
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 01
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 01
 - **Archivos:** raíz (`temp_*.py`, `test_*.py`, `add_*.py`, `fix_*.py`),
   `proyectofinal/pages/compras_admin_page.py` (vacío), `proyectofinal/pages/ubicacion_page.py`,
   `proyectofinal/state/app_state.py`, `state/global_state.py`, `state/compras_admin_state.py`,
@@ -125,6 +134,15 @@ sin secretos en el repo y sin versiones sorpresa.
   - [x] No quedan imports a archivos eliminados.
   - [x] `reflex compile` sigue pasando.
   - [x] `seed.py` y `run.ps1` se conservan; `security.py` se elimina con D-019.
+- **Verificación (2026-10-27):** borrados de la raíz `add_direccion_column.py`,
+  `add_productos_json_column.py`, `check_pedidos.py`, `create_tables.py`,
+  `fix_productos_json.py`, `temp_check_consultas_order.py`, `temp_test_admin_modal.py`,
+  `temp_test_catalogo.py`, `temp_test_catalogo2.py`, `temp_test_create_user.py`,
+  `temp_test_eliminar_dialog.py`, `test_consultas.py` y `test_show_stock.py`. Sin referencias
+  en el código (`grep` vacío). `seed.py` y `run.ps1` intactos.
+  - Pendiente de T-060 (no es raíz): `pages/ubicacion_page.py` duplicado de
+    `pages/ubicaccion_page.py`, y `pages/compras_admin_page.py`.
+  - `security.py` **no** se borró: sigue en uso hasta que entre D-019.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-026.
 - **Depende de:** —

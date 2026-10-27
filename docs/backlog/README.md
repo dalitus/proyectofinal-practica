@@ -38,11 +38,11 @@
 
 | ID | Título | Épica | Prioridad | Estado |
 |---|---|---|---|---|
-| T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | lista |
+| T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | en curso |
 | T-002 | Configuración única de base de datos y engine | 01 Arranque | P0 | lista |
 | T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | lista |
 | T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | lista |
-| T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | lista |
+| T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |
 | T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | lista |
 | T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | lista |
 | T-011 | Identidad y rol del administrador | 02 Datos | P0 | lista |
