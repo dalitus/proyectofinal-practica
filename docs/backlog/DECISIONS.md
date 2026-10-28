@@ -297,7 +297,7 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 ## D-019 · Autenticación con `reflex-local-auth`
 
 - **Tarea:** T-022, T-011, T-010, T-024
-- **Estado:** decidida (reemplaza D-001)
+- **Estado:** decidida (validada en el spike del 2026-10-28 sobre Reflex 0.10.1)
 - **Opciones:** bcrypt + AuthState propio / plugin `reflex-local-auth` / FastAPI + JWT
 - **Decisión:** se usa `reflex-local-auth` 0.5.0 para todos los actores. `LocalUser` guarda
   credenciales (`username` = email, `password_hash`, `enabled`) y `UserProfile` guarda nombre,

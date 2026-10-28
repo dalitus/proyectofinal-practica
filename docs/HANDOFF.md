@@ -66,15 +66,12 @@ conectando; el historial queda como deuda documentada (D-039).
 
 ### Fase 2 · Spike de identidad (1 día)
 
-Instalar `reflex-local-auth` 0.5.0 en una rama `spike/local-auth` y probar login/logout con
-`LocalUser` sobre 0.10.1.
+✅ **Hecho (2026-10-28, rama `spike/local-auth`).** `reflex-local-auth` 0.5.0 instala y resuelve
+sobre Reflex 0.10.1 sin conflictos; registro, hash bcrypt y sesión de 7 días verificados en el
+navegador. Detalle en T-022. **No hizo falta el plan B de D-019.**
 
-**Por qué acá y no después:** la identidad decide el modelo (`LocalUser` + `UserProfile`), el
-modelo decide el esquema, y el esquema decide la migración. Si el plugin falla, el plan B de D-019
-mantiene exactamente ese modelo con bcrypt propio, así que el esquema no cambia: el riesgo está
-contenido, pero hay que resolverlo **antes** de generar la migración.
-
-**Gate:** login y logout funcionando en el spike, o plan B decidido y escrito en `DECISIONS.md`.
+**Gate:** cumplido (login real contra la DB). Queda para la Fase 4 el `AuthState` propio,
+`require_login` y el logout desde UI.
 
 ### Fase 3 · Modelos finales y UNA migración (2-3 días)
 

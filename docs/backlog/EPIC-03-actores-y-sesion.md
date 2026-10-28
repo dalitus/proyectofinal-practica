@@ -64,8 +64,23 @@ que las contraseñas no se guarden en texto plano.
   - [x] No se puede leer el hash desde la API/estado (`model_dump` lo oculta).
   - [x] Sesión persistida en `LocalAuthSession` con token en `localStorage` y vencimiento 7 días.
   - [x] No hay contraseñas en texto plano ni migración de hashes (la DB se recrea).
-  - [ ] `reflex-local-auth` convive con Reflex 0.10.1 y Pydantic 2 (smoke test).
+  - [x] `reflex-local-auth` convive con Reflex 0.10.1 y Pydantic 2 (smoke test).
   - [ ] Registro propio crea `LocalUser` + `UserProfile` en una transacción.
+    - Pendiente de la Fase 4: el registro propio (con `UserProfile`) todavía no existe; el
+      formulario del plugin solo crea `LocalUser`.
+- **Verificación del spike (2026-10-28, rama `spike/local-auth`):**
+  - `uv add reflex-local-auth==0.5.0` resolvió sin conflictos sobre Reflex 0.10.1 / Pydantic 2.14.1
+    (agrega `bcrypt==5.0.0`). `reflex compile --dry` → `Success` con las páginas `/login` y
+    `/register` del plugin montadas.
+  - Registro real desde el navegador: `localuser` quedó con `username=spike@example.com`,
+    `enabled=1` y hash `$2b$12$…`. Login real: `localauthsession` creó la fila con vencimiento a
+    7 días y el token quedó en `localStorage` como `_auth_token`.
+  - `LocalUser` hereda de `SQLModel` (no de `rx.Model`) y expone `hash_password()` / `verify()`:
+    no arrastra la deprecación de `reflex.Model`.
+  - No verificado en el spike: logout desde UI, `require_login` y la sincronización del token al
+    recargar (necesita un `AuthState` propio que consuma `LocalAuthState`, es la Fase 4).
+  - Las tablas `localuser` y `localauthsession` se crearon a mano en `zapateria_db` para la prueba
+    y se borraron después: la migración de la Fase 3 las genera.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-019 y D-020.
 - **Depende de:** T-021
