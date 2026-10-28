@@ -7,17 +7,25 @@ imágenes que no se rompan.
 
 ## T-030 · Estado de carga y listado del catálogo
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 04
-- **Archivos:** `pages/catalogo_page.py:119-128`, `state/catalogo_state.py:18-45`
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 04
+- **Archivos:** `app/pages/catalogo_pagina.py`, `app/state/catalogo_estado.py`,
+  `app/service/catalogo_servicio.py`, `app/repository/producto_repositorio.py`,
+  `tests/test_catalogo_servicio.py`
 - **Problema:** `CatalogoState.productos == []` se compila a `=== []` (siempre falso), así que el
   spinner nunca aparece y no se distingue “cargando” de “sin resultados”.
 - **Decisión (D-014):** los agotados se muestran como “sin stock”; filtros y paginación definidos.
 - **AC propuestos:**
   - [x] Var `loading: bool` explícita, con skeleton mientras carga.
+        → `CatalogoEstado.cargando`; la rama de carga pinta 8 `Skeleton("card")` (design.md 4.3).
   - [x] Estado vacío distinto de error y de “sin resultados de búsqueda”.
+        → `Alert` de error con “Reintentar”, `EmptyState` de “sin coincidencias” con “Limpiar
+        filtros” y `EmptyState` de catálogo vacío.
   - [x] Usar `.length() == 0` en lugar de comparar con `[]`.
+        → `CatalogoEstado.productos.length() == 0`.
   - [x] Refrescar la página vuelve a cargar el catálogo.
+        → `on_load=CatalogoEstado.on_load`; verificado con un refresh real (6 tarjetas).
   - [x] Los productos sin stock se muestran como “sin stock” (D-014).
+        → `_estado_stock` en el servicio; cubierto por `test_estado_de_stock`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-014.
 - **Depende de:** T-010
@@ -68,18 +76,27 @@ imágenes que no se rompan.
 
 ## T-033 · Visibilidad, filtros y orden del catálogo
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 04
-- **Archivos:** `pages/catalogo_page.py:6-49`, `service/catalogo_service.py:22-29`
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 04
+- **Archivos:** `app/pages/catalogo_pagina.py`, `app/state/catalogo_estado.py`,
+  `app/service/catalogo_servicio.py`, `app/repository/producto_repositorio.py`
 - **Problema:** el catálogo solo filtra por nombre/marca y oculta productos sin stock. No hay
   filtros por categoría/talle/color ni orden.
 - **Decisión (D-014):** mostrar agotados como “sin stock”; filtros de texto/categoría/talle/color;
-  orden nombre A-Z con precio asc/desc; 12 por página.
+  orden nombre A-Z con precio asc/desc; 12 por página. La marca se busca con el texto (D-047).
 - **AC propuestos:**
   - [x] Política de stock definida: se muestran como “sin stock” y no se pueden agregar.
+        → se muestran con `StockBadge` y `EXISTS` de variantes; la acción de agregar llega con el
+        carrito (T-040), así que hoy no hay botón que pueda saltear el control.
   - [x] Filtros de búsqueda, categoría, talle y color, combinables.
+        → verificado en el navegador (talle 42 → 3 productos) y en
+        `test_filtros_de_categoria_talle_y_color_combinados`.
   - [x] Orden por nombre (default) y por precio asc/desc.
+        → `test_orden_por_nombre_y_precio`; el select muestra las tres opciones.
   - [x] Paginación de 12 productos por página.
-  - [ ] Estado vacío claro cuando no hay coincidencias.
+        → `test_paginacion_de_doce_y_limites` (13 productos → 12 + 1). En dev hay 6 productos, así
+        que el control queda oculto a propósito (`total_paginas > 1`).
+  - [x] Estado vacío claro cuando no hay coincidencias.
+        → `EmptyState` con “Limpiar filtros”; verificado en el navegador.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-014.
 - **Depende de:** T-030

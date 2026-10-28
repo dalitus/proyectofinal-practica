@@ -204,6 +204,7 @@ def Select(
     value: Any = None,
     on_change: Any = None,
     error: Any = None,
+    opciones: Any = None,
     placeholder: str | None = None,
     name: str | None = None,
     disabled: Any = False,
@@ -214,8 +215,10 @@ def Select(
 ) -> rx.Component:
     """Labelled native select: normal, focus and error.
 
-    Options are ``"texto"`` (value = text) or ``("valor", "Texto")``. The native
-    element keeps keyboard and assistive-technology behaviour for free.
+    Options are ``"texto"`` (value = text) or ``("valor", "Texto")``. Pass
+    ``opciones`` with a Var holding ``[{"valor", "texto"}, ...]`` when the list
+    comes from the database. The native element keeps keyboard and
+    assistive-technology behaviour for free.
     """
     element_id = input_id or f"ui-input-{next(_INPUT_IDS)}"
 
@@ -240,6 +243,17 @@ def Select(
         else:
             option_value, option_label = option, option
         rendered_options.append(rx.el.option(option_label, value=option_value))
+
+    if opciones is not None:
+        rendered_options.append(
+            rx.foreach(
+                opciones,
+                lambda opcion: rx.el.option(
+                    opcion["texto"],
+                    value=opcion["valor"],
+                ),
+            )
+        )
 
     fields: list[Any] = []
     if label is not None:
@@ -282,12 +296,14 @@ def Badge(
     label: Any,
     *,
     tone: str = "neutral",
+    quiet: bool = False,
     class_name: str | None = None,
     **props: Any,
 ) -> rx.Component:
     """Pill with a tone dot: ``neutral``, ``success``, ``danger`` or ``info``.
 
-    The dot is decoration; the label carries the state (design.md 7).
+    ``quiet`` paints the label in ``muted`` while the dot keeps the tone: that is
+    the stock badge of design.md 4.3, where colour never carries the meaning.
     """
     if tone not in BADGE_TONES:
         raise ValueError(f"Unknown badge tone {tone!r}; expected one of {BADGE_TONES}")
@@ -298,7 +314,12 @@ def Badge(
             **{"aria-hidden": "true"},
         ),
         label,
-        class_name=_join("ui-badge", f"ui-badge--{tone}", class_name),
+        class_name=_join(
+            "ui-badge",
+            f"ui-badge--{tone}",
+            "ui-badge--quiet" if quiet else None,
+            class_name,
+        ),
         **props,
     )
 

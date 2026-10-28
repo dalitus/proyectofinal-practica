@@ -54,10 +54,10 @@
 | T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | hecha |
 | T-023 | Guardas de rutas por rol | 03 Sesión | P0 | lista |
 | T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | en curso |
-| T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | lista |
+| T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | hecha |
 | T-031 | Detalle de producto por URL (refresh-safe) | 04 Catálogo | P1 | lista |
 | T-032 | Precio final y formato en la UI | 04 Catálogo | P1 | lista |
-| T-033 | Visibilidad, filtros y orden del catálogo | 04 Catálogo | P2 | lista |
+| T-033 | Visibilidad, filtros y orden del catálogo | 04 Catálogo | P2 | hecha |
 | T-034 | Imágenes: placeholder, upload, Drive, create/edit | 04 Catálogo | P1 | lista |
 | T-040 | Estado único de carrito y vars inexistentes | 05 Carrito | P1 | lista |
 | T-041 | Política de invitados vs logueados en carrito | 05 Carrito | P1 | lista |
@@ -72,7 +72,7 @@
 | T-060 | Eliminar estados duplicados y código muerto | 07 Arquitectura | P1 | hecha |
 | T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | lista |
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | lista |
-| T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | en curso |
+| T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | hecha |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | lista |
 | T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | en curso |

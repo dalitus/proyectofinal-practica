@@ -792,3 +792,29 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
     `font-family` se declara en sus propias clases.
 - **Fecha:** 2026-10-28
 
+---
+
+## D-047 · Catálogo: marca, umbral de stock y dónde viven los filtros
+
+- **Tarea:** T-030, T-033
+- **Estado:** decidida
+- **Opciones:** un `select` de marca aparte / buscar la marca con el mismo campo de texto
+- **Decisión:**
+  - La búsqueda por texto cubre **nombre y marca** con el mismo campo. No hay `select` de marca.
+  - `StockBadge`: "Sin stock" con 0 unidades; "Ultimas N" cuando el total de unidades es 1 a 3;
+    "Disponible" desde 4. El umbral es `UMBRAL_ULTIMAS_UNIDADES = 3` y cuenta la suma de todas las
+    variantes del producto, no cada variante por separado.
+  - Filtros, orden y página viven en `CatalogoEstado`, **no** en la URL. La sincronización con la
+    URL queda para T-061.
+- **Motivo:** `docs/design.md` 4.3 proponía un filtro de marca separado, pero D-014 ya cerró la
+  barra como texto/categoría/talle/color y una marca por producto suele tener pocos valores
+  distintos: un `select` más agranda la barra sin agregar precisión. Para el stock, "últimas
+  unidades" tiene que significar algo para el comprador; 3 unidades totales es el punto donde
+  todavía puede decidir. Los filtros en el estado evitan reescribir la página cuando T-061 defina
+  las rutas únicas.
+- **Consecuencias:** el repositorio resuelve el texto con `nombre ILIKE ... OR marca ILIKE ...`; el
+  servicio devuelve `stock_estado` y `stock_etiqueta` ya resueltos para que la página no compare
+  números. Al no estar en la URL, recargar la página vuelve al catálogo sin filtros y el link no es
+  compartible: eso se corrige en T-061.
+- **Fecha:** 2026-10-28
+

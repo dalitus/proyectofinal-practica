@@ -5,16 +5,16 @@ de login viene del plugin y se monta con ``add_page``; la de registro es propia
 y se registra sola, porque el alta tiene que crear ``LocalUser`` + ``UserProfile``
 y la del plugin solo crea la credencial (T-022).
 
-Estado actual: solo la raiz y las dos pantallas de sesion. El catalogo, el
-carrito y el panel del admin se reconstruyen en las fases siguientes, despues
-de que la Fase 5 borrara el codigo viejo que dependia de los modelos
-eliminados (T-060).
+Estado actual: el catalogo en la raiz, el detalle y las dos pantallas de sesion.
+El carrito y el panel del admin se reconstruyen en las fases siguientes, despues
+de que la Fase 5 borrara el codigo viejo que dependia de los modelos eliminados
+(T-060).
 """
 
 import reflex as rx
 import reflex_local_auth
 
-from app.pages.inicio_pagina import inicio_pagina  # noqa: F401  (registra "/")
+from app.pages.catalogo_pagina import catalogo_pagina  # noqa: F401  (registra "/")
 from app.pages.registro_pagina import registro_pagina  # noqa: F401  (registra "/register")
 from app.ui import APP_CSS, FONT_HEAD_COMPONENTS
 

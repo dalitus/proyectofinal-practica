@@ -390,6 +390,22 @@ _PRIMITIVES = """
 .ui-badge--danger .ui-badge__dot { background: var(--color-danger); }
 .ui-badge--info .ui-badge__dot { background: var(--color-accent); }
 
+/* StockBadge (design.md 4.3): the dot carries the tone, the label stays muted. */
+.ui-badge--quiet { color: var(--color-muted); }
+
+/* Announces a change to screen readers without adding a visible line. */
+.ui-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .ui-chip {
   display: inline-flex;
   align-items: center;
@@ -549,6 +565,99 @@ body .ui-dialog__content {
 }
 """
 
+_CATALOGO = """
+/* Catalog page (design.md 4.3): 4 columns on desktop, 2 on tablet, 1 on phone. */
+.ui-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.ui-filters__fields {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+}
+
+.ui-filters__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.ui-grid {
+  display: grid;
+  gap: var(--space-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .ui-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .ui-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* The card is the product: the image bleeds to the edges. */
+.ui-product { padding: 0; overflow: hidden; }
+
+.ui-product__media { aspect-ratio: 3 / 4; background: var(--color-surface); }
+
+.ui-product__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.ui-product__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.ui-product__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+}
+
+.ui-product__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: var(--leading-body);
+  color: var(--color-text);
+}
+
+.ui-product__price {
+  margin: 0;
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: var(--leading-h2);
+  color: var(--color-text);
+}
+
+.ui-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+"""
+
 _MOTION = """
 @media (prefers-reduced-motion: reduce) {
   .ui-btn, .ui-input, .ui-card--clickable, .ui-chip { transition: none; }
@@ -566,6 +675,7 @@ APP_CSS = "\n".join(
         _SHELL,
         _PRIMITIVES,
         _FEEDBACK,
+        _CATALOGO,
         _MOTION,
     ]
 )

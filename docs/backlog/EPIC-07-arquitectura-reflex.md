@@ -76,7 +76,7 @@ consistente.
 
 ## T-063 · Sistema de diseño: tokens, shell y primitivos
 
-- **Estado:** en curso · **Prioridad:** P1 · **Épica:** 07
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
 - **Archivos:** `docs/design.md` (spec), `app/ui/` (nuevo), `app/app.py`,
   `app/pages/*.py`, `app/pages/ui_helpers.py`
 - **Problema:** cada página define su propio fondo, ancho y estilos (`background_color="#ADD8E6"`,
@@ -107,7 +107,11 @@ consistente.
     1280px sin scroll horizontal; Inter cargada; controles de 44px; drawer a la derecha con scrim
     de `text` al 35 %; `ConfirmDialog` con `role="alertdialog"` y sin botones anidados; toast real
     al confirmar; el formulario de alta muestra el `Alert` de error con `role="alert"` al fallar.
-- **Falta:** el AC del catálogo, que espera a Fase 6.
+- **Qué se hizo (avance 2, 2026-10-28):** el catálogo piloto se construyó entero con el sistema
+  (`app/pages/catalogo_pagina.py`) y no necesitó ni un valor suelto: el bloque `_CATALOGO` de
+  `styles.py` agrega `.ui-filters*`, `.ui-grid` (4/2/1 columnas), `.ui-product*` y `.ui-pagination`.
+  `Select` acepta `opciones` con una lista de la base y `Badge` gana `quiet` para el
+  `StockBadge` de design.md 4.3 (el punto lleva el tono, la etiqueta queda en `muted`).
 - **AC propuestos:**
   - [x] Existe `app/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
         `pages/` contiene hex, `box_shadow` ni `color_scheme` sueltos.
@@ -118,9 +122,9 @@ consistente.
         Se agrega `Alert` (D-045), que no estaba en la lista original.
   - [x] `feedback.py` implementa `Skeleton`, `Toast`, `Drawer` y `ConfirmDialog`.
   - [x] `ui_helpers.py` se elimina y no quedan imports.
-  - [ ] El catálogo se ve en 360px, 768px y 1280px sin scroll horizontal.
-        **Pendiente:** el catálogo es de Fase 6. El shell, el alta y la galería de componentes se
-        midieron sin overflow en los tres anchos.
+  - [x] El catálogo se ve en 360px, 768px y 1280px sin scroll horizontal.
+        Medido con iframes sobre `/`: 360 → 1 columna, 768 → 2, 1024/1280 → 4; `scrollWidth`
+        igual a `clientWidth` en los cuatro anchos y filtros en 1/3/4/5 columnas.
   - [x] Contraste AA verificado; focus visible de 2px en todos los interactivos.
         Medido: texto/tarjeta 18.88:1, muted/lienzo 4.97:1, danger/tarjeta 6.57:1, success/tarjeta
         5.69:1. Foco: `outline: 2px solid accent` con `offset: 2px`.
