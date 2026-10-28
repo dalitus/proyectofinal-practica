@@ -78,8 +78,10 @@ class PedidoState(rx.State):
 
     @rx.event
     async def cargar_pedidos_usuario(self):
-        # Tomamos el ID directamente del UsersState
-        user_id = await UsersState.get_user_id()
+        # El id vive en UsersState (por sesión). `app_globals` es un global de
+        # módulo que mezcla sesiones, así que no se usa acá.
+        users_state = await self.get_state(UsersState)
+        user_id = users_state.id or 0
         if user_id > 0:
             await self.get_all_pedidos_usuario(id_usuario=user_id)
             if len(self.pedidos_usuario) == 0:
