@@ -120,17 +120,29 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-004 · Dependencias reproducibles y versiones
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
-- **Archivos:** `requirements.txt`, `venv/`
+- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 01
+- **Archivos:** `pyproject.toml`, `uv.lock`, `.venv/`, `requirements.txt`
 - **Problema:** solo `reflex` está pinneado; faltan `sqlmodel` y `alembic`; no hay lockfile.
   El entorno instalado no es reproducible.
 - **Decisión (D-027):** `uv` + `pyproject.toml` + `uv.lock`, Python 3.13.
 - **AC propuestos:**
   - [x] Un venv nuevo instala con un solo comando (`uv sync`) y la app compila.
-  - [x] `pyproject.toml` incluye todas las dependencias directas (incluida `alembic`, `sqlmodel`,
+  - [ ] `pyproject.toml` incluye todas las dependencias directas (incluida `alembic`, `sqlmodel`,
     `reflex-local-auth`).
+    - Las directas de hoy están (`alembic`, `sqlmodel`, `reflex`, `pymysql`, `cryptography`,
+      `python-dotenv`, `google-*`). Falta `reflex-local-auth`: se agrega con el spike de la Fase 2
+      (D-019), no antes, para no instalar en el entorno principal un plugin sin probar.
   - [x] Existe un lockfile (`uv.lock`).
   - [x] El README indica la versión de Python soportada (3.13).
+- **Verificación (2026-10-28):**
+  - `uv sync` generó `.venv` desde `uv.lock` (77 paquetes) y `reflex compile --dry` → `Success` en
+    3.9 s. Versiones instaladas: Python 3.13.1, pydantic 2.14.1, sqlmodel 0.0.30, alembic 1.18.1.
+  - `uv 0.13.6` quedó en `%USERPROFILE%\.local\bin` (fuera del venv, para que `uv sync` no lo
+    borre) y esa carpeta se agregó al `PATH` de usuario.
+  - `run.ps1` ahora acepta `.venv` (preferido) o `venv`; `README.md` documenta `uv sync` y
+    `requires-python = ">=3.13,<3.14"`.
+  - `requirements.txt` sigue en el repo como referencia; la fuente de verdad pasa a ser
+    `pyproject.toml` + `uv.lock`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-027.
 - **Depende de:** T-001

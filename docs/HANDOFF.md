@@ -17,7 +17,7 @@ Arquitectura: `model → repository → service → state → pages`.
 
 | Componente | Estado | Evidencia |
 |---|---|---|
-| Reflex / Pydantic | **Ya migrado** a 0.10.1 / 2.14.1 | `requirements.txt` + venv |
+| Reflex / Pydantic | **Ya migrado** a 0.10.1 / 2.14.1 | `requirements.txt` + `.venv` |
 | `reflex compile --dry` | **Pasa** en 3.1 s | ejecutado hoy |
 | Arranque en prod | **Sin verificar** | hay que correr `run.ps1 -Prod` y pedir 200 |
 | `reflex-local-auth` | **No instalado** | `importlib.metadata` no lo encuentra |
@@ -56,9 +56,11 @@ conectando; el historial queda como deuda documentada (D-039).
 
 ### Fase 1 · Cerrar el arranque (medio día)
 
-- **T-004**: `uv` + `pyproject.toml` + `uv.lock` (hoy hay `requirements.txt` sin lock).
-- **T-001**: verificar `run.ps1 -Prod` y que responda 200.
-- **T-005**: borrar los `add_*`, `fix_*`, `temp_*`, `test_*` de la raíz.
+- ✅ **T-004** (2026-10-28): `pyproject.toml` + `uv.lock` (77 paquetes) y `.venv` creado con
+  `uv sync`. `run.ps1` detecta `.venv` o `venv`. Queda abierto solo el AC de `reflex-local-auth`,
+  que entra con el spike de la Fase 2.
+- **T-001**: `/producto/[id]` sigue pendiente de T-031; el resto del smoke en prod pasó (2026-10-28).
+- ✅ **T-005**: hecha.
 
 **Gate:** compile pasa, prod responde 200, la raíz solo tiene archivos de proyecto.
 
@@ -140,28 +142,25 @@ T-060. Renombrar antes es hacer el mismo trabajo dos veces.
 ## 6. Primeros pasos concretos
 
 ```powershell
-git switch -c wip/baseline
-git add -A; git commit -m "chore: baseline before schema rework"
+uv sync                                 # crea/actualiza .venv desde uv.lock
 
-# rotar la clave en MySQL y dejarla solo en .env
-# luego vaciar sqlalchemy.url de alembic.ini
-
-venv\Scripts\reflex.exe compile --dry   # debe decir Success
+.\.venv\Scripts\reflex.exe compile --dry   # debe decir Success
 ```
 
-Después: abrir `docs/backlog/EPIC-01-arranque-y-entorno.md` y ejecutar **T-004**.
+Después: abrir `docs/backlog/EPIC-02-datos-y-contratos.md` y encarar la Fase 2 (spike de identidad).
 
 ## 7. Comandos
 
 ```powershell
+uv sync                                # dependencias desde uv.lock
 .\run.ps1                              # dev con recarga
 .\run.ps1 -Prod                        # producción (verificar 200)
-.\venv\Scripts\reflex.exe compile --dry
+.\.venv\Scripts\reflex.exe compile --dry
 alembic upgrade head
-.\venv\Scripts\python.exe seed.py
+.\.venv\Scripts\python.exe seed.py
 ```
 
-Siempre con el venv activo (o prefijando `venv\Scripts` al `PATH`), si no Reflex lanza el
+Siempre con el `.venv` activo (o prefijando `.venv\Scripts` al `PATH`), si no Reflex lanza el
 `granian` global y muere con `TypeError: 'module' object is not callable`.
 
 ## 8. Mapa de archivos

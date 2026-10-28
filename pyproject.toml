@@ -1,0 +1,23 @@
+[project]
+name = "proyectofinal-practica"
+version = "0.1.0"
+description = "Tienda online de indumentaria y calzado (Reflex + MySQL)"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "reflex==0.10.1",
+    "pydantic>=2.12,<3.0",
+    "sqlmodel==0.0.30",
+    "sqlalchemy==2.0.46",
+    "alembic==1.18.1",
+    "pymysql==1.1.2",
+    "cryptography==46.0.3",
+    "python-dotenv==1.2.1",
+    "google-api-python-client==2.188.0",
+    "google-auth-httplib2==0.3.0",
+    "google-auth-oauthlib==1.2.4",
+]
+
+[tool.uv]
+# The app is run from the source tree, not installed as a package.
+package = false
