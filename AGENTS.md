@@ -23,11 +23,33 @@ Comprar requiere cuenta (no hay carrito de invitado). Ver `docs/backlog/DECISION
 **Regla:** no se implementa una tarea con preguntas abiertas o AC sin confirmar. Si aparece una
 decisión nueva, se registra en `DECISIONS.md` antes de codear.
 
+## Regla de oro: el backlog se actualiza mientras se trabaja
+
+El backlog es la fuente de verdad y el tablero (`.\tablero.ps1`) lo lee en vivo. No hay un archivo
+que regenerar: si el `.md` no cambia, el tablero no cambia. Por eso **todo agente actualiza el
+backlog en el mismo commit que el código**, nunca "después".
+
+Estados válidos, escritos exactamente así (son las columnas del tablero): `propuesta`,
+`en grill`, `lista`, `en curso`, `bloqueada`, `hecha`. No inventar estados nuevos: crearían
+columnas nuevas.
+
+| Momento | Qué tocar |
+|---|---|
+| Al empezar una tarea | `- **Estado:** lista` → `en curso` en el `EPIC-*.md` |
+| Al cerrar cada AC | `- [ ]` → `- [x]` en el `EPIC-*.md` |
+| Al cerrar la tarea | `- **Estado:** hecha` en el `EPIC-*.md` |
+| Siempre, junto con el estado | La fila de esa tarea en la tabla de `docs/backlog/README.md` (última columna) |
+| Si la tarea no existe | Crearla primero en la épica **y** en el índice del README |
+| Si aparece un bloqueo | `- **Estado:** bloqueada` y anotar qué falta |
+
+Las dos ubicaciones tienen que coincidir. El tablero marca en rojo (`README: <estado>`) cualquier
+tarea cuyo estado de la épica no coincida con el del índice.
+
 ## Stack real (no el ideal)
 
-- Python 3.13.1, entorno virtual en `venv/`.
+- Python 3.13.1, entorno virtual en `.venv/` (lo crea `uv sync` desde `uv.lock`; D-027).
 - Reflex **0.10.1**, SQLModel 0.0.30, SQLAlchemy 2.0.46, pydantic **2.14.1**, Alembic 1.18.1.
-  Versiones verificadas con `importlib.metadata` sobre `venv/` el 2026-10-27.
+  Versiones verificadas con `importlib.metadata` sobre `.venv/` el 2026-10-28.
 - MySQL 8, base `zapateria_db`, URL única en `.env` (`DATABASE_URL`).
 - La migración a Reflex 0.10.x **ya está hecha** (T-006). Escribir APIs de 0.10: `.model_dump()`
   en vez de `.dict()`, modelos pydantic v2, y no usar `--single-port` (no existe).
@@ -47,16 +69,21 @@ model/ → repository/ → service/ → state/ → pages/
 ## Comandos
 
 ```powershell
+uv sync                    # instala/actualiza .venv desde uv.lock
 .\run.ps1                  # dev con recarga
 .\run.ps1 -Prod            # producción
-.\venv\Scripts\reflex.exe compile --dry   # validar sin levantar
+.\.venv\Scripts\reflex.exe compile --dry  # validar sin levantar
 alembic upgrade head       # migraciones
-.\venv\Scripts\python.exe seed.py         # admin + datos de ejemplo
+.\.venv\Scripts\python.exe seed.py        # admin + datos de ejemplo
+.\tablero.ps1              # tablero kanban del backlog (solo lectura)
+.\tablero.ps1 -Write       # tablero con arrastre que reescribe el .md
 ```
 
-- Frontend en `:3000`, backend en `:8000`.
+- Frontend en `:3000`, backend en `:8000`. Tablero del backlog en `:8765`.
 - **Siempre activar el venv** (o prefijar `venv\Scripts` al `PATH`). Si no, Reflex lanza el `granian`
   global y el backend muere con `TypeError: 'module' object is not callable` en `@rx.event`.
+- **Antes de levantar el tablero del backlog, preguntar al usuario si lo quiere levantar.**
+  No arrancarlo por iniciativa propia: queda un proceso escuchando en `:8765`.
 
 ## Reglas de código
 
@@ -83,7 +110,8 @@ alembic upgrade head       # migraciones
 
 ## Antes de cerrar una tarea
 
-- [ ] AC de la tarea marcados en la épica.
+- [ ] AC de la tarea marcados en la épica (`- [x]`).
+- [ ] `- **Estado:** hecha` en la épica **y** en la fila del índice del `README.md`.
 - [ ] `reflex compile --dry` sin errores ni warnings nuevos.
 - [ ] Flujo afectado probado a mano.
 - [ ] `DECISIONS.md` actualizado si hubo decisión.
