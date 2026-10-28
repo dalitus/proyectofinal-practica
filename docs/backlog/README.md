@@ -51,9 +51,9 @@
 | T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | lista |
 | T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | lista |
 | T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | lista |
-| T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | lista |
+| T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | hecha |
 | T-023 | Guardas de rutas por rol | 03 Sesión | P0 | lista |
-| T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | lista |
+| T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | en curso |
 | T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | lista |
 | T-031 | Detalle de producto por URL (refresh-safe) | 04 Catálogo | P1 | lista |
 | T-032 | Precio final y formato en la UI | 04 Catálogo | P1 | lista |

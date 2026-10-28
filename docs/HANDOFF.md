@@ -26,7 +26,8 @@ Arquitectura: `model → repository → service → state → pages`.
 | Migración inicial | **Una sola, desde los modelos finales** (`61c05db43688`) | `alembic upgrade head` + `alembic check` OK en `zapateria_test` |
 | `model/__init__.py` | **11 tablas finales**, incluidas las del plugin | `SQLModel.metadata.tables` |
 | UI | Solo `ui/tokens.py` (4 diccionarios) | sin componentes ni shell |
-| Tests | `pytest` con 9 tests del esquema | `tests/`, verde sobre `zapateria_test` |
+| Tests | `pytest` con 19 tests (esquema + identidad) | `tests/`, verde sobre `zapateria_test` |
+| Seed | Admin + 6 productos con variantes, idempotente | `seed.py`, verificado contra MySQL |
 | Árbol de trabajo | Rama `wip/esquema` (modelos+ migración) sobre `wip/baseline` | `e563f63` |
 
 ⚠️ `wip/esquema` **no compila la app**: los consumidores todavía importan los modelos borrados.
@@ -97,11 +98,18 @@ momento.
 
 ### Fase 4 · Identidad y sesión (2 días)
 
-**T-022 → T-020 → T-021 → T-023 → T-024**: implementar el plugin, matar `app_globals`, login único
-en `/login`, guardas por rol con 403, seed del admin desde `.env`.
+🟡 **En curso (2026-10-28).** Hecho: `service/auth_servicio.py` con alta de comprador
+(`LocalUser` + `UserProfile` en una transacción), búsqueda de perfil y bootstrap del admin
+idempotente (**T-022** cerrada, **T-024** a medias); `seed.py` reescrito sobre el esquema nuevo y
+verificado contra MySQL real; 8 tests de identidad en verde. Falta: `AuthState` sobre
+`LocalAuthState` (vars `user_id`/`is_admin`/`logeado`), matar `app_globals` (**T-020**), login
+único con `redirect_to` (**T-021**), guardas por rol (**T-023**) y la UI de cuenta.
 
 **Gate:** dos navegadores con carritos distintos; admin entra al panel; comprador recibe 403;
 invitado va a `/login` con `redirect_to`.
+
+⚠️ Ese gate no se puede verificar hasta la Fase 5: las páginas y estados viejos siguen
+importando los modelos borrados, así que la app no compila en `wip/esquema`.
 
 ### Fase 5 · Esqueleto de UI y limpieza (2 días)
 

@@ -17,11 +17,13 @@
   - [ ] Un test de smoke levanta la app/compila.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-036.
-- **Verificación (2026-10-28):** `pytest` corre con un comando y da 9/9 en verde. Las fixtures
-  crean el esquema en `zapateria_test` y vacían las tablas entre tests. Los tests cubren el
-  esquema (variantes únicas, stock no negativo, FK de carrito, snapshot de pedido, perfil único,
-  un solo head de Alembic), no todavía los flujos de servicio: se escriben cuando existan
-  servicios y repositorios rewireados, y el smoke de compilación espera que la app vuelva a
+- **Verificación (2026-10-28):** `pytest` corre con un comando y da 19/19 en verde. Las fixtures
+  crean el esquema en `zapateria_test` y vacían las tablas entre tests; un fixture autouse apunta
+  el engine de la app a la base de test, así que ningún test puede tocar `zapateria_db`. Los tests
+  cubren el esquema (variantes únicas, stock no negativo, FK de carrito, snapshot de pedido,
+  perfil único, un solo head de Alembic) y el alta de cuentas (hash bcrypt, email duplicado,
+  datos inválidos, admin idempotente). Faltan los flujos de catalogo, carrito y pedido: se
+  escriben cuando existan esos servicios, y el smoke de compilación espera que la app vuelva a
   compilar.
 - **Depende de:** T-010, T-020
 

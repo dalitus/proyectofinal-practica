@@ -52,9 +52,8 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-022 · Autenticación con `reflex-local-auth`
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 03
-- **Archivos:** `repository/users_repository.py:39-42`, `model/users_model.py:18`,
-  `model/gerente_model.py:10`
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 03
+- **Archivos:** `service/auth_servicio.py`, `model/perfil_modelo.py`, `tests/test_auth_servicio.py`
 - **Problema:** las contraseñas se guardan y comparan en texto plano; no hay token de sesión ni
   hashing.
 - **Decisión (D-019/D-020):** `reflex-local-auth` para todos; `LocalUser` + `UserProfile`;
@@ -65,9 +64,7 @@ que las contraseñas no se guarden en texto plano.
   - [x] Sesión persistida en `LocalAuthSession` con token en `localStorage` y vencimiento 7 días.
   - [x] No hay contraseñas en texto plano ni migración de hashes (la DB se recrea).
   - [x] `reflex-local-auth` convive con Reflex 0.10.1 y Pydantic 2 (smoke test).
-  - [ ] Registro propio crea `LocalUser` + `UserProfile` en una transacción.
-    - Pendiente de la Fase 4: el registro propio (con `UserProfile`) todavía no existe; el
-      formulario del plugin solo crea `LocalUser`.
+  - [x] Registro propio crea `LocalUser` + `UserProfile` en una transacción.
 - **Verificación del spike (2026-10-28, rama `spike/local-auth`):**
   - `uv add reflex-local-auth==0.5.0` resolvió sin conflictos sobre Reflex 0.10.1 / Pydantic 2.14.1
     (agrega `bcrypt==5.0.0`). `reflex compile --dry` → `Success` con las páginas `/login` y
@@ -77,10 +74,16 @@ que las contraseñas no se guarden en texto plano.
     7 días y el token quedó en `localStorage` como `_auth_token`.
   - `LocalUser` hereda de `SQLModel` (no de `rx.Model`) y expone `hash_password()` / `verify()`:
     no arrastra la deprecación de `reflex.Model`.
-  - No verificado en el spike: logout desde UI, `require_login` y la sincronización del token al
-    recargar (necesita un `AuthState` propio que consuma `LocalAuthState`, es la Fase 4).
-  - Las tablas `localuser` y `localauthsession` se crearon a mano en `zapateria_db` para la prueba
-    y se borraron después: la migración de la Fase 3 las genera.
+  - No verificado en el spike: logout desde UI y `require_login` (necesitan el `AuthState` propio
+    y las páginas nuevas; es la Fase 4-5).
+- **Verificación del registro propio (2026-10-28, `wip/esquema`):**
+  - `service/auth_servicio.py:registrar_comprador` normaliza el email, exige 8 caracteres de
+    contraseña y crea `LocalUser` (`username` = email, `enabled=True`, hash bcrypt) más
+    `UserProfile` con `is_admin=False` en una sola transacción; si el email se repite, hace
+    `rollback` y no deja filas huérfanas.
+  - `tests/test_auth_servicio.py` (8 casos) verifica hash/verify, que `model_dump()` no exponga
+    el hash, email duplicado con distinta capitalización, datos inválidos y que el alta pública
+    nunca cree un admin. Corren contra `zapateria_test`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-019 y D-020.
 - **Depende de:** T-021
@@ -110,8 +113,8 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-024 · Cuenta única de administrador y bootstrap
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 03
-- **Archivos:** `service/users_service.py:80-93`, `seed.py` (nuevo), `model/user_profile.py` (nuevo)
+- **Estado:** en curso · **Prioridad:** P1 · **Épica:** 03
+- **Archivos:** `seed.py`, `service/auth_servicio.py`, `model/perfil_modelo.py`, `.env.example`
 - **Problema:** no hay un proceso claro para crear el admin inicial ni para garantizar que sea único.
 - **Decisión (D-013/D-019):** seed idempotente desde `ADMIN_EMAIL`/`ADMIN_PASSWORD`; crea
   `LocalUser` (username = email) + `UserProfile(is_admin=True)`; sin cambio obligatorio en el
@@ -119,9 +122,15 @@ que las contraseñas no se guarden en texto plano.
 - **AC propuestos:**
   - [x] Comando/seed idempotente crea el admin si no existe (credenciales por `.env`).
   - [x] El formulario público no permite crear admins.
-  - [x] No se puede borrar al último admin.
-  - [x] El admin puede cambiar su contraseña.
+  - [ ] No se puede borrar al último admin.
+  - [ ] El admin puede cambiar su contraseña.
   - [x] No se fuerza el cambio de contraseña en el primer login.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-013.
+- **Verificación (2026-10-28, `wip/esquema`):** `seed.py` reescrito sobre el esquema nuevo.
+  `crear_admin_si_no_existe` es idempotente (segunda corrida devuelve `False` y no duplica) y toma
+  las credenciales de `ADMIN_EMAIL`/`ADMIN_PASSWORD`; si faltan, corta con un mensaje claro en vez
+  de usar un default. Corrida real contra `zapateria_test`: admin + perfil `is_admin=1`, 6
+  categorías, 6 productos y 14 variantes; la segunda corrida no creó nada. Las dos AC pendientes
+  necesitan la pantalla de cuenta y el borrado de usuarios, que llegan con el panel del admin.
 - **Depende de:** T-011, T-022
