@@ -1,4 +1,7 @@
-from .users_repository import select_all, select_by_email, create_user, delete_user_by_email
-from .gerente_repocitory import select_gerente_by_email_y_contra
-from .conect_db import get_session
+"""Acceso a datos.
 
+Sin re-exports: cada modulo importa su repositorio por nombre
+(``from proyectofinal.repository.producto_repocitory import ...``). El
+``__init__`` vacio evita cargar todo el arbol de repositorios al importar uno
+solo (y rompia los tests y Alembic cuando alguno quedaba a medio migrar).
+"""

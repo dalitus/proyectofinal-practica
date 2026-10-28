@@ -54,3 +54,15 @@ def session(engine: Engine) -> Session:
 
     with Session(engine) as session:
         yield session
+
+
+@pytest.fixture(autouse=True)
+def _engine_de_test(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Point the app engine at the test database for every test.
+
+    Services open their own sessions (D-033), so tests inject the test engine
+    instead of passing sessions around. Nothing here can reach `zapateria_db`.
+    """
+    from proyectofinal.repository import conect_db
+
+    monkeypatch.setattr(conect_db, "engine", engine)
