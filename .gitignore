@@ -25,3 +25,6 @@ backups/
 # Artefactos de ejecucion de Reflex
 .reflex.pid
 reflex.lock/
+
+# Cache generada por el registro de skills (no es fuente del proyecto)
+.atl/
