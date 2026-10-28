@@ -36,6 +36,11 @@ RADIUS = {
     "pill": "9999px",
 }
 
+# Only for floating elements (drawer, dialog, sticky summary). docs/design.md 2.3.
+SHADOW = {
+    "floating": "0 1px 2px rgba(0, 0, 0, 0.06)",
+}
+
 # Role -> size / weight / line-height, from docs/design.md 2.2.
 TYPE = {
     "display": {"size": "32px", "weight": "600", "line_height": "1.2"},

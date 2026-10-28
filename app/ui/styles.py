@@ -12,7 +12,7 @@ from ``app.ui.tokens``: that file stays the only place with literal values.
 
 import reflex as rx
 
-from app.ui.tokens import COLORS, FONT, RADIUS, SPACE, TYPE
+from app.ui.tokens import COLORS, FONT, RADIUS, SHADOW, SPACE, TYPE
 
 _FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
 
@@ -29,8 +29,20 @@ def _css_vars() -> str:
     for name, spec in TYPE.items():
         lines.append(f"  --text-{name}: {spec['size']};")
         lines.append(f"  --leading-{name}: {spec['line_height']};")
+    for name, value in SHADOW.items():
+        lines.append(f"  --shadow-{name}: {value};")
     lines.append(f"  --font-ui: {FONT};")
+    # Scrim of overlays: the text colour with alpha, derived so the palette
+    # still has a single source.
+    lines.append(f"  --scrim: {_rgba(COLORS['text'], 0.35)};")
     return "\n".join(lines)
+
+
+def _rgba(hex_color: str, alpha: float) -> str:
+    """Turn ``#111111`` into ``rgba(17, 17, 17, alpha)``."""
+    channels = [int(hex_color[index : index + 2], 16) for index in (1, 3, 5)]
+    red, green, blue = channels
+    return f"rgba({red}, {green}, {blue}, {alpha})"
 
 
 _BASE = """
@@ -329,12 +341,219 @@ _PRIMITIVES = """
 }
 
 .ui-alert__description { font-size: var(--text-small); color: var(--color-muted); }
+
+/* Select: native control for free keyboard support, our border and a chevron
+   drawn with borders so the indicator needs no extra asset or hex value. */
+.ui-select-wrap { position: relative; width: 100%; }
+
+.ui-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: var(--space-md);
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--color-muted);
+  border-bottom: 1.5px solid var(--color-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.ui-select { appearance: none; padding-right: var(--space-2xl); cursor: pointer; }
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* Colour lives in the dot; the label always says the state in words. */
+.ui-badge__dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-muted);
+}
+
+.ui-badge--success .ui-badge__dot { background: var(--color-success); }
+.ui-badge--danger .ui-badge__dot { background: var(--color-danger); }
+.ui-badge--info .ui-badge__dot { background: var(--color-accent); }
+
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.ui-chip:hover:not([disabled]) { border-color: var(--color-muted); }
+
+.ui-chip--selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.ui-chip[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.ui-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl) var(--space-lg);
+  background: var(--color-card);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.ui-empty__title {
+  margin: 0;
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: var(--leading-h2);
+  color: var(--color-text);
+}
+
+.ui-empty__text {
+  margin: 0;
+  max-width: 65ch;
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+"""
+
+_FEEDBACK = """
+.ui-skeleton {
+  display: block;
+  background: var(--color-surface);
+  border-radius: var(--radius-control);
+  animation: ui-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.ui-skeleton--line { height: var(--text-body); }
+.ui-skeleton--block { height: 96px; border-radius: var(--radius-card); }
+.ui-skeleton--card { height: 280px; border-radius: var(--radius-card); }
+
+@keyframes ui-pulse { from { opacity: 0.55; } to { opacity: 1; } }
+
+/* Vaul (the primitive behind rx.drawer) hardcodes `inset: 0` on the panel and
+   `rgba(0,0,0,.5)` on the scrim, so these rules carry the `body` prefix to win
+   the cascade: specificity 0,1,1 against their 0,1,0. */
+body .ui-overlay {
+  background: var(--scrim);
+}
+
+body .ui-drawer__content {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: min(420px, 100%);
+  height: 100%;
+  padding: var(--space-lg);
+  overflow-y: auto;
+  background: var(--color-card);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-floating);
+  font-family: var(--font-ui);
+  color: var(--color-text);
+}
+
+body .ui-drawer__content--left {
+  left: 0;
+  right: auto;
+  border-left: none;
+  border-right: 1px solid var(--color-border);
+}
+
+.ui-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.ui-drawer__title {
+  margin: 0;
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: var(--leading-h2);
+  color: var(--color-text);
+}
+
+/* Radix positions the dialog box; these two selectors carry `body` so they win
+   over `.rt-BaseDialogContent` (same specificity, loaded later in the head). */
+body .ui-dialog__content {
+  width: min(440px, calc(100% - 2 * var(--space-md)));
+  padding: var(--space-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-floating);
+  font-family: var(--font-ui);
+  color: var(--color-text);
+}
+
+.ui-dialog__title {
+  margin: 0;
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: var(--leading-h2);
+  color: var(--color-text);
+}
+
+.ui-dialog__description {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--color-muted);
+}
+
+.ui-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
 """
 
 _MOTION = """
 @media (prefers-reduced-motion: reduce) {
-  .ui-btn, .ui-input, .ui-card--clickable { transition: none; }
+  .ui-btn, .ui-input, .ui-card--clickable, .ui-chip { transition: none; }
   .ui-btn__spinner { animation-duration: 2s; }
+  .ui-skeleton { animation: none; opacity: 0.7; }
 }
 """
 
@@ -346,6 +565,7 @@ APP_CSS = "\n".join(
         _BASE,
         _SHELL,
         _PRIMITIVES,
+        _FEEDBACK,
         _MOTION,
     ]
 )

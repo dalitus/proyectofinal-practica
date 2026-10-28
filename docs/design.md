@@ -131,7 +131,7 @@ Cada componente vive en `app/ui/<nombre>.py` y se exporta desde
 | `EmptyState` | — | título, texto, acción opcional |
 | `Alert` | `info` `success` `error` | normal (mensaje en línea, no reemplaza el error de campo) |
 | `Skeleton` | línea, bloque, card | — |
-| `Toast` | éxito, error | — |
+| `Toast` | éxito, error | devuelve el evento de `rx.toast`; se usa desde handlers |
 | `Drawer` | edición lateral | abierto, cerrado |
 | `ConfirmDialog` | acción destructiva | abierto, cerrado |
 

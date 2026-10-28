@@ -766,3 +766,29 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   El foco usa selectores de clase (especificidad 0,2,0) para ganarle a resets de terceros.
 - **Fecha:** 2026-10-28
 
+---
+
+## D-046 · Drawer y ConfirmDialog sobre los primitivos de Reflex
+
+- **Tarea:** T-063
+- **Estado:** decidida
+- **Opciones:** reimplementar overlay + focus trap + Escape a mano / usar `rx.drawer` (Vaul) y
+  `rx.alert_dialog` (Radix) y vestirlos con las clases propias
+- **Decisión:** `Drawer` usa `rx.drawer` y `ConfirmDialog` usa `rx.alert_dialog`. El look lo pone
+  `app/ui/styles.py`; la semántica (`role="alertdialog"`, foco atrapado, cierre con Escape y con
+  click afuera) la pone la librería. `Toast` no es un componente: devuelve el `EventSpec` de
+  `rx.toast` para usarse desde un handler (T-064).
+- **Motivo:** un drawer con focus trap bien hecho no es un `<div>` con `position: fixed`; es la
+  parte que más se rompe con teclado y lectores de pantalla. Vaul y Radix ya resuelven eso y vienen
+  con Reflex, así que reimplementarlo era cambiar código probado por código propio sin tests.
+- **Consecuencias y trampas verificadas en el navegador:**
+  - `DrawerContent` de Reflex fija `inset: 0` y `background: rgba(0,0,0,.5)` en el overlay, así que
+    las reglas del panel y del scrim llevan prefijo `body` (especificidad 0,1,1) para ganarles; el
+    lado lo decide `direction` en el `Root`, no el CSS.
+  - `AlertDialog.Action`/`Cancel` usan `asChild`: hay que pasarles **un** elemento, y ese elemento es
+    el `Button` propio. Sin `as_child=False` explícito, un `as_child=True` termina en `css` y rompe
+    el render.
+  - Ambos viven en un portal fuera de `.ui-shell`, así que no heredan tipografía: el
+    `font-family` se declara en sus propias clases.
+- **Fecha:** 2026-10-28
+

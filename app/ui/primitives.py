@@ -17,6 +17,7 @@ import reflex as rx
 
 BUTTON_VARIANTS = ("primary", "secondary", "ghost", "danger")
 ALERT_TONES = ("info", "success", "error")
+BADGE_TONES = ("neutral", "success", "danger", "info")
 
 _INPUT_IDS = itertools.count(1)
 
@@ -195,3 +196,156 @@ def Alert(
         role="alert" if tone == "error" else "status",
         **props,
     )
+
+
+def Select(
+    *options: str | tuple[str, str],
+    label: Any = None,
+    value: Any = None,
+    on_change: Any = None,
+    error: Any = None,
+    placeholder: str | None = None,
+    name: str | None = None,
+    disabled: Any = False,
+    required: bool = False,
+    input_id: str | None = None,
+    class_name: str | None = None,
+    **props: Any,
+) -> rx.Component:
+    """Labelled native select: normal, focus and error.
+
+    Options are ``"texto"`` (value = text) or ``("valor", "Texto")``. The native
+    element keeps keyboard and assistive-technology behaviour for free.
+    """
+    element_id = input_id or f"ui-input-{next(_INPUT_IDS)}"
+
+    if error is None:
+        invalid = False
+        error_text: Any = ""
+    elif isinstance(error, rx.Var):
+        invalid = error != ""
+        error_text = error
+    else:
+        invalid = bool(error)
+        error_text = error
+
+    rendered_options: list[Any] = []
+    if placeholder is not None:
+        rendered_options.append(
+            rx.el.option(placeholder, value="", disabled=True, hidden=True)
+        )
+    for option in options:
+        if isinstance(option, tuple):
+            option_value, option_label = option
+        else:
+            option_value, option_label = option, option
+        rendered_options.append(rx.el.option(option_label, value=option_value))
+
+    fields: list[Any] = []
+    if label is not None:
+        fields.append(
+            rx.el.label(
+                label,
+                **{"html_for": element_id},
+                class_name="ui-field__label",
+            )
+        )
+    fields.append(
+        rx.el.div(
+            rx.el.select(
+                *rendered_options,
+                id=element_id,
+                name=name,
+                value=value,
+                on_change=on_change,
+                disabled=disabled,
+                required=required,
+                class_name=_join("ui-input", "ui-select", class_name),
+                **{"aria-invalid": invalid},
+                **props,
+            ),
+            class_name="ui-select-wrap",
+        )
+    )
+    fields.append(
+        rx.cond(
+            error_text != "",
+            rx.el.span(error_text, class_name="ui-field__error", role="alert"),
+            rx.fragment(),
+        )
+    )
+
+    return rx.el.div(*fields, class_name="ui-field")
+
+
+def Badge(
+    label: Any,
+    *,
+    tone: str = "neutral",
+    class_name: str | None = None,
+    **props: Any,
+) -> rx.Component:
+    """Pill with a tone dot: ``neutral``, ``success``, ``danger`` or ``info``.
+
+    The dot is decoration; the label carries the state (design.md 7).
+    """
+    if tone not in BADGE_TONES:
+        raise ValueError(f"Unknown badge tone {tone!r}; expected one of {BADGE_TONES}")
+
+    return rx.el.span(
+        rx.el.span(
+            class_name="ui-badge__dot",
+            **{"aria-hidden": "true"},
+        ),
+        label,
+        class_name=_join("ui-badge", f"ui-badge--{tone}", class_name),
+        **props,
+    )
+
+
+def SizeChip(
+    label: Any,
+    *,
+    selected: Any = False,
+    disabled: Any = False,
+    on_click: Any = None,
+    class_name: str | None = None,
+    **props: Any,
+) -> rx.Component:
+    """Talle/talla selector: normal, selected and disabled (out of stock)."""
+    base_class = _join("ui-chip", class_name)
+    if isinstance(selected, rx.Var):
+        chip_class: Any = rx.cond(
+            selected,
+            f"{base_class} ui-chip--selected",
+            base_class,
+        )
+    else:
+        chip_class = _join(base_class, "ui-chip--selected" if selected else None)
+
+    return rx.el.button(
+        label,
+        type="button",
+        on_click=on_click,
+        disabled=disabled,
+        class_name=chip_class,
+        **{"aria-pressed": selected},
+        **props,
+    )
+
+
+def EmptyState(
+    title: Any,
+    text: Any = None,
+    action: rx.Component | None = None,
+    *,
+    class_name: str | None = None,
+) -> rx.Component:
+    """Empty list/result: title, explanation and one optional action."""
+    children: list[Any] = [rx.el.p(title, class_name="ui-empty__title")]
+    if text is not None:
+        children.append(rx.el.p(text, class_name="ui-empty__text"))
+    if action is not None:
+        children.append(action)
+
+    return rx.el.div(*children, class_name=_join("ui-empty", class_name))

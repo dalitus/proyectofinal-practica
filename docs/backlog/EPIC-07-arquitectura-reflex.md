@@ -96,28 +96,31 @@ consistente.
   - `layout.py`: `AppShell`, `TopNav` (marca, buscador y cuenta como slots), `Container`,
     `PageHeader` y `Footer`.
   - `primitives.py`: `Button` (primary/secondary/ghost/danger + loading), `Input` (label visible,
-    error junto al campo, `aria-invalid`), `Card` y `Alert` (informativo, en línea).
+    error junto al campo, `aria-invalid`), `Select` (nativo, con error), `Card`, `Badge` (dot por
+    tono), `SizeChip` (seleccionado/deshabilitado) y `EmptyState` (título, texto y una acción).
+  - `feedback.py`: `Skeleton` (línea/bloque/card), `Toast` (devuelve el evento de `rx.toast`),
+    `Drawer` (panel lateral con título, cierre y `open` opcional) y `ConfirmDialog`
+    (`role="alertdialog"`, confirmar/cancelar como botones propios).
   - `/` y `/register` se reescribieron con el shell y los primitivos: `pages/` no tiene hex,
     `box_shadow` ni `color_scheme`.
-  - Verificado en el navegador: 360, 768 y 1280px sin scroll horizontal; Inter cargada; controles
-    de 44px; el formulario de alta muestra el `Alert` de error con `role="alert"` al fallar.
-- **Falta:** `Select`, `Badge`, `SizeChip`, `EmptyState` y todo `feedback.py` (`Skeleton`, `Toast`,
-  `Drawer`, `ConfirmDialog`); el AC del catálogo espera a Fase 6.
+  - Verificado en el navegador con una galería temporal (borrada antes del commit): 360, 768 y
+    1280px sin scroll horizontal; Inter cargada; controles de 44px; drawer a la derecha con scrim
+    de `text` al 35 %; `ConfirmDialog` con `role="alertdialog"` y sin botones anidados; toast real
+    al confirmar; el formulario de alta muestra el `Alert` de error con `role="alert"` al fallar.
+- **Falta:** el AC del catálogo, que espera a Fase 6.
 - **AC propuestos:**
   - [x] Existe `app/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
         `pages/` contiene hex, `box_shadow` ni `color_scheme` sueltos.
   - [x] `layout.py` implementa `AppShell`, `TopNav`, `Container`, `PageHeader` y `Footer`, y las
         páginas existentes los usan en lugar de repetir fondo y estructura.
-  - [ ] `primitives.py` implementa `Button` (primary/secondary/ghost/danger), `Input`, `Select`,
+  - [x] `primitives.py` implementa `Button` (primary/secondary/ghost/danger), `Input`, `Select`,
         `Card`, `Badge`, `SizeChip` y `EmptyState`, con estados normal/hover/focus/disabled.
-        **Parcial:** están `Button`, `Input`, `Card` y `Alert` (D-045). Faltan `Select`, `Badge`,
-        `SizeChip` y `EmptyState`.
-  - [ ] `feedback.py` implementa `Skeleton`, `Toast`, `Drawer` y `ConfirmDialog`.
-        **Pendiente:** el módulo no existe todavía.
+        Se agrega `Alert` (D-045), que no estaba en la lista original.
+  - [x] `feedback.py` implementa `Skeleton`, `Toast`, `Drawer` y `ConfirmDialog`.
   - [x] `ui_helpers.py` se elimina y no quedan imports.
   - [ ] El catálogo se ve en 360px, 768px y 1280px sin scroll horizontal.
-        **Pendiente:** el catálogo es de Fase 6. El shell y `/register` se midieron sin overflow en
-        los tres anchos.
+        **Pendiente:** el catálogo es de Fase 6. El shell, el alta y la galería de componentes se
+        midieron sin overflow en los tres anchos.
   - [x] Contraste AA verificado; focus visible de 2px en todos los interactivos.
         Medido: texto/tarjeta 18.88:1, muted/lienzo 4.97:1, danger/tarjeta 6.57:1, success/tarjeta
         5.69:1. Foco: `outline: 2px solid accent` con `offset: 2px`.
