@@ -76,7 +76,7 @@ consistente.
 
 ## T-063 · Sistema de diseño: tokens, shell y primitivos
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
+- **Estado:** en curso · **Prioridad:** P1 · **Épica:** 07
 - **Archivos:** `docs/design.md` (spec), `app/ui/` (nuevo), `app/app.py`,
   `app/pages/*.py`, `app/pages/ui_helpers.py`
 - **Problema:** cada página define su propio fondo, ancho y estilos (`background_color="#ADD8E6"`,
@@ -87,18 +87,41 @@ consistente.
   por página y checklist de PR. Es la referencia obligatoria.
 - **Decisión (D-034):** paleta neutra con acento negro, Inter 400/600, borde en lugar de sombra,
   componentes en `app/ui/`.
+- **Qué se hizo (avance 1, 2026-10-28):**
+  - `tokens.py` con color, espacio, radio y escala tipográfica (`TYPE`); es el único archivo con
+    valores literales.
+  - `styles.py` (D-045): emite los tokens como variables CSS y concentra `:hover`,
+    `:focus-visible`, `[disabled]`, `[aria-invalid]` y las media queries. Se inyecta una vez en
+    `app/app.py`, así que toda ruta lo hereda.
+  - `layout.py`: `AppShell`, `TopNav` (marca, buscador y cuenta como slots), `Container`,
+    `PageHeader` y `Footer`.
+  - `primitives.py`: `Button` (primary/secondary/ghost/danger + loading), `Input` (label visible,
+    error junto al campo, `aria-invalid`), `Card` y `Alert` (informativo, en línea).
+  - `/` y `/register` se reescribieron con el shell y los primitivos: `pages/` no tiene hex,
+    `box_shadow` ni `color_scheme`.
+  - Verificado en el navegador: 360, 768 y 1280px sin scroll horizontal; Inter cargada; controles
+    de 44px; el formulario de alta muestra el `Alert` de error con `role="alert"` al fallar.
+- **Falta:** `Select`, `Badge`, `SizeChip`, `EmptyState` y todo `feedback.py` (`Skeleton`, `Toast`,
+  `Drawer`, `ConfirmDialog`); el AC del catálogo espera a Fase 6.
 - **AC propuestos:**
-  - [ ] Existe `app/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
+  - [x] Existe `app/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
         `pages/` contiene hex, `box_shadow` ni `color_scheme` sueltos.
-  - [ ] `layout.py` implementa `AppShell`, `TopNav`, `Container`, `PageHeader` y `Footer`, y las
+  - [x] `layout.py` implementa `AppShell`, `TopNav`, `Container`, `PageHeader` y `Footer`, y las
         páginas existentes los usan en lugar de repetir fondo y estructura.
   - [ ] `primitives.py` implementa `Button` (primary/secondary/ghost/danger), `Input`, `Select`,
         `Card`, `Badge`, `SizeChip` y `EmptyState`, con estados normal/hover/focus/disabled.
+        **Parcial:** están `Button`, `Input`, `Card` y `Alert` (D-045). Faltan `Select`, `Badge`,
+        `SizeChip` y `EmptyState`.
   - [ ] `feedback.py` implementa `Skeleton`, `Toast`, `Drawer` y `ConfirmDialog`.
-  - [ ] `ui_helpers.py` se elimina y no quedan imports.
+        **Pendiente:** el módulo no existe todavía.
+  - [x] `ui_helpers.py` se elimina y no quedan imports.
   - [ ] El catálogo se ve en 360px, 768px y 1280px sin scroll horizontal.
-  - [ ] Contraste AA verificado; focus visible de 2px en todos los interactivos.
-  - [ ] `reflex compile` pasa sin warnings nuevos.
+        **Pendiente:** el catálogo es de Fase 6. El shell y `/register` se midieron sin overflow en
+        los tres anchos.
+  - [x] Contraste AA verificado; focus visible de 2px en todos los interactivos.
+        Medido: texto/tarjeta 18.88:1, muted/lienzo 4.97:1, danger/tarjeta 6.57:1, success/tarjeta
+        5.69:1. Foco: `outline: 2px solid accent` con `offset: 2px`.
+  - [x] `reflex compile` pasa sin warnings nuevos.
 - **Fuera de alcance:** componentes de dominio (`ProductCard`, `CartLine`, `OrdersTable`); se
   construyen dentro de T-030/T-031, T-040 y T-050 siguiendo el mismo documento.
 - **Grill / preguntas abiertas:**

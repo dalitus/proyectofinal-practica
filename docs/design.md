@@ -129,6 +129,7 @@ Cada componente vive en `app/ui/<nombre>.py` y se exporta desde
 | `Badge` | `stock` `pedido` | según valor |
 | `Card` | — | normal, hover (solo si es clickeable) |
 | `EmptyState` | — | título, texto, acción opcional |
+| `Alert` | `info` `success` `error` | normal (mensaje en línea, no reemplaza el error de campo) |
 | `Skeleton` | línea, bloque, card | — |
 | `Toast` | éxito, error | — |
 | `Drawer` | edición lateral | abierto, cerrado |
@@ -230,14 +231,20 @@ app/
 └── ui/
     ├── __init__.py        # re-exporta todo
     ├── tokens.py          # colores, espacio, tipografía, radios
+    ├── styles.py          # tokens → variables CSS + :hover, :focus-visible y media queries
     ├── layout.py          # AppShell, TopNav, Container, PageHeader, Footer
-    ├── primitives.py      # Button, Input, Select, Card, Badge, EmptyState...
+    ├── primitives.py      # Button, Input, Card, Alert...
     ├── feedback.py        # Skeleton, Toast, Drawer, ConfirmDialog
     └── domain/
         ├── product.py     # ProductCard, ProductGrid, PriceTag, StockBadge, SizePicker
         ├── cart.py        # CartLine, QuantityStepper, OrderSummary
         └── order.py       # OrdersTable, ProductsTable, AddressForm
 ```
+
+`styles.py` existe porque el prop `style` de Reflex se serializa como estilo inline y no
+puede expresar `:hover`, `:focus-visible` ni `@media`. Los valores literales siguen viviendo
+solo en `tokens.py`: el stylesheet los emite como variables CSS y las clases las consumen.
+Se inyecta una vez desde `app/app.py`, así que toda pantalla lo hereda.
 
 ### 9.2 Tokens en código
 
@@ -246,6 +253,8 @@ app/
 COLORS = {
     "bg": "#FFFFFF",
     "surface": "#F7F7F5",
+    "page": "#F7F7F5",
+    "card": "#FFFFFF",
     "border": "#E5E5E5",
     "text": "#111111",
     "muted": "#6B6B6B",
@@ -257,6 +266,7 @@ COLORS = {
 
 SPACE = {"xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "2xl": "48px"}
 RADIUS = {"card": "8px", "control": "6px", "pill": "9999px"}
+TYPE = {"display": {...}, "h1": {...}, "h2": {...}, "body": {...}, "small": {...}, "caption": {...}}
 FONT = "'Inter', system-ui, sans-serif"
 ```
 

@@ -1,65 +1,38 @@
-"""Pagina de inicio provisoria.
+"""Provisional landing page.
 
-Mientras el catalogo se reconstruye sobre el esquema nuevo (Fase 6), la raiz
-solo presenta la tienda y las dos entradas de sesion. Usa los tokens de
-``app/ui/tokens.py`` y no declara colores ni sombras propias (T-063).
+While the catalog is rebuilt on the new schema (Fase 6), the root only presents
+the shop and the two session entry points. Layout and primitives come from
+``app/ui``; this module declares no colour, spacing or shadow of its own (T-063).
 """
 
 import reflex as rx
 
-from app.ui.tokens import COLORS, FONT, RADIUS, SPACE
-
-
-def _boton(texto: str, ruta: str, primario: bool) -> rx.Component:
-    fondo = COLORS["accent"] if primario else COLORS["card"]
-    color = COLORS["accent_text"] if primario else COLORS["text"]
-    return rx.button(
-        texto,
-        on_click=rx.redirect(ruta),
-        background_color=fondo,
-        color=color,
-        border=f"1px solid {COLORS['border']}",
-        border_radius=RADIUS["control"],
-        padding=f"{SPACE['sm']} {SPACE['lg']}",
-        font_family=FONT,
-        font_weight="600",
-        cursor="pointer",
-    )
+from app.ui import AppShell, Button, Card, Container, PageHeader
 
 
 @rx.page(route="/", title="Tienda")
 def inicio_pagina() -> rx.Component:
-    return rx.center(
-        rx.vstack(
-            rx.heading(
+    return AppShell(
+        Container(
+            PageHeader(
                 "Indumentaria y calzado",
-                size="7",
-                color=COLORS["text"],
-                font_family=FONT,
+                "Estamos reconstruyendo el catalogo sobre el esquema nuevo.",
             ),
-            rx.text(
-                "Estamos reconstruyendo el catalogo sobre el esquema nuevo. "
-                "Mientras tanto, podes crear tu cuenta o iniciar sesion.",
-                color=COLORS["muted"],
-                font_family=FONT,
-                text_align="center",
+            Card(
+                rx.el.p(
+                    "Mientras tanto, podes crear tu cuenta o iniciar sesion.",
+                    class_name="ui-text ui-text--muted",
+                ),
+                rx.el.div(
+                    Button("Iniciar sesion", on_click=rx.redirect("/login")),
+                    Button(
+                        "Crear cuenta",
+                        variant="secondary",
+                        on_click=rx.redirect("/register"),
+                    ),
+                    class_name="ui-row",
+                ),
+                class_name="ui-stack",
             ),
-            rx.hstack(
-                _boton("Iniciar sesion", "/login", primario=True),
-                _boton("Crear cuenta", "/register", primario=False),
-                spacing="3",
-                justify="center",
-                wrap="wrap",
-            ),
-            spacing="4",
-            align="center",
-            max_width="520px",
-            padding=SPACE["xl"],
-            background_color=COLORS["card"],
-            border=f"1px solid {COLORS['border']}",
-            border_radius=RADIUS["card"],
-        ),
-        min_height="100vh",
-        background_color=COLORS["page"],
-        padding=SPACE["md"],
+        )
     )

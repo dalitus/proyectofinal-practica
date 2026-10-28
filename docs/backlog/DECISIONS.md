@@ -741,3 +741,28 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   rompe el compile con `RouteValueError` (dos páginas en `/register`), así que el reemplazo tiene
   que entrar en un solo commit.
 - **Fecha:** 2026-10-28
+
+---
+
+## D-045 · Estados de UI en un stylesheet generado desde los tokens
+
+- **Tarea:** T-063
+- **Estado:** decidida
+- **Opciones:** estilos inline por componente / Radix Themes con `color_scheme` / clases propias en
+  un stylesheet alimentado por `tokens.py`
+- **Decisión:** los primitivos se construyen sobre `rx.el` (button, input, div) con clases `ui-*`, y
+  todos los estados (`:hover`, `:focus-visible`, `[disabled]`, `[aria-invalid]`, media queries) viven
+  en `app/ui/styles.py`, que emite los tokens como variables CSS y se inyecta una sola vez desde
+  `app/app.py`. Se agrega `Alert` al inventario de primitivos (informativo, en línea).
+- **Motivo:** el prop `style` de Reflex se serializa a estilo inline, así que no puede expresar
+  pseudo-clases ni `@media`: sin un stylesheet, "hover y focus visibles" era imposible de cumplir
+  sin tocar Radix. Radix Themes trae su propia paleta y su `color_scheme`, que `docs/design.md` 2.1
+  prohíbe, y su reset `.rt-reset:where(:focus){outline:none}` compite con el foco de 2px. Los
+  elementos HTML con clases propias dejan un único lugar donde se define cada estado y un
+  `Alert` en línea para los mensajes de página (el error de campo sigue yendo junto al campo).
+- **Consecuencias:** una variante nueva se agrega en `primitives.py` **y** en `styles.py`, nunca en
+  la página; el stylesheet se hereda en todas las rutas porque se monta en el `App`; los elementos
+  no heredan estilos de Radix, así que cada uno declara `font-family` y `color` desde los tokens.
+  El foco usa selectores de clase (especificidad 0,2,0) para ganarle a resets de terceros.
+- **Fecha:** 2026-10-28
+

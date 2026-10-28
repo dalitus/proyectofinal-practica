@@ -72,7 +72,7 @@
 | T-060 | Eliminar estados duplicados y código muerto | 07 Arquitectura | P1 | hecha |
 | T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | lista |
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | lista |
-| T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | lista |
+| T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | en curso |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | lista |
 | T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | en curso |
