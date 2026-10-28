@@ -100,14 +100,11 @@ def _admin_credentials() -> tuple[str, str]:
 def seed_admin() -> bool:
     """Create the bootstrap admin if it does not exist."""
     email, password = _admin_credentials()
-    with get_session() as session:
-        try:
-            creado = crear_admin_si_no_existe(
-                session, email=email, password=password, nombre=ADMIN_NOMBRE
-            )
-        except ErrorDeRegistro as error:
-            print(f"[error] admin: {error}")
-            return False
+    try:
+        creado = crear_admin_si_no_existe(email=email, password=password, nombre=ADMIN_NOMBRE)
+    except ErrorDeRegistro as error:
+        print(f"[error] admin: {error}")
+        return False
 
     if creado:
         print(f"[ok]   admin creado: {email}")

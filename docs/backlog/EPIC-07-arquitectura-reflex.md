@@ -7,21 +7,26 @@ consistente.
 
 ## T-060 · Eliminar estados duplicados y código muerto
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `state/app_state.py`, `state/global_state.py`, `state/compras_admin_state.py`,
-  `pages/ubicacion_page.py`, `pages/compras_admin_page.py`, `service/google_drive_service.py`,
-  `model/producto_model_pydantic.py`
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
+- **Archivos:** todo `app/pages/`, `app/state/`, `app/service/`, `app/repository/` previos
 - **Problema:** hay estados y páginas sin uso, dos `UbicacionState`, dos servicios de Drive y
   lógica de carrito repetida en tres lugares.
 - **Decisión (D-015/D-025):** Drive queda fuera (upload local); ubicación con imagen + link a
   Google Maps; se elimina el código muerto.
-- **AC propuestos:**
+- **Qué se hizo (Fase 5):** se borró el árbol completo de `app/pages/` y `app/state/`, y todos los
+  `app/service/*` y `app/repository/*` salvo `auth_servicio.py` y `conect_db.py`. Sobreviven los
+  modelos finales (`app/model/`), los tokens de diseño (`app/ui/tokens.py`) y el alta de comprador.
+  La app vuelve a compilar porque `app/app.py` ya no importa nada eliminado.
+- **AC:**
   - [x] No quedan archivos/clases sin referencias.
-  - [x] Una sola implementación de carrito, login, ubicación y subida de imágenes.
   - [x] `rg` de los nombres eliminados no devuelve usos.
   - [x] `reflex compile` pasa.
   - [x] `google_drive_service.py` se elimina; solo queda el upload local.
   - [x] La ubicación no embebe mapas ni usa API keys.
+  - [ ] Una sola implementación de carrito, login, ubicación y subida de imágenes.
+        **Movido:** el login existe (plugin), pero carrito, ubicación y subida todavía no tienen
+        código. Se cierran cuando se reimplementen en Fase 6-7 (T-061, T-076, T-077). No se marca
+        acá porque marcar un AC de código que no existe es mentir en el tablero.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-015 y D-025.
 - **Depende de:** T-005

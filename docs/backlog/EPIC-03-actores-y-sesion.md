@@ -84,6 +84,14 @@ que las contraseñas no se guarden en texto plano.
   - `tests/test_auth_servicio.py` (8 casos) verifica hash/verify, que `model_dump()` no exponga
     el hash, email duplicado con distinta capitalización, datos inválidos y que el alta pública
     nunca cree un admin. Corren contra `zapateria_test`.
+- **Corrección (2026-10-28, `wip/esquema`):** el AC "registro propio crea `LocalUser` +
+  `UserProfile` en una transacción" estaba marcado por el **servicio**, pero la UI seguía montando
+  la página `/register` del plugin. `RegistrationState._register_user` crea `LocalUser` por su
+  cuenta y **no** toca `UserProfile`: un registro desde el navegador dejaba la cuenta sin perfil
+  (verificado: `localuser` con fila, `user_profiles` vacía, 1 huérfano). Se agregó
+  `app/pages/registro_pagina.py` + `app/state/registro_estado.py`, que llaman a
+  `registrar_comprador()`, y se dejó de montar la página del plugin. Verificado en el navegador:
+  alta real → dos filas, `localuser sin perfil = 0`; login con esa cuenta → token y redirect a `/`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-019 y D-020.
 - **Depende de:** T-021

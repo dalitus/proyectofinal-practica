@@ -716,3 +716,28 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   `app/`; `wip/baseline` sigue con `proyectofinal/` porque ahí el renombre no existe todavía, así
   que esas ediciones **no** se cherry-piquean hasta el merge.
 - **Fecha:** 2026-10-28
+
+---
+
+## D-044 · Página de registro propia en vez de la del plugin
+
+- **Tarea:** T-022 / T-061
+- **Estado:** decidida
+- **Opciones:** usar `/register` del plugin / escribir la página propia / heredar
+  `RegistrationState` y pisar `_register_user`
+- **Decisión:** `/register` es una página nuestra (`app/pages/registro_pagina.py` +
+  `app/state/registro_estado.py`) que llama a `service/auth_servicio.registrar_comprador`. `/login`
+  sigue siendo la del plugin, montada con `add_page`.
+- **Motivo:** `reflex_local_auth.registration.RegistrationState._register_user` crea `LocalUser`
+  directo con `rx.session()` y nunca crea `UserProfile`. Verificado en el navegador contra
+  `zapateria_db`: el alta dejaba `localuser` con fila y `user_profiles` vacía. Como el perfil es la
+  tabla de la que cuelgan el rol, los pedidos y las consultas, toda cuenta creada por esa página
+  quedaba inservible. Heredar y pisar `_register_user` obliga a monkeypatchear la clase que usan
+  los componentes del plugin, así que se descartó.
+- **Consecuencias:** la lógica de alta queda en una sola función (`registrar_comprador`) y la
+  página es solo maquetación. `LocalAuthState` sigue siendo el dueño de la sesión. Si el plugin
+  cambia de versión, `/login` puede romperse pero el alta no depende de él. Efecto secundario
+  detectado: editar `app/app.py` con la página nueva registrada y la del plugin todavía montada
+  rompe el compile con `RouteValueError` (dos páginas en `/register`), así que el reemplazo tiene
+  que entrar en un solo commit.
+- **Fecha:** 2026-10-28

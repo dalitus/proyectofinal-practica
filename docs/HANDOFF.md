@@ -113,14 +113,25 @@ importando los modelos borrados, así que la app no compila en `wip/esquema`.
 
 ### Fase 5 · Esqueleto de UI y limpieza (2 días)
 
-**T-060** (borrar estados/páginas muertas) → **T-062** (handlers finos) → **T-061** (rutas únicas) →
-**T-063** (tokens, primitivos, shell) → **T-064** (logging, sin `print()`).
+🟢 **Cerrada la limpieza (2026-10-28).** **T-060 hecha:** se borró todo `app/pages/` y
+`app/state/`, y todos los `app/service/*` y `app/repository/*` salvo `auth_servicio.py` y
+`conect_db.py`. Sobreviven `app/model/` (11 tablas), `app/ui/tokens.py` y el alta de comprador.
+La app compila otra vez (17 módulos contra 34 antes) y levanta: `/` es una home provisoria,
+`/login` es la página del plugin y `/register` es propia (D-044) porque la del plugin no crea
+`UserProfile`. `seed.py` arreglado y corrido sobre `zapateria_db` recreada.
+
+**Pendiente en esta fase:** **T-062** (handlers finos), **T-061** (rutas únicas), **T-063**
+(tokens, primitivos, shell) y **T-064** (logging, sin `print()`).
 
 **Por qué antes de las pantallas:** construir páginas con los estilos y estados actuales significa
 reescribirlas dos veces.
 
 **Gate:** `rg` de los nombres borrados sin resultados, compile sin warnings nuevos, catálogo piloto
 con el shell nuevo.
+
+⚠️ Lo que la Fase 5 borró (carrito, ubicación, subida de imágenes, panel del admin) **no está
+reimplementado**: vuelve en las fases 6 y 7 sobre el esquema nuevo. Ese es el AC de T-060 que
+quedó abierto a propósito.
 
 ### Fase 6 · Camino del comprador (1 semana)
 
