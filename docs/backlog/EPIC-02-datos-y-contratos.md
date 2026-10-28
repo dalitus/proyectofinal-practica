@@ -7,10 +7,8 @@ datos garantice integridad.
 
 ## T-010 · Normalización de claves (`id`, `usuario_id`, `producto_id`)
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 02
-- **Archivos:** `model/users_model.py:13`, `model/pedido_model.py:11`, `repository/users_repository.py:48`,
-  `service/users_service.py:47,99`, `service/pedido_service.py:52-101`, `service/detalle_service.py:7`,
-  `state/app_state.py:31`, `state/global_state.py:39`, `state/data.py:6,18`
+- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 02
+- **Archivos:** `proyectofinal/model/*`, `repository/`, `service/`, `state/`
 - **Problema:** el código usa `Users.id_users`, `Pedido.id_usuario`, `Producto.id_producto` y
   `Users.es_admin`, pero los modelos definen `id`, `usuario_id`, `id` y no tienen `es_admin`.
   Esto produce `AttributeError` / `ValidationError` en login, pedidos y detalle.
@@ -18,13 +16,17 @@ datos garantice integridad.
   `usuario_id` → `local_user.id`.
 - **AC propuestos:**
   - [x] Convención única: `LocalUser.id`, `UserProfile.local_user_id`, `Pedido.usuario_id`,
-    `Producto.id`, `Carrito.usuario_id/producto_id`.
-  - [x] `rg "id_users|id_usuario|id_producto|es_admin"` no devuelve usos de modelo/servicio.
-  - [x] Login, alta de pedido, detalle y carrito funcionan de punta a punta.
+    `Producto.id`, `Carrito.usuario_id/variante_id`.
+  - [ ] `rg "id_users|id_usuario|id_producto|es_admin"` no devuelve usos de modelo/servicio.
+  - [ ] Login, alta de pedido, detalle y carrito funcionan de punta a punta.
   - [x] No hay migración de datos: la DB se recrea (D-012).
   - [x] El carrito referencia `variante_id`/`stock_id` y el pedido guarda color/talle (D-009).
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-009 y D-019.
+- **Verificación (2026-10-28):** los modelos ya usan la convención nueva y la migración inicial la
+  refleja. Falta el rewire: 28 archivos de `repository/`, `service/`, `state/` y `pages/` siguen
+  importando los modelos borrados, por eso la app no compila en esta rama y los dos AC de
+  consumidores quedan abiertos.
 - **Depende de:** T-003
 
 ---
@@ -73,9 +75,8 @@ datos garantice integridad.
 
 ## T-013 · Tablas legado `rx.Model` y alcance
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 02
-- **Archivos:** `model/envio_model.py`, `model/presupuesto_model.py`, `model/solicitan_model.py`,
-  `model/detalle_model.py`, `model/producto_model_pydantic.py`
+- **Estado:** en curso · **Prioridad:** P2 · **Épica:** 02
+- **Archivos:** `proyectofinal/model/`, `repository/`, `service/`, `seed.py`
 - **Problema:** conviven modelos `rx.Model` (legado) sin FKs ni uso claro con SQLModel. No está
   claro si envíos, presupuestos y detalles están en el alcance del producto.
 - **Decisión (D-029):** se eliminan `detalles`, `envios`, `presupuestos`, `solicitan` y
@@ -83,10 +84,14 @@ datos garantice integridad.
 - **AC propuestos:**
   - [x] Decisión documentada: las tablas legado se eliminan.
   - [x] No queda ningún `rx.Model`; todo es SQLModel.
-  - [x] Se borran también sus repositorios y referencias.
+  - [ ] Se borran también sus repositorios y referencias.
   - [x] `PedidoItem` reemplaza a `Detalles` y a `Pedido.productos_json`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-029.
+- **Verificación (2026-10-28):** se borraron los siete modelos (`users`, `gerente`, `detalle`,
+  `envio`, `presupuesto`, `solicitan`, `producto_model_pydantic`) y `SQLModel.metadata` ya solo
+  tiene las once tablas finales. Las referencias a esos modelos en repositorios, servicios,
+  estados, páginas y `seed.py` siguen ahí: se limpian en el rewire (Fase 5-6).
 - **Depende de:** T-010
 
 ---

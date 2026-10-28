@@ -6,17 +6,23 @@
 
 ## T-070 · Tests de servicios y repositorios
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 08
-- **Archivos:** `tests/` (nuevo), `pyproject.toml`
+- **Estado:** en curso · **Prioridad:** P2 · **Épica:** 08
+- **Archivos:** `tests/conftest.py`, `tests/test_esquema.py`, `pyproject.toml`
 - **Problema:** no hay tests automatizados; los `test_*.py` de la raíz son scripts manuales.
 - **Decisión (D-036):** `pytest` contra MySQL `zapateria_test`; flujos críticos obligatorios.
 - **AC propuestos:**
   - [x] `pytest` corre en local con un comando.
-  - [x] Tests de los flujos críticos: login, alta de producto, carrito, pedido, stock, consultas.
+  - [ ] Tests de los flujos críticos: login, alta de producto, carrito, pedido, stock, consultas.
   - [x] DB de test aislada (`zapateria_test`) creada y limpiada por fixtures.
-  - [x] Un test de smoke levanta la app/compila.
+  - [ ] Un test de smoke levanta la app/compila.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-036.
+- **Verificación (2026-10-28):** `pytest` corre con un comando y da 9/9 en verde. Las fixtures
+  crean el esquema en `zapateria_test` y vacían las tablas entre tests. Los tests cubren el
+  esquema (variantes únicas, stock no negativo, FK de carrito, snapshot de pedido, perfil único,
+  un solo head de Alembic), no todavía los flujos de servicio: se escriben cuando existan
+  servicios y repositorios rewireados, y el smoke de compilación espera que la app vuelva a
+  compilar.
 - **Depende de:** T-010, T-020
 
 ---

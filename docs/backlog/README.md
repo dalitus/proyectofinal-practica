@@ -40,14 +40,14 @@
 |---|---|---|---|---|
 | T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | en curso |
 | T-002 | Configuración única de base de datos y engine | 01 Arranque | P0 | hecha |
-| T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | lista |
+| T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | hecha |
 | T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | en curso |
 | T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |
 | T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | lista |
-| T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | lista |
+| T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | en curso |
 | T-011 | Identidad y rol del administrador | 02 Datos | P0 | lista |
 | T-012 | Integridad de datos (FK, cascadas, unique email) | 02 Datos | P1 | lista |
-| T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | lista |
+| T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | en curso |
 | T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | lista |
 | T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | lista |
 | T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | lista |
@@ -75,7 +75,7 @@
 | T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | lista |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | lista |
-| T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | lista |
+| T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | en curso |
 | T-071 | Lint, formato, pre-commit y CI | 08 Calidad | P2 | lista |
 | T-072 | Documentación y `.env.example` | 08 Calidad | P2 | lista |
 | T-073 | Revisión de secretos y `.gitignore` | 08 Calidad | P0 | hecha |

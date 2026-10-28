@@ -17,17 +17,20 @@ Arquitectura: `model → repository → service → state → pages`.
 
 | Componente | Estado | Evidencia |
 |---|---|---|
-| Reflex / Pydantic | **Ya migrado** a 0.10.1 / 2.14.1 | `requirements.txt` + `.venv` |
-| `reflex compile --dry` | **Pasa** en 3.1 s | ejecutado hoy |
+| Reflex / Pydantic | **Ya migrado** a 0.10.1 / 2.14.1 | `pyproject.toml` + `.venv` |
+| `reflex compile --dry` | **Pasa** en `wip/baseline` | ejecutado 2026-10-28 |
 | Arranque en prod | **Sin verificar** | hay que correr `run.ps1 -Prod` y pedir 200 |
-| `reflex-local-auth` | **No instalado** | `importlib.metadata` no lo encuentra |
-| `alembic/env.py` | Lee `DATABASE_URL` | `alembic/env.py:38-41` |
-| `alembic.ini` | **Sin credenciales** (vacío; D-039/D-042) | `alembic.ini:87` |
-| Migración inicial | Existe pero **nace de los modelos legacy** | `639270ca9d26` crea `detalles` |
-| `model/__init__.py` | **Registra los 12 modelos legacy** | incluye `Detalles`, `Envios`, `Presupuestos`, `Solicitan` |
+| `reflex-local-auth` | **Instalado** (0.5.0) y verificado | `pyproject.toml` + spike en T-022 |
+| `alembic/env.py` | Lee `DATABASE_URL` | `alembic/env.py` |
+| `alembic.ini` | **Sin credenciales** (vacío; D-039/D-042) | `alembic.ini` |
+| Migración inicial | **Una sola, desde los modelos finales** (`61c05db43688`) | `alembic upgrade head` + `alembic check` OK en `zapateria_test` |
+| `model/__init__.py` | **11 tablas finales**, incluidas las del plugin | `SQLModel.metadata.tables` |
 | UI | Solo `ui/tokens.py` (4 diccionarios) | sin componentes ni shell |
-| Tests | **No hay `tests/`** | T-070 sin empezar |
-| Árbol de trabajo | **Limpio**, en rama `wip/baseline` | commit `fd090f7` (2026-10-27) |
+| Tests | `pytest` con 9 tests del esquema | `tests/`, verde sobre `zapateria_test` |
+| Árbol de trabajo | Rama `wip/esquema` (modelos+ migración) sobre `wip/baseline` | `e563f63` |
+
+⚠️ `wip/esquema` **no compila la app**: los consumidores todavía importan los modelos borrados.
+`wip/baseline` sigue siendo la rama que arranca.
 
 Conclusión: el **upgrade está hecho**, la **arquitectura de datos no**. El trabajo pendiente no es
 "migrar Reflex", es **rediseñar el esquema y la identidad** y después reconstruir la UI sobre eso.
@@ -75,19 +78,22 @@ navegador. Detalle en T-022. **No hizo falta el plan B de D-019.**
 
 ### Fase 3 · Modelos finales y UNA migración (2-3 días)
 
-Aplicar en los modelos, en este orden: **D-009** (variante `(producto, color, talle)`), **D-019**
-(`LocalUser` + `UserProfile`, borrar `users` y `gerentes`), **D-023** (`Categoria`), **D-028**
-(`activo`), **D-029** (`PedidoItem`, borrar `detalles`/`envios`/`presupuestos`/`solicitan`).
+✅ **Hecho (2026-10-28, rama `wip/esquema`).** Modelos finales aplicados en el orden previsto:
+**D-009** (`Stocks` es la variante `(producto, color, talle)` con unique y check de stock no
+negativo), **D-019** (`LocalUser` + `UserProfile`, borrados `users` y `gerentes`), **D-023**
+(`Categoria` + `producto.categoria_id`), **D-028** (`producto.activo`), **D-029** (`PedidoItem` con
+snapshot, borrados `detalles`/`envios`/`presupuestos`/`solicitan`). La migración vieja se borró y
+se regeneró la inicial única (`61c05db43688`). Arnés de tests (T-070) con `pytest` contra
+`zapateria_test`: 9/9 en verde.
 
-Recién con los modelos finales: **borrar `639270ca9d26` y regenerar la migración inicial única**.
-En la misma fase, levantar el arnés de tests (**T-070**) contra `zapateria_test`, con fixtures que
-crean el esquema; sin eso, cada cambio posterior es fe.
+**Gate:** cumplido en `zapateria_test`. `upgrade head` OK, `alembic check` sin diferencias,
+`alembic heads` con un solo head (hay un test que lo hace fallar si se duplica), `pytest` verde
+con el esquema nuevo.
 
-**Por qué todo junto:** cada cambio de modelo posterior obliga a otra migración. Juntarlos cuesta
-una sola; hacerlos por feature cuesta cinco y deja el historial lleno de ruido.
-
-**Gate:** `alembic upgrade head` sobre DB vacía, `alembic check` sin diferencias, `alembic heads`
-con un solo head, `pytest` corriendo en verde con el esquema nuevo.
+**Deuda que deja esta fase:** 28 archivos de `repository/`, `service/`, `state/`, `pages/` y
+`seed.py` siguen importando los modelos borrados, así que `wip/esquema` **no compila la app**
+todavía. Se resuelve en las Fases 4-6. `zapateria_db` (dev) mantiene el esquema legacy hasta ese
+momento.
 
 ### Fase 4 · Identidad y sesión (2 días)
 

@@ -96,8 +96,9 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-003 · Migraciones Alembic (head roto, credenciales, env.py)
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
-- **Archivos:** `alembic/env.py:22-28`, `alembic/versions/57fefbfec4ff_*.py:32-49`, `alembic.ini:87`
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
+- **Archivos:** `alembic/env.py`, `alembic/script.py.mako`, `alembic/versions/61c05db43688_initial_schema.py`,
+  `alembic.ini`, `README.md`
 - **Problema:** la migración head usa `sqlmodel.sql.sqltypes.AutoString()` sin importar `sqlmodel`
   (falla con `NameError`). `alembic.ini` tiene una contraseña hardcodeada y `env.py` no lee
   `.env`. El run log muestra `Target database is not up to date`.
@@ -105,13 +106,19 @@ sin secretos en el repo y sin versiones sorpresa.
   documentadas; sin `upgrade` automático al arrancar; credenciales solo en `.env`.
 - **AC propuestos:**
   - [x] Se descarta el historial roto y se genera una única migración inicial desde los modelos.
-  - [ ] `alembic upgrade head` funciona sobre una DB vacía y deja el esquema igual a los modelos.
-  - [ ] `alembic check` no reporta diferencias.
+  - [x] `alembic upgrade head` funciona sobre una DB vacía y deja el esquema igual a los modelos.
+  - [x] `alembic check` no reporta diferencias.
   - [x] `alembic.ini` no contiene usuario/contraseña; `env.py` toma `DATABASE_URL`.
-  - [ ] `alembic heads` muestra un único head.
-  - [ ] El README documenta `alembic upgrade head` como paso previo al arranque.
+  - [x] `alembic heads` muestra un único head.
+  - [x] El README documenta `alembic upgrade head` como paso previo al arranque.
   - [x] La app no corre migraciones automáticamente al iniciar.
   - [x] La DB de test es `zapateria_test` y no comparte la URL de desarrollo (D-036).
+- **Verificación (2026-10-28):** historial borrado y regenerado sobre `zapateria_test` vacía:
+  `alembic upgrade head` → `Running upgrade -> 61c05db43688`, `alembic check` → "No new upgrade
+  operations detected", `alembic heads` → un solo head, y `pytest` incluye un test que falla si
+  aparecen dos heads. `alembic/script.py.mako` ahora hace `import sqlmodel` para que las
+  migraciones autogeneradas no repitan el `NameError`. `zapateria_db` (dev) todavía tiene el
+  esquema viejo: se recrea cuando estén rewireados los consumidores (Fase 5-6).
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-012 (estrategia) y D-036 (DB de test).
 - **Depende de:** T-002
