@@ -11,7 +11,7 @@ load_dotenv()
 
 # Importar el paquete de modelos registra todas las tablas en SQLModel.metadata,
 # incluidas las del plugin de autenticacion (D-019).
-import proyectofinal.model  # noqa: E402,F401
+import app.model  # noqa: E402,F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

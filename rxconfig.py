@@ -16,7 +16,7 @@ if not DATABASE_URL:
     )
 
 config = rx.Config(
-    app_name="proyectofinal",
+    app_name="app",
     upload_dir="static",
     db_url=DATABASE_URL,
     disable_plugins=[SitemapPlugin],  # opcional: silencia warning

@@ -546,7 +546,7 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   negro, Inter, bordes en lugar de sombras, mobile primero, contraste AA, labels visibles, `alt`
   obligatorio y estados vacío/carga/error. Nada de hex sueltos en `pages/`.
 - **Motivo:** el documento ya existe, está completo y evita discutir estilos pantalla por pantalla.
-- **Consecuencias:** los componentes viven en `proyectofinal/ui/`; `pages/` solo compone; se elimina
+- **Consecuencias:** los componentes viven en `app/ui/`; `pages/` solo compone; se elimina
   `background_color="#ADD8E6"` y los `min_height="100vh"` repetidos; la accesibilidad AA es parte
   del Definition of Done.
 - **Fecha:** 2026-10-27

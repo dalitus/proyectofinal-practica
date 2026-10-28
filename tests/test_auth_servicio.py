@@ -10,8 +10,8 @@ import pytest
 from reflex_local_auth import LocalUser
 from sqlmodel import Session, select
 
-from proyectofinal.model import UserProfile
-from proyectofinal.service.auth_servicio import (
+from app.model import UserProfile
+from app.service.auth_servicio import (
     ErrorDeRegistro,
     crear_admin_si_no_existe,
     normalizar_email,

@@ -183,7 +183,7 @@ Siempre con el `.venv` activo (o prefijando `.venv\Scripts` al `PATH`), si no Re
 | `docs/backlog/DECISIONS.md` | D-001..D-040, la fuente de verdad de producto |
 | `docs/design.md` | sistema de diseño obligatorio |
 | `AGENTS.md` | reglas de código, comandos y trampas |
-| `rxconfig.py`, `proyectofinal/repository/conect_db.py` | configuración de DB (ambos deben leer `.env`) |
+| `rxconfig.py`, `app/repository/conect_db.py` | configuración de DB (ambos deben leer `.env`) |
 | `alembic.ini`, `alembic/env.py` | migraciones |
 
 ## 9. Riesgos abiertos

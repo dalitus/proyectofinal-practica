@@ -16,11 +16,11 @@ from decimal import Decimal
 from dotenv import load_dotenv
 from sqlmodel import Session, select
 
-from proyectofinal.model.categoria_modelo import Categoria
-from proyectofinal.model.product_model import Producto
-from proyectofinal.model.stock_model import Stocks
-from proyectofinal.repository.conect_db import get_session
-from proyectofinal.service.auth_servicio import ErrorDeRegistro, crear_admin_si_no_existe
+from app.model.categoria_modelo import Categoria
+from app.model.product_model import Producto
+from app.model.stock_model import Stocks
+from app.repository.conect_db import get_session
+from app.service.auth_servicio import ErrorDeRegistro, crear_admin_si_no_existe
 
 load_dotenv()
 

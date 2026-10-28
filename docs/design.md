@@ -105,8 +105,8 @@ AppShell
 
 ## 4. Componentes
 
-Cada componente vive en `proyectofinal/ui/<nombre>.py` y se exporta desde
-`proyectofinal/ui/__init__.py`. Ninguna página define estilos inline propios: usa estos.
+Cada componente vive en `app/ui/<nombre>.py` y se exporta desde
+`app/ui/__init__.py`. Ninguna página define estilos inline propios: usa estos.
 
 ### 4.1 Estructura
 
@@ -226,7 +226,7 @@ Cada componente vive en `proyectofinal/ui/<nombre>.py` y se exporta desde
 ### 9.1 Estructura de archivos
 
 ```
-proyectofinal/
+app/
 └── ui/
     ├── __init__.py        # re-exporta todo
     ├── tokens.py          # colores, espacio, tipografía, radios
@@ -242,7 +242,7 @@ proyectofinal/
 ### 9.2 Tokens en código
 
 ```python
-# proyectofinal/ui/tokens.py
+# app/ui/tokens.py
 COLORS = {
     "bg": "#FFFFFF",
     "surface": "#F7F7F5",
@@ -264,7 +264,7 @@ FONT = "'Inter', system-ui, sans-serif"
 
 ```python
 # Correcto
-from proyectofinal.ui import ProductGrid, PageHeader
+from app.ui import ProductGrid, PageHeader
 
 # Prohibido en páginas
 rx.box(..., box_shadow="0px 2px 5px rgba(0,0,0,0.06)", background_color="#ADD8E6")
@@ -278,7 +278,7 @@ Nunca se escribe un hex suelto en una página.
 ## 10. Checklist de PR de UI
 
 - [ ] No hay hex, `box_shadow` ni `color_scheme` sueltos en `pages/`.
-- [ ] La pantalla usa solo componentes de `proyectofinal/ui/`.
+- [ ] La pantalla usa solo componentes de `app/ui/`.
 - [ ] Existen los estados vacío, carga y error.
 - [ ] Funciona a 360px, 768px y 1280px.
 - [ ] Un solo CTA primario visible.
@@ -295,5 +295,5 @@ Nunca se escribe un hex suelto en una página.
 | 2026-10-27 | Paleta neutra con acento negro; se elimina `#ADD8E6` | El fondo celeste competía con el producto y no es una referencia de tienda |
 | 2026-10-27 | Sin sombras; borde `1px` | Menos ruido, más consistencia entre card, tabla e input |
 | 2026-10-27 | Una sola familia tipográfica, dos pesos | La jerarquía se resuelve por tamaño, no por cantidad de fuentes |
-| 2026-10-27 | Componentes en `proyectofinal/ui/`, no en `pages/` | Evita duplicación; `ui_helpers.py` queda obsoleto y se reemplaza |
+| 2026-10-27 | Componentes en `app/ui/`, no en `pages/` | Evita duplicación; `ui_helpers.py` queda obsoleto y se reemplaza |
 | 2026-10-27 | Compra solo para usuarios registrados | Cierra T-041 del backlog; el CTA de invitado redirige a login con retorno |

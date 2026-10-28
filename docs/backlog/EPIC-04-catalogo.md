@@ -28,7 +28,7 @@ imágenes que no se rompan.
 
 - **Estado:** lista · **Prioridad:** P1 · **Épica:** 04
 - **Archivos:** `pages/producto_detalle_page.py:4-30`, `state/catalogo_state.py:47-51`,
-  `proyectofinal/proyectofinal.py:27`
+  `app/app.py:27`
 - **Problema:** el detalle depende de `producto_seleccionado` en memoria y la ruta está registrada
   dos veces (estática `/detalle_producto` y dinámica `[producto_id]`). Al refrescar o compartir el
   link se pierde el producto.

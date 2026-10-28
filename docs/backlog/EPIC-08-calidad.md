@@ -106,7 +106,7 @@
 ## T-074 · Accesibilidad y responsive básico
 
 - **Estado:** lista · **Prioridad:** P2 · **Épica:** 08
-- **Archivos:** `pages/*.py`, `proyectofinal/ui/`
+- **Archivos:** `pages/*.py`, `app/ui/`
 - **Problema:** hay imágenes sin `alt`, formularios sin labels asociados y layouts con anchos fijos
   (`60vw`, `70vw`, `75%`) que se rompen en mobile.
 - **Decisión (D-034):** `docs/design.md` fija accesibilidad AA, labels visibles, `alt` obligatorio,

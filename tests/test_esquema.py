@@ -10,7 +10,7 @@ from reflex_local_auth import LocalUser
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlmodel import Session, select
 
-from proyectofinal.model import (
+from app.model import (
     Carrito,
     Categoria,
     Pedido,

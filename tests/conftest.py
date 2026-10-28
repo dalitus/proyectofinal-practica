@@ -14,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine, make_url
 from sqlmodel import Session, SQLModel, create_engine
 
-import proyectofinal.model  # noqa: F401  (registra todas las tablas)
+import app.model  # noqa: F401  (registra todas las tablas)
 
 load_dotenv()
 
@@ -63,6 +63,6 @@ def _engine_de_test(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
     Services open their own sessions (D-033), so tests inject the test engine
     instead of passing sessions around. Nothing here can reach `zapateria_db`.
     """
-    from proyectofinal.repository import conect_db
+    from app.repository import conect_db
 
     monkeypatch.setattr(conect_db, "engine", engine)

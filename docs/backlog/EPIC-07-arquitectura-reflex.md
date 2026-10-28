@@ -31,7 +31,7 @@ consistente.
 ## T-061 · Registro único de rutas y URLs canónicas
 
 - **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `proyectofinal/proyectofinal.py:21-33`, `pages/*.py` (`@rx.page`)
+- **Archivos:** `app/app.py:21-33`, `pages/*.py` (`@rx.page`)
 - **Problema:** todas las páginas se registran dos veces (`@rx.page` + `app.add_page`), hay rutas
   duplicadas (`/` vs `/catalogo`, `/user` vs `/users`) y warnings en el compile.
 - **Decisión (D-024):** `/` catálogo; `/login` + `/register`; `/producto/[id]`; redirects para
@@ -72,8 +72,8 @@ consistente.
 ## T-063 · Sistema de diseño: tokens, shell y primitivos
 
 - **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `docs/design.md` (spec), `proyectofinal/ui/` (nuevo), `proyectofinal/proyectofinal.py`,
-  `proyectofinal/pages/*.py`, `proyectofinal/pages/ui_helpers.py`
+- **Archivos:** `docs/design.md` (spec), `app/ui/` (nuevo), `app/app.py`,
+  `app/pages/*.py`, `app/pages/ui_helpers.py`
 - **Problema:** cada página define su propio fondo, ancho y estilos (`background_color="#ADD8E6"`,
   `min_height="100vh"`, cards de `220px` fijas, `box_shadow` por card). No hay tokens, ni layout
   compartido, ni primitivos: `ui_helpers.py` solo envuelve botones de Radix sin criterio visual. El
@@ -81,9 +81,9 @@ consistente.
 - **Spec:** `docs/design.md` (v1) — principios, tokens, layout, inventario de componentes, patrones
   por página y checklist de PR. Es la referencia obligatoria.
 - **Decisión (D-034):** paleta neutra con acento negro, Inter 400/600, borde en lugar de sombra,
-  componentes en `proyectofinal/ui/`.
+  componentes en `app/ui/`.
 - **AC propuestos:**
-  - [ ] Existe `proyectofinal/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
+  - [ ] Existe `app/ui/tokens.py` con los valores de `docs/design.md`; ningún archivo de
         `pages/` contiene hex, `box_shadow` ni `color_scheme` sueltos.
   - [ ] `layout.py` implementa `AppShell`, `TopNav`, `Container`, `PageHeader` y `Footer`, y las
         páginas existentes los usan en lugar de repetir fondo y estructura.
@@ -144,7 +144,7 @@ consistente.
 ## T-075 · Nombres de archivo: ortografía y función
 
 - **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** todo `proyectofinal/**/*.py`
+- **Archivos:** todo `app/**/*.py`
 - **Problema:** varios módulos tienen palabras mal escritas o nombres que no dicen qué hacen
   (`adnmin_shouder_page.py`, `andmin_page.py`, `ubicaccion_page.py`, `consulta_repocitory.py`,
   `conect_db.py`, `notifail.py`), y las capas mezclan sufijos en inglés y en español.
@@ -194,7 +194,7 @@ consistente.
 | pages | `users_page.py` | `login_pagina.py` + `registro_pagina.py` |
 | pages | `andmin_page.py` | se fusiona en `login_pagina.py` (D-018) |
 
-- **Sin cambios:** `proyectofinal/proyectofinal.py` (convención del template de Reflex) y las
+- **Sin cambios:** `app/app.py` (convención del template de Reflex) y las
   carpetas `model/`, `repository/`, `service/`, `state/`, `pages/`, `ui/`.
 - **Se eliminan, no se renombran:** `detalle_model.py`, `envio_model.py`, `presupuesto_model.py`,
   `solicitan_model.py`, `producto_model_pydantic.py`, `gerente_model.py`, `detalle_repository.py`,

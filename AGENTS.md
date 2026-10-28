@@ -90,7 +90,7 @@ alembic upgrade head       # migraciones
 - Identificadores, comentarios y strings de código en **inglés**; **nombres de archivo en español**
   con el sufijo de capa (`producto_repositorio.py`, `carrito_estado.py`) y sin errores de
   ortografía (D-040). Documentación y copy de UI en **español**.
-- UI: usar solo componentes de `proyectofinal/ui/`. Prohibido hex sueltos, `box_shadow` o
+- UI: usar solo componentes de `app/ui/`. Prohibido hex sueltos, `box_shadow` o
   `color_scheme` en `pages/` (T-063).
 - Estados de UI obligatorios: vacío, carga (`Skeleton`) y error. Sin spinners de página completa.
 - Sin `print()` de depuración: usar `logging` (T-064).

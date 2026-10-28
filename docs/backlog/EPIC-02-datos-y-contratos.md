@@ -8,7 +8,7 @@ datos garantice integridad.
 ## T-010 · Normalización de claves (`id`, `usuario_id`, `producto_id`)
 
 - **Estado:** en curso · **Prioridad:** P0 · **Épica:** 02
-- **Archivos:** `proyectofinal/model/*`, `repository/`, `service/`, `state/`
+- **Archivos:** `app/model/*`, `repository/`, `service/`, `state/`
 - **Problema:** el código usa `Users.id_users`, `Pedido.id_usuario`, `Producto.id_producto` y
   `Users.es_admin`, pero los modelos definen `id`, `usuario_id`, `id` y no tienen `es_admin`.
   Esto produce `AttributeError` / `ValidationError` en login, pedidos y detalle.
@@ -76,7 +76,7 @@ datos garantice integridad.
 ## T-013 · Tablas legado `rx.Model` y alcance
 
 - **Estado:** en curso · **Prioridad:** P2 · **Épica:** 02
-- **Archivos:** `proyectofinal/model/`, `repository/`, `service/`, `seed.py`
+- **Archivos:** `app/model/`, `repository/`, `service/`, `seed.py`
 - **Problema:** conviven modelos `rx.Model` (legado) sin FKs ni uso claro con SQLModel. No está
   claro si envíos, presupuestos y detalles están en el alcance del producto.
 - **Decisión (D-029):** se eliminan `detalles`, `envios`, `presupuestos`, `solicitan` y

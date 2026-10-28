@@ -8,7 +8,7 @@ sin secretos en el repo y sin versiones sorpresa.
 ## T-001 · La app no arranca en producción (`@rx.event`)
 
 - **Estado:** en curso · **Prioridad:** P0 · **Épica:** 01
-- **Archivos:** `proyectofinal/state/users_state.py:28`, `run_log.txt`, `requirements.txt`
+- **Archivos:** `app/state/users_state.py:28`, `run_log.txt`, `requirements.txt`
 - **Problema:** `reflex run --env prod` termina con `TypeError: 'module' object is not callable`
   en el decorador `@rx.event`. En dev el compile fue exitoso. El venv tiene `reflex 0.8.4` y
   `pydantic 1.10.26`; no hay pins ni lockfile.
@@ -46,7 +46,7 @@ sin secretos en el repo y sin versiones sorpresa.
 ## T-006 · Plan de migración Reflex 0.8.4 → 0.10.x
 
 - **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
-- **Archivos:** `requirements.txt`, `rxconfig.py`, `proyectofinal/**/*.py`, `.states/`
+- **Archivos:** `requirements.txt`, `rxconfig.py`, `app/**/*.py`, `.states/`
 - **Problema:** saltar de 0.8.4 a 0.10.1 incluye cambios de comportamiento. La guía de upgrade
   menciona, entre otros: lectura de vars backend en la clase del estado (`default_value()`),
   defaults mutables que ahora se copian en profundidad, y un state store incompatible entre 0.9 y
@@ -68,7 +68,7 @@ sin secretos en el repo y sin versiones sorpresa.
 ## T-002 · Configuración única de base de datos y engine
 
 - **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
-- **Archivos:** `rxconfig.py:13-16`, `proyectofinal/repository/conect_db.py:11-25`, `alembic.ini:87`
+- **Archivos:** `rxconfig.py:13-16`, `app/repository/conect_db.py:11-25`, `alembic.ini:87`
 - **Problema:** hay dos URLs por defecto distintas (`zapateria_db` en Reflex y `zap_db` en el
   engine propio), dos engines separados, y `session = Session(engine)` a nivel módulo deja una
   conexión abierta y se importa globalmente.
@@ -160,8 +160,8 @@ sin secretos en el repo y sin versiones sorpresa.
 
 - **Estado:** hecha · **Prioridad:** P1 · **Épica:** 01
 - **Archivos:** raíz (`temp_*.py`, `test_*.py`, `add_*.py`, `fix_*.py`),
-  `proyectofinal/pages/compras_admin_page.py` (vacío), `proyectofinal/pages/ubicacion_page.py`,
-  `proyectofinal/state/app_state.py`, `state/global_state.py`, `state/compras_admin_state.py`,
+  `app/pages/compras_admin_page.py` (vacío), `app/pages/ubicacion_page.py`,
+  `app/state/app_state.py`, `state/global_state.py`, `state/compras_admin_state.py`,
   `service/google_drive_service.py`, `service/security.py`, `model/producto_model_pydantic.py`
 - **Problema:** hay código duplicado o inalcanzable que confunde el scan y puede romper imports.
 - **Decisión (D-026):** borrar one-off (`add_*`, `fix_*`, `temp_*`, `test_*` manuales); conservar

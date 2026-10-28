@@ -93,7 +93,7 @@ que las contraseñas no se guarden en texto plano.
 ## T-023 · Guardas de rutas por rol
 
 - **Estado:** lista · **Prioridad:** P0 · **Épica:** 03
-- **Archivos:** `proyectofinal/proyectofinal.py:21-33`, `pages/adnmin_shouder_page.py:239`,
+- **Archivos:** `app/app.py:21-33`, `pages/adnmin_shouder_page.py:239`,
   `pages/pedidos_admin_page.py:144`, `pages/consulta_admin_page.py:132`,
   `pages/pedidos_page.py:65`, `pages/carrito_page.py:149`
 - **Problema:** cualquier visitante puede abrir `/admin_dashboard`, `/pedidos_admin` y
