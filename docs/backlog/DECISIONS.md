@@ -628,7 +628,7 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 - **Motivo:** rotar el secreto es lo que realmente reduce el riesgo; reescribir el historial
   obliga a un force-push y a invalidar todos los clones, y el usuario decidió no hacerlo.
 - **Riesgos:** `github.com/dalitus/proyectofinal-practica` es público desde febrero de 2026 y
-  `alembic.ini:87` contiene `root:Dalecolon123` en el historial. Cualquiera puede leer la clave
+  `alembic.ini:87` contenía la clave de `root` en texto plano. Cualquiera puede leer la clave
   vieja, así que la rotación debe hacerse antes de exponer cualquier instancia MySQL. La deuda
   queda registrada acá y en T-073.
 - **Consecuencias:** `.gitignore` en UTF-8 e incluye `.env`, `credentials.json`, `token.json`,
@@ -674,3 +674,23 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   pantalla nueva debe usar `COLORS["page"]` en el contenedor y `COLORS["card"]` en las tarjetas.
   Si algún día se quiere modo oscuro, hay que tokenizar los colores de texto antes de habilitarlo.
 - **Fecha:** 2026-10-27
+
+---
+
+## D-042 · Usuario de MySQL dedicado en vez de rotar `root`
+
+- **Tarea:** T-073
+- **Estado:** decidida
+- **Opciones:** rotar la clave de `root` / crear un usuario `zapateria_app` con permisos acotados /
+  no rotar
+- **Decisión:** se crea el usuario `zapateria_app` con clave aleatoria, permisos `SELECT, INSERT,
+  UPDATE, DELETE, CREATE, DROP, ALTER, INDEX, REFERENCES` sobre `zapateria_db` y `zapateria_test`,
+  y `DATABASE_URL` en `.env` pasa a usarlo. La clave de `root` **no** se toca.
+- **Motivo:** D-039 pedía rotar, pero la app venía conectando como `root`, así que rotar esa clave
+  cambia el acceso de **toda** la instancia local de MySQL y puede romper otros proyectos sin que
+  nadie lo note. Un usuario dedicado logra el mismo objetivo de seguridad (la clave filtrada deja
+  de servir para este proyecto) con blast radius mínimo y principio de menor privilegio.
+- **Consecuencias:** la clave vieja de `root` sigue siendo válida en la instancia local, pero ya no
+  es la que usa la app y no da acceso a través del proyecto. `.env.example` documenta `USUARIO` /
+  `PASSWORD` genéricos. Si se recrea la DB desde cero hay que volver a correr el `GRANT`.
+- **Fecha:** 2026-10-28

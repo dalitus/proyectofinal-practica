@@ -1,11 +1,18 @@
 assets/external/
-.states
-.web
+.states/
+.web/
 __pycache__/
 *.py[cod]
 *.db
-credentials.json
+
+# Secretos y credenciales: nunca al repo
 .env
+.env.*
+!.env.example
+credentials.json
+token.json
+*.pem
+
 venv/
 .venv/
 

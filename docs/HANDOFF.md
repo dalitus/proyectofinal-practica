@@ -22,7 +22,7 @@ Arquitectura: `model → repository → service → state → pages`.
 | Arranque en prod | **Sin verificar** | hay que correr `run.ps1 -Prod` y pedir 200 |
 | `reflex-local-auth` | **No instalado** | `importlib.metadata` no lo encuentra |
 | `alembic/env.py` | Lee `DATABASE_URL` | `alembic/env.py:38-41` |
-| `alembic.ini` | **Todavía con la contraseña real** | `alembic.ini:87`, repo público |
+| `alembic.ini` | **Sin credenciales** (vacío; D-039/D-042) | `alembic.ini:87` |
 | Migración inicial | Existe pero **nace de los modelos legacy** | `639270ca9d26` crea `detalles` |
 | `model/__init__.py` | **Registra los 12 modelos legacy** | incluye `Detalles`, `Envios`, `Presupuestos`, `Solicitan` |
 | UI | Solo `ui/tokens.py` (4 diccionarios) | sin componentes ni shell |
@@ -47,7 +47,9 @@ gate verificable; no se pasa a la siguiente sin cumplirlo.
 
 1. ✅ **Hecho** (2026-10-27): rama `wip/baseline` + commit `fd090f7` con todo el trabajo real
    (docs, `ui/`, `seed.py`, `run.ps1`, migración, `AGENTS.md` corregido a Reflex 0.10.1).
-2. **T-073**: rotar la clave de MySQL, cargarla en `.env`, vaciar `alembic.ini`.
+2. ✅ **Hecho** (2026-10-28): **T-073** cerrada con D-042. `alembic.ini` sin credenciales, `.gitignore`
+   en UTF-8 (incluye `token.json`), `.env.example` creado y la app conectada con el usuario dedicado
+   `zapateria_app` (permisos solo sobre `zapateria_db` y `zapateria_test`). `root` no se tocó.
 
 **Gate:** `git grep` del secreto viejo no devuelve nada en archivos actuales; la app sigue
 conectando; el historial queda como deuda documentada (D-039).

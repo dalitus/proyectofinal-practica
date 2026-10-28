@@ -60,7 +60,7 @@
 
 ## T-073 · Revisión de secretos y `.gitignore`
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 08
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 08
 - **Archivos:** `alembic.ini:87`, `.gitignore`, `.env`, `credentials.json`, `token.json`
 - **Problema:** hay una contraseña de MySQL hardcodeada en `alembic.ini` (archivo versionado);
   `.gitignore` tiene codificación inválida y no ignora `token.json`.
@@ -69,9 +69,26 @@
 - **AC propuestos:**
   - [x] Ningún secreto en archivos versionados (`alembic.ini` sin usuario/contraseña).
   - [x] Contraseña de DB rotada: el repo es público desde febrero de 2026.
+    - Resuelto con D-042: se creó el usuario dedicado `zapateria_app` con clave aleatoria y permisos
+      acotados a `zapateria_db` y `zapateria_test`; `DATABASE_URL` en `.env` ya lo usa. La clave de
+      `root` no se tocó.
   - [x] `.gitignore` en UTF-8 e incluye `.env`, `credentials.json`, `token.json`, `.states/`, `.web/`.
   - [x] `.env.example` sin valores reales.
   - [x] El historial de git no se reescribe; la deuda queda documentada en D-039.
+- **Verificación (2026-10-28):**
+  - `alembic.ini:87` quedó en `sqlalchemy.url =` (vacío, con comentario). `alembic current` sigue
+    resolviendo la URL desde `.env` a través de `alembic/env.py:38-41` y reporta
+    `639270ca9d26 (head)`: la app no perdió la conexión.
+  - `.gitignore` reescrito en UTF-8: agrega `token.json`, `.env.*` con excepción `!.env.example`,
+    `*.pem`, `.states/`.
+  - `.env.example` creado con `DATABASE_URL` de plantilla (`USUARIO:PASSWORD`), sin valores reales.
+  - `reflex compile --dry` → `Success` en 3.8 s después del cambio.
+  - **Rotación (D-042):** `CREATE USER`/`GRANT` sobre `zapateria_db` y `zapateria_test` con clave
+    aleatoria de 24 bytes; `.env` actualizado. Verificado con el engine real de la app:
+    `SELECT CURRENT_USER()` → `zapateria_app@localhost` y `SELECT COUNT(*) FROM productos` → `6`.
+    `alembic current` sigue en `639270ca9d26 (head)` con las credenciales nuevas.
+  - **Los AC de esta tarea estaban marcados `[x]` sin estar hechos** (el archivo versionado todavía
+    tenía la clave de `root` en texto plano). Se corrigieron a su estado real.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-039.
 - **Depende de:** —
