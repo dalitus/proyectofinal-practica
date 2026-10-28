@@ -39,7 +39,7 @@
 | ID | Título | Épica | Prioridad | Estado |
 |---|---|---|---|---|
 | T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | en curso |
-| T-002 | Configuración única de base de datos y engine | 01 Arranque | P0 | lista |
+| T-002 | Configuración única de base de datos y engine | 01 Arranque | P0 | hecha |
 | T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | lista |
 | T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | lista |
 | T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |

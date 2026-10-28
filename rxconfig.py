@@ -1,20 +1,24 @@
+import os
+
 import reflex as rx
 from reflex.plugins.sitemap import SitemapPlugin
 
-import os
-try:
-    from dotenv import load_dotenv  # type: ignore
-    load_dotenv()
-except Exception:
-    pass
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is not set. Copy .env.example to .env and fill in the "
+        "database credentials (D-011)."
+    )
 
 config = rx.Config(
     app_name="proyectofinal",
     upload_dir="static",
-    db_url=os.getenv(
-        "DATABASE_URL",
-        "mysql+pymysql://root:root@localhost:3306/zapateria_db"
-    ),
+    db_url=DATABASE_URL,
     disable_plugins=[SitemapPlugin],  # opcional: silencia warning
     plugins=[rx.plugins.RadixThemesPlugin()],  # explicito: evita el warning de 0.9
     # La UI es solo clara (docs/design.md). Sin esto, un sistema operativo en

@@ -4,9 +4,6 @@ from proyectofinal.service.security import verify_password
 from sqlmodel import select
 
 
-from proyectofinal.model.users_model import Users
-from proyectofinal.repository.conect_db import session
-
 # Obtener todos los usuarios
 def select_all():
     with get_session() as session:

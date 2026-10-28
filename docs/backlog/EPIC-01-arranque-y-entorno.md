@@ -58,7 +58,7 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-002 · Configuración única de base de datos y engine
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
 - **Archivos:** `rxconfig.py:13-16`, `proyectofinal/repository/conect_db.py:11-25`, `alembic.ini:87`
 - **Problema:** hay dos URLs por defecto distintas (`zapateria_db` en Reflex y `zap_db` en el
   engine propio), dos engines separados, y `session = Session(engine)` a nivel módulo deja una
@@ -69,6 +69,16 @@ sin secretos en el repo y sin versiones sorpresa.
   - [x] La app (Reflex), los repositorios y Alembic usan la misma URL.
   - [x] No existe `Session(engine)` a nivel módulo; cada operación abre y cierra su sesión.
   - [x] Si falta `DATABASE_URL`, el arranque falla con un mensaje claro (no con un default silencioso).
+- **Verificación (2026-10-28):** los AC estaban marcados `[x]` sin estarlo: `conect_db.py` todavía
+  tenía el fallback `root:root@…/zap_db`, `rxconfig.py` otro default distinto y
+  `session = Session(engine)` a nivel módulo. Se corrigió:
+  - `conect_db.py` y `rxconfig.py` leen solo `DATABASE_URL`; si falta, lanzan `RuntimeError` con
+    instrucciones. Probado forzando la variable vacía: `OK conect_db: DATABASE_URL is not set…`.
+  - Eliminado el `Session(engine)` global y el import duplicado de `session` en
+    `users_repository.py:8` (no se usaba).
+  - `git grep "mysql+pymysql"` sin resultados en `.py`/`.ini`: la URL existe solo en `.env`.
+  - `reflex compile --dry` → `Success` en 2.7 s; `get_session()` conecta como `zapateria_app` y
+    `select_all()` de usuarios responde.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-011.
 - **Depende de:** —
