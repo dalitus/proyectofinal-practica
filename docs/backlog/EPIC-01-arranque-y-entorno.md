@@ -16,8 +16,12 @@ sin secretos en el repo y sin versiones sorpresa.
   >=3.11 (el venv usa 3.13), en un upgrade directo sin pasar por 0.9. El plan de migración es T-006.
 - **AC propuestos:**
   - [ ] `reflex run --env prod` levanta y responde 200 en `/` y `/producto/[id]`.
-  - [ ] El error de `@rx.event` no se reproduce en dev ni en prod.
+    - `/` responde **200** (2026-10-28). `/producto/[id]` sigue en **404**: la ruta no existe, el
+      detalle vive en `/detalle_producto`. Ese AC depende de **T-031**.
+  - [x] El error de `@rx.event` no se reproduce en dev ni en prod.
   - [ ] Versiones de `reflex`, `pydantic`, `sqlmodel` y `alembic` fijadas y documentadas.
+    - `requirements.txt` fija `reflex==0.10.1`, `sqlmodel==0.0.30`, `SQLAlchemy==2.0.46`,
+      `alembic==1.18.1`; `pydantic` sigue como rango (`>=2.12,<3.0`). El lockfile llega con **T-004**.
   - [x] El diagnóstico y la versión elegida quedan en `DECISIONS.md` (D-007, D-016).
 - **Verificación (2026-10-27):**
   - Prod sobre Reflex 0.10.1 responde **200** en `/`, `/catalogo`, `/detalle_producto`,
@@ -28,6 +32,11 @@ sin secretos en el repo y sin versiones sorpresa.
     y lee el producto del estado, no de la URL. Ese AC depende de **T-031**.
   - Falta la prueba en **dev**: con Node v22.15.0 (`< 22.22.0`, mínimo de Reflex 0.10.1) el
     frontend no se puede compilar ni relanzar.
+- **Verificación (2026-10-28):** con Node v24.22.1 ya se puede compilar en dev. Se repitió el smoke
+  en **prod** después de T-073 (usuario MySQL dedicado) y T-002 (una sola fuente de `DATABASE_URL`):
+  `/` → 200, `/catalogo` → 200, `/carrito` → 200, `/admin_dashboard` → 200,
+  `/detalle_producto` → 200, `/producto/1` → 404 (ruta inexistente, ver T-031). El backend arrancó
+  sin `TypeError: 'module' object is not callable`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-016 (camino de upgrade) y D-024 (rutas canónicas).
 - **Depende de:** T-006
