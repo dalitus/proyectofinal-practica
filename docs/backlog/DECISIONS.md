@@ -694,3 +694,25 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   es la que usa la app y no da acceso a través del proyecto. `.env.example` documenta `USUARIO` /
   `PASSWORD` genéricos. Si se recrea la DB desde cero hay que volver a correr el `GRANT`.
 - **Fecha:** 2026-10-28
+
+---
+
+## D-043 · Paquete Python `app` en lugar de `proyectofinal`
+
+- **Tarea:** T-075 (prerrequisito)
+- **Estado:** decidida
+- **Opciones:** dejar `proyectofinal/` / renombrar a `app/` / renombrar a `zapateria/`
+- **Decisión:** el paquete pasa de `proyectofinal/` a `app/`, con el módulo de entrada en
+  `app/app.py` y `app_name="app"` en `rxconfig.py`. El nombre de la distribución en
+  `pyproject.toml` (`proyectofinal-practica`) queda como está: no lo importa nadie.
+- **Motivo:** Reflex exige que `app_name` sea el nombre del paquete y que exista
+  `<app_name>/<app_name>.py`. Con el nombre viejo quedaba `proyectofinal/proyectofinal.py`, es decir
+  paquete y repo con el mismo nombre y un módulo de entrada que no dice qué hace. `app` es la
+  convención del framework. Se descartó `zapateria/` porque `AGENTS.md` define el proyecto como
+  indumentaria **y** calzado, y el nombre encasillaría.
+- **Consecuencias:** el renombre tocó 158 referencias en 54 archivos de código y config, más los
+  docs que citaban rutas (`AGENTS.md`, `HANDOFF.md`, backlog, `design.md`). Es puramente mecánico:
+  `git blame` se ensucia en las líneas de import. `docs/HANDOFF.md` y los docs de esta rama citan
+  `app/`; `wip/baseline` sigue con `proyectofinal/` porque ahí el renombre no existe todavía, así
+  que esas ediciones **no** se cherry-piquean hasta el merge.
+- **Fecha:** 2026-10-28
