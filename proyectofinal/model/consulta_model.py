@@ -1,26 +1,27 @@
-# proyectofinal/model/consulta_model.py
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
 from datetime import datetime
-from proyectofinal.model.users_model import Users
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
 
 class Consulta(SQLModel, table=True):
+    """Consulta de un comprador; la responde un administrador (D-019).
+
+    No hay tabla `gerentes`: quien responde es otro `LocalUser` con
+    `UserProfile.is_admin = True`.
+    """
+
     __tablename__ = "consultas"
 
     id_consulta: Optional[int] = Field(default=None, primary_key=True)
-    usuario_id: int = Field(foreign_key="users.id")
-    id_gerente: Optional[int] = Field(default=None, foreign_key="gerentes.id_gerente")
+    usuario_id: int = Field(foreign_key="localuser.id", index=True)
+    respondido_por_id: Optional[int] = Field(
+        default=None, foreign_key="localuser.id", index=True
+    )
 
-    # Campos obligatorios
     asunto: str = Field(index=True)
-    mensaje: str = Field(index=True)
+    mensaje: str
 
     respuesta: Optional[str] = None
-    fecha_creacion: Optional[str] = Field(
-        default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
-    fecha_respuesta: Optional[str] = None
-
-    # Relación con Users
-    usuario: Optional[Users] = Relationship()
-
+    fecha_creacion: datetime = Field(default_factory=datetime.now)
+    fecha_respuesta: Optional[datetime] = None

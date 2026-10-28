@@ -9,22 +9,9 @@ from sqlmodel import SQLModel
 # Cargar DATABASE_URL desde .env: Alembic y la app usan la misma base.
 load_dotenv()
 
-# Importar todos los modelos registra sus tablas en SQLModel.metadata,
-# para que las migraciones se generen a partir del esquema completo.
-from proyectofinal.model import (  # noqa: E402,F401
-    carrito_model,
-    consulta_model,
-    detalle_model,
-    envio_model,
-    gerente_model,
-    pedido_model,
-    presupuesto_model,
-    product_model,
-    solicitan_model,
-    stock_model,
-    ubicacion_model,
-    users_model,
-)
+# Importar el paquete de modelos registra todas las tablas en SQLModel.metadata,
+# incluidas las del plugin de autenticacion (D-019).
+import proyectofinal.model  # noqa: E402,F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -82,7 +69,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
         )
 
         with context.begin_transaction():

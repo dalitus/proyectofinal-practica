@@ -1,32 +1,31 @@
+from datetime import datetime
+from decimal import Decimal
 from typing import Optional
-from sqlmodel import SQLModel, Field, Relationship
-from proyectofinal.model.users_model import Users
+
+from sqlmodel import Field, SQLModel
+
 
 class Pedido(SQLModel, table=True):
+    """Pedido de un comprador registrado.
+
+    Los datos de entrega se copian al crear el pedido; las lineas viven en
+    `PedidoItem` con el snapshot de color, talle y precio (D-029). `total` se
+    guarda calculado como suma de `cantidad * precio_unitario`.
+    """
+
     __tablename__ = "pedidos"
-    
+
     id_pedido: Optional[int] = Field(default=None, primary_key=True)
+    usuario_id: int = Field(foreign_key="localuser.id", index=True)
 
-    # Foreign key normalizada
-    usuario_id: int = Field(foreign_key="users.id")   # antes id_users
+    estado: str = Field(default="en espera", index=True)
+    total: Decimal
+    fecha_pedido: datetime = Field(default_factory=datetime.now)
+    fecha_entrega: Optional[datetime] = None
 
-    estado: str = Field(default="en espera")  # "en espera", "enviado", "entregado"
-    total: float
-    fecha_pedido: str
-    fecha_entrega: Optional[str] = None
-    productos_json: str = ""  # Guardar como JSON los productos del pedido
-    
-    # Datos de ubicación para la entrega
-    direccion: Optional[str] = None
-    numero: Optional[str] = None
-    departamento: Optional[str] = None
-    codigo_postal: Optional[str] = None
-    ciudad: Optional[str] = None
-    provincia: Optional[str] = None
-
-    # Campos adicionales
-    talles: Optional[str] = None
-    colores: Optional[str] = None
-    
-    # Relación con Users
-    usuario: Optional[Users] = Relationship(back_populates="pedidos")
+    direccion: str = ""
+    numero: str = ""
+    departamento: str = ""
+    codigo_postal: str = ""
+    ciudad: str = ""
+    provincia: str = ""

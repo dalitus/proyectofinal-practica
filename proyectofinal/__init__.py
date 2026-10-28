@@ -1,4 +1,7 @@
-from proyectofinal.model.users_model import Users
-from proyectofinal.model.gerente_model import Gerente
-from proyectofinal.pages.andmin_page import admin_login_page
-from proyectofinal.pages.producto_detalle_page import detalle_producto_page
+"""Paquete de la aplicacion.
+
+Sin imports: los efectos de registro de paginas viven en
+``proyectofinal/proyectofinal.py``, que es el modulo que Reflex importa. Tener
+imports aca obligaba a cargar paginas, estados y repositorios solo para leer un
+modelo (y rompia Alembic, que solo necesita el paquete ``model``).
+"""
