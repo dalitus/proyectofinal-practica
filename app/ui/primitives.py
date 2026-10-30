@@ -81,6 +81,32 @@ def Button(
     )
 
 
+def ButtonLink(
+    label: Any,
+    *,
+    href: Any,
+    variant: str = "secondary",
+    class_name: str | None = None,
+    **props: Any,
+) -> rx.Component:
+    """Navigation painted like a button (``href``, no handler).
+
+    A link is not a button: it opens a page, it does not run an action. Keeping
+    them apart means the keyboard and "open in new tab" behaviour stay correct.
+    """
+    if variant not in BUTTON_VARIANTS:
+        raise ValueError(
+            f"Unknown button variant {variant!r}; expected one of {BUTTON_VARIANTS}"
+        )
+
+    return rx.link(
+        label,
+        href=href,
+        class_name=_join("ui-btn", f"ui-btn--{variant}", class_name),
+        **props,
+    )
+
+
 def Input(
     *,
     label: Any = None,

@@ -28,11 +28,21 @@ class ErrorDeRegistro(ValueError):
     """Datos invalidos o email ya usado al crear una cuenta."""
 
 
+class ErrorDeAcceso(ValueError):
+    """Credenciales invalidas o cuenta deshabilitada al iniciar sesion (T-021)."""
+
+
+# El mismo texto para email inexistente y contrasena equivocada: el formulario
+# no revela si la cuenta existe (T-021).
+MENSAJE_CREDENCIALES = "El email o la contraseña no son correctos."
+MENSAJE_CUENTA_DESHABILITADA = "Esta cuenta está deshabilitada. Escribinos para reactivarla."
+
+
 def normalizar_email(email: str) -> str:
     """Return the email trimmed and lowercased, validating its shape."""
     limpio = (email or "").strip().lower()
     if not EMAIL_PATTERN.match(limpio):
-        raise ErrorDeRegistro("Ingresa un email valido.")
+        raise ErrorDeRegistro("Ingresá un email válido.")
     return limpio
 
 
@@ -40,7 +50,7 @@ def validar_password(password: str) -> str:
     """Return the password unchanged if it meets the minimum rules."""
     if not password or len(password) < MIN_PASSWORD_LENGTH:
         raise ErrorDeRegistro(
-            f"La contrasena necesita al menos {MIN_PASSWORD_LENGTH} caracteres."
+            f"La contraseña necesita al menos {MIN_PASSWORD_LENGTH} caracteres."
         )
     return password
 
@@ -114,6 +124,30 @@ def registrar_comprador(
             direccion=direccion,
             is_admin=False,
         )
+
+
+def autenticar(*, email: str, password: str) -> int:
+    """Return the ``LocalUser.id`` when the credentials are valid (T-021).
+
+    The message is the same for an unknown email and a wrong password, so the
+    form never reveals whether an account exists. A disabled account gets its
+    own message because its owner has to ask the store to reactivate it.
+    """
+    limpio = (email or "").strip().lower()
+    if not limpio or not password:
+        raise ErrorDeAcceso(MENSAJE_CREDENCIALES)
+
+    with get_session() as session:
+        usuario = _buscar_usuario(session, limpio)
+        if usuario is None:
+            raise ErrorDeAcceso(MENSAJE_CREDENCIALES)
+        if not usuario.enabled:
+            raise ErrorDeAcceso(MENSAJE_CUENTA_DESHABILITADA)
+        if not usuario.verify(password):
+            raise ErrorDeAcceso(MENSAJE_CREDENCIALES)
+        if usuario.id is None:  # leido de la DB: el id siempre existe
+            raise ErrorDeAcceso(MENSAJE_CREDENCIALES)
+        return usuario.id
 
 
 def crear_admin_si_no_existe(

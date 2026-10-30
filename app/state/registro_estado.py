@@ -50,7 +50,7 @@ class RegistroState(rx.State):
         self.error = ""
 
         if self.password != self.confirmacion:
-            self.error = "Las contrasenas no coinciden."
+            self.error = "Las contraseñas no coinciden."
             self._limpiar_passwords()
             return
 

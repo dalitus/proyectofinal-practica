@@ -1,6 +1,6 @@
-# Tienda online de indumentaria y calzado
+# Tienda online de Calzado Fermin
 
-Aplicación web de venta de indumentaria y calzado hecha con **Reflex + MySQL**.
+Aplicación web de venta de Calzado Fermin hecha con **Reflex + MySQL**.
 Dos actores: el **administrador** gestiona productos, stock, pedidos y consultas;
 el **comprador registrado** ve el catálogo, arma el carrito, compra y consulta sus
 pedidos. Comprar requiere cuenta (D-002).

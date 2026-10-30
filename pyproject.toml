@@ -1,7 +1,7 @@
 [project]
 name = "proyectofinal-practica"
 version = "0.1.0"
-description = "Tienda online de indumentaria y calzado (Reflex + MySQL)"
+description = "Tienda online de Calzado Fermin (Reflex + MySQL)"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [

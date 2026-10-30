@@ -12,8 +12,8 @@ from typing import Any
 
 import reflex as rx
 
-DEFAULT_BRAND = "Indumentaria y calzado"
-DEFAULT_FOOTER = "Indumentaria y calzado"
+DEFAULT_BRAND = "Calzado Fermin 👠"
+DEFAULT_FOOTER = "Calzado Fermin"
 
 
 def _join(*class_names: str | None) -> str:
@@ -49,13 +49,14 @@ def TopNav(
 
     if account is None:
         account = rx.fragment(
-            rx.el.a("Iniciar sesion", href="/login", class_name="ui-topnav__link"),
+            rx.el.a("Iniciar sesión", href="/login", class_name="ui-topnav__link"),
             rx.el.a("Crear cuenta", href="/register", class_name="ui-topnav__link"),
         )
 
     inner.append(
         rx.el.nav(
             *(links or []),
+            rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link"),
             account,
             class_name="ui-topnav__nav",
         )

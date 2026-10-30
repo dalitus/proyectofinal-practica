@@ -21,7 +21,7 @@ def registro_pagina() -> rx.Component:
             rx.el.div(
                 PageHeader(
                     "Crear cuenta",
-                    "Con tu cuenta podes comprar y seguir tus pedidos.",
+                    "Con tu cuenta podés comprar y seguir tus pedidos.",
                 ),
                 Card(
                     rx.cond(
@@ -37,7 +37,7 @@ def registro_pagina() -> rx.Component:
                         label="Nombre",
                         value=RegistroState.nombre,
                         on_change=RegistroState.set_nombre,
-                        placeholder="Como queres que te llamemos",
+                        placeholder="Cómo querés que te llamemos",
                         required=True,
                     ),
                     Input(
@@ -49,7 +49,7 @@ def registro_pagina() -> rx.Component:
                         required=True,
                     ),
                     Input(
-                        label="Contrasena",
+                        label="Contraseña",
                         value=RegistroState.password,
                         on_change=RegistroState.set_password,
                         type="password",
@@ -57,11 +57,11 @@ def registro_pagina() -> rx.Component:
                         required=True,
                     ),
                     Input(
-                        label="Repetir contrasena",
+                        label="Repetir contraseña",
                         value=RegistroState.confirmacion,
                         on_change=RegistroState.set_confirmacion,
                         type="password",
-                        placeholder="La misma contrasena",
+                        placeholder="Repetí la misma contraseña",
                         required=True,
                     ),
                     Button(
