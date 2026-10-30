@@ -100,19 +100,36 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-023 · Guardas de rutas por rol
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 03
-- **Archivos:** `app/app.py:21-33`, `pages/adnmin_shouder_page.py:239`,
-  `pages/pedidos_admin_page.py:144`, `pages/consulta_admin_page.py:132`,
-  `pages/pedidos_page.py:65`, `pages/carrito_page.py:149`
-- **Problema:** cualquier visitante puede abrir `/admin_dashboard`, `/pedidos_admin` y
-  `/consulta_admin` por URL. Las páginas de usuario no exigen login de forma consistente.
+- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 03
+- **Archivos:** `app/service/sesion_servicio.py`, `tests/test_sesion_rol.py`, `app/app.py`
+  (registro de rutas, todavía sin tocar)
+- **Problema:** cualquier visitante puede abrir las rutas del admin por URL. Las páginas de usuario
+  no exigen login de forma consistente.
 - **Decisión (D-021):** invitado → login con `redirect_to`; sin permiso → 403; chequeo server-side.
+- **Qué se hizo (2026-10-30, backend):**
+  - `sesion_servicio.rol(token)` devuelve `invitado`, `comprador` o `admin` leyendo el token vivo y
+    el perfil en cada llamada (no se confía en una var del cliente).
+  - `es_admin(token)` y `usuario_con_rol(token, *roles)` son la guarda que van a usar los estados:
+    devuelven el id cuando el rol está permitido y `None` cuando hay que redirigir.
+  - Un `LocalUser` sin fila en `UserProfile` cuenta como comprador: nunca se deduce admin de la
+    ausencia de perfil.
+  - `tests/test_sesion_rol.py` (8 tests): sin token, token desconocido, sesión vencida, comprador,
+    admin, guarda por rol, guarda sin roles y cuenta sin perfil.
 - **AC propuestos:**
-  - [x] `on_load` valida sesión y rol en cada ruta protegida.
-  - [x] Invitado → login; usuario sin permiso → página 403; admin OK.
+  - [ ] `on_load` valida sesión y rol en cada ruta protegida.
+        **Pendiente:** la guarda existe en el servicio; falta el estado base y las rutas de admin
+        (T-051/T-052).
+  - [ ] Invitado → login; usuario sin permiso → página 403; admin OK.
+        **Pendiente:** falta la página 403 y el registro de rutas en `app/app.py`.
   - [x] La validación es server-side (no solo ocultar botones).
+        → `rol()` consulta la base en cada llamada; no hay ninguna var de rol en el cliente.
   - [ ] Tests manuales con URL directa para cada rol.
-  - [x] El admin tiene su panel y no ve carrito/checkout.
+        **Pendiente:** no hay ruta protegida que probar todavía.
+  - [ ] El admin tiene su panel y no ve carrito/checkout.
+        **Pendiente:** el panel de admin es T-051/T-052; las páginas viejas se borraron en T-060.
+- **Nota (corrección 2026-10-30):** los AC de esta tarea estaban marcados `[x]` sobre las páginas
+  anteriores al rediseño. Esas páginas ya no existen (T-060), así que hoy no hay ninguna ruta
+  protegida: se destildó lo que no se puede verificar en el código actual.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-021.
 - **Depende de:** T-020

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from sqlalchemy import Column, Text
 from sqlmodel import Field, SQLModel
 
 
@@ -20,8 +21,13 @@ class Consulta(SQLModel, table=True):
     )
 
     asunto: str = Field(index=True)
-    mensaje: str
+    # TEXT: 255 caracteres no alcanzan y MySQL corta con error en vez de truncar
+    # (D-048). El tope real lo valida el servicio.
+    mensaje: str = Field(sa_column=Column(Text, nullable=False))
 
-    respuesta: Optional[str] = None
+    respuesta: Optional[str] = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True),
+    )
     fecha_creacion: datetime = Field(default_factory=datetime.now)
     fecha_respuesta: Optional[datetime] = None

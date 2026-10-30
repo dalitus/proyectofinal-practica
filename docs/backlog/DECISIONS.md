@@ -818,3 +818,19 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   compartible: eso se corrige en T-061.
 - **Fecha:** 2026-10-28
 
+---
+
+## D-048 · Consultas: largo del mensaje y de la respuesta
+
+- **Tarea:** T-052
+- **Estado:** decidida
+- **Opciones:** dejar `VARCHAR(255)` / pasar a `TEXT` con un tope validado en el servicio
+- **Decisión:** `consultas.mensaje` y `consultas.respuesta` pasan a `TEXT`. El servicio valida la
+  respuesta con un máximo de 2000 caracteres; el mismo tope vale para el mensaje cuando llegue la
+  pantalla del comprador (T-065).
+- **Motivo:** 255 caracteres no alcanzan para una consulta real, y MySQL no trunca: corta con el
+  error 1406 y el comprador pierde lo que escribió. El tope va en el servicio para que el rechazo
+  sea un mensaje del formulario y no una excepción del motor.
+- **Consecuencias:** migración `c4d8f1a9e2b6` altera las dos columnas; el listado del admin sigue
+  mostrando un resumen de 140 caracteres para que la tabla no crezca con mensajes largos.
+- **Fecha:** 2026-10-30

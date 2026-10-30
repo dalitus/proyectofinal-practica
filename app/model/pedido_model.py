@@ -22,6 +22,7 @@ class Pedido(SQLModel, table=True):
     total: Decimal
     fecha_pedido: datetime = Field(default_factory=datetime.now)
     fecha_entrega: Optional[datetime] = None
+    fecha_cancelacion: Optional[datetime] = None
 
     direccion: str = ""
     numero: str = ""
