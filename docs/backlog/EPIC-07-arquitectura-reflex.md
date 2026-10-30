@@ -55,19 +55,31 @@ consistente.
 
 ## T-062 · Capa de servicios y event handlers
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `state/carrito_state.py:70-84`, `state/users_state.py`, `state/pedido_state.py`,
-  `pages/adnmin_shouder_page.py`
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
+- **Archivos:** `app/state/*.py`, `app/pages/*.py`, `tests/test_arquitectura.py`
 - **Problema:** algunos estados abren `Session(engine)` y llaman repositorios; otros pasan por
   services. Los handlers mezclan validación, acceso a datos y UI.
-- **Decisión (D-033):** se mantiene `repository → service → state`; estados sin engine/sesiones;
+- **Decisión (D-033):** se mantiene `repository → service → state → pages`; estados sin engine/sesiones;
   handlers finos y síncronos salvo `await` de otro estado; errores al log y mensaje claro.
+- **Qué se hizo (2026-10-30):**
+  - Los seis estados (`carrito`, `catalogo`, `checkout`, `detalle`, `login`, `registro`) importan
+    solo `app.service`; ninguno toca `app.repository`, `sqlmodel` ni abre sesión.
+  - `tests/test_arquitectura.py` verifica la regla sobre el AST, no con grep: estados sin
+    repositorio ni llamadas a `Session`/`get_session`/`create_engine`, páginas sin acceso a datos,
+    sin `print()`, sin `traceback` crudo y sin hex/`box_shadow`/`color_scheme` (T-063, T-064).
+  - Un test por estado y por página (`parametrize`), así el que agrega una capa de más sabe cuál
+    archivo rompió la regla.
 - **AC propuestos:**
   - [x] Los estados no importan `engine` ni abren sesiones.
+        → `test_los_estados_no_tocan_la_base`.
   - [x] Toda operación pasa por un service con validación.
+        → los estados solo importan `app.service.*`; los services validan y devuelven dataclasses.
   - [x] Handlers finos: llamar al service, actualizar vars, devolver evento/toast.
   - [x] Manejo de errores uniforme (sin `traceback.print_exc()` al usuario).
+        → `logger.exception` + mensaje en la UI; `test_sin_print_de_depuracion` y
+        `test_sin_traceback_crudo_al_usuario`.
   - [x] `async` solo cuando hace falta `await` de otro estado.
+        → solo `carrito_estado` y `checkout_estado` leen el token del estado del plugin.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-033.
 - **Depende de:** T-002, T-020
