@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 from app.model.product_model import Producto
 from app.repository import producto_repositorio
@@ -62,6 +63,51 @@ class OpcionesDeFiltro:
     colores: list[dict[str, str]]
 
 
+@dataclass(frozen=True)
+class Variante:
+    """One (colour, size) pair with its own stock (D-009).
+
+    ``id`` is the ``stocks`` row: the cart line points at it, not at the product
+    (D-009), so the detail can hand the exact variant over to the cart.
+    """
+
+    id: int
+    color: str
+    talle: str
+    cantidad: int
+
+
+@dataclass(frozen=True)
+class ProductoDetalle:
+    """One product page, ready to render."""
+
+    id: int
+    nombre: str
+    marca: str
+    categoria: str
+    descripcion: str
+    precio: str
+    imagen: str
+    variantes: list[Variante]
+    colores: list[str]
+    talles: list[str]
+    total_stock: int
+    stock_estado: str
+    stock_etiqueta: str
+
+
+def _clave_talle(talle: str) -> tuple[int, str]:
+    """Sort sizes naturally: ``"40"`` before ``"41"``, letters after numbers.
+
+    The numeric label is zero-padded so the comparison stays string-to-string;
+    mixing ``int`` and ``str`` in one tuple would raise on a non-numeric size.
+    """
+    try:
+        return (0, f"{int(talle):05d}")
+    except (TypeError, ValueError):
+        return (1, str(talle))
+
+
 def normalizar_orden(orden: str | None) -> str:
     """Fall back to the default order instead of failing on a stale link."""
     return orden if orden in ORDENES else ORDEN_POR_DEFECTO
@@ -77,7 +123,7 @@ def categoria_desde_valor(valor: str | None) -> int | None:
         return None
 
 
-def _estado_stock(total: int) -> tuple[str, str]:
+def estado_de_stock(total: int) -> tuple[str, str]:
     """Return (state key, label) for the StockBadge (design.md 4.3).
 
     The rule lives here and not in the page: "Ultimas 3" is a business message,
@@ -94,7 +140,7 @@ def _estado_stock(total: int) -> tuple[str, str]:
 def _a_producto_en_catalogo(producto: Producto) -> ProductoEnCatalogo:
     variantes = list(producto.stocks)
     total_stock = sum(variante.cantidad_disponible for variante in variantes)
-    stock_estado, stock_etiqueta = _estado_stock(total_stock)
+    stock_estado, stock_etiqueta = estado_de_stock(total_stock)
 
     return ProductoEnCatalogo(
         id=producto.id or 0,
@@ -174,3 +220,71 @@ def opciones_de_filtro() -> OpcionesDeFiltro:
             for color in producto_repositorio.listar_colores()
         ],
     )
+
+
+def obtener_detalle(producto_id: int) -> ProductoDetalle | None:
+    """Product page data for an active product, or ``None`` when it does not exist.
+
+    ``None`` covers three cases with the same answer: unknown id, a soft-deleted
+    product (D-028) and an id that is not a number — the page shows one "no
+    encontrado" state, not three.
+    """
+    producto = producto_repositorio.obtener_producto(producto_id)
+    if producto is None:
+        return None
+
+    variantes = [
+        Variante(
+            id=variante.id_stock or 0,
+            color=variante.color,
+            talle=variante.talle,
+            cantidad=variante.cantidad_disponible,
+        )
+        for variante in sorted(
+            producto.stocks,
+            key=lambda variante: (variante.color, _clave_talle(variante.talle)),
+        )
+    ]
+    total_stock = sum(variante.cantidad for variante in variantes)
+    stock_estado, stock_etiqueta = estado_de_stock(total_stock)
+
+    return ProductoDetalle(
+        id=producto.id or 0,
+        nombre=producto.nombre,
+        marca=producto.marca,
+        categoria=producto.categoria.nombre if producto.categoria else "",
+        descripcion=producto.descripcion,
+        precio=formatear_precio(producto.precio),
+        imagen=producto.imagen or "",
+        variantes=variantes,
+        colores=sorted({variante.color for variante in variantes}),
+        talles=sorted({variante.talle for variante in variantes}, key=_clave_talle),
+        total_stock=total_stock,
+        stock_estado=stock_estado,
+        stock_etiqueta=stock_etiqueta,
+    )
+
+
+def talles_por_color(detalle: ProductoDetalle) -> dict[str, list[dict[str, Any]]]:
+    """For each colour, every size of the product with its availability (D-009).
+
+    The size picker shows the whole scale and disables the sizes with no stock in
+    the chosen colour. Computing it in the service keeps the page from doing
+    lookups and numeric comparisons over an untyped ``Var``.
+    """
+    cantidades = {
+        (variante.color, variante.talle): variante.cantidad
+        for variante in detalle.variantes
+    }
+
+    return {
+        color: [
+            {
+                "talle": talle,
+                "cantidad": cantidades.get((color, talle), 0),
+                "agotado": cantidades.get((color, talle), 0) <= 0,
+            }
+            for talle in detalle.talles
+        ]
+        for color in detalle.colores
+    }

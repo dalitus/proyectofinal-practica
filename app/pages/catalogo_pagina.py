@@ -117,36 +117,44 @@ def _estado_de_stock(producto: Any) -> rx.Component:
 
 
 def _tarjeta(producto: Any) -> rx.Component:
-    """ProductCard: 3:4 image, brand, name, final price and stock (design.md 4.3)."""
-    return Card(
-        rx.el.div(
-            rx.cond(
-                producto["imagen"] != "",
-                rx.image(
-                    src=producto["imagen"],
-                    alt=producto["nombre"],
-                    loading="lazy",
-                    class_name="ui-product__image",
+    """ProductCard: 3:4 image, brand, name, final price and stock (design.md 4.3).
+
+    The card itself is the link to ``/producto/[id]`` (D-024): a click anywhere
+    on it opens the detail, and the browser still gets a real anchor.
+    """
+    return rx.link(
+        Card(
+            rx.el.div(
+                rx.cond(
+                    producto["imagen"] != "",
+                    rx.image(
+                        src=producto["imagen"],
+                        alt=producto["nombre"],
+                        loading="lazy",
+                        class_name="ui-product__image",
+                    ),
+                    rx.el.div("Sin imagen", class_name="ui-product__placeholder"),
                 ),
-                rx.el.div("Sin imagen", class_name="ui-product__placeholder"),
+                class_name="ui-product__media",
             ),
-            class_name="ui-product__media",
-        ),
-        rx.el.div(
-            rx.cond(
-                producto["marca"] != "",
-                rx.el.p(
-                    producto["marca"],
-                    class_name="ui-text ui-text--muted ui-text--small",
+            rx.el.div(
+                rx.cond(
+                    producto["marca"] != "",
+                    rx.el.p(
+                        producto["marca"],
+                        class_name="ui-text ui-text--muted ui-text--small",
+                    ),
+                    rx.fragment(),
                 ),
-                rx.fragment(),
+                rx.el.h2(producto["nombre"], class_name="ui-product__name"),
+                rx.el.p(producto["precio"], class_name="ui-product__price"),
+                _estado_de_stock(producto),
+                class_name="ui-product__body",
             ),
-            rx.el.h2(producto["nombre"], class_name="ui-product__name"),
-            rx.el.p(producto["precio"], class_name="ui-product__price"),
-            _estado_de_stock(producto),
-            class_name="ui-product__body",
+            class_name="ui-product",
         ),
-        class_name="ui-product",
+        href="/producto/" + producto["id"].to_string(),
+        class_name="ui-product-link",
     )
 
 

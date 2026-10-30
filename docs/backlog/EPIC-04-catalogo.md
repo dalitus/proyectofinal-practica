@@ -34,21 +34,46 @@ imágenes que no se rompan.
 
 ## T-031 · Detalle de producto por URL (refresh-safe)
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 04
-- **Archivos:** `pages/producto_detalle_page.py:4-30`, `state/catalogo_state.py:47-51`,
-  `app/app.py:27`
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 04
+- **Archivos:** `app/pages/producto_pagina.py`, `app/state/detalle_estado.py`,
+  `app/service/catalogo_servicio.py`, `app/repository/producto_repositorio.py`,
+  `tests/test_detalle_servicio.py`
 - **Problema:** el detalle depende de `producto_seleccionado` en memoria y la ruta está registrada
   dos veces (estática `/detalle_producto` y dinámica `[producto_id]`). Al refrescar o compartir el
   link se pierde el producto.
 - **Decisión (D-024):** ruta única `/producto/[id]`; `/detalle_producto` redirige; el detalle es
   público (D-002).
+- **Qué se hizo (2026-10-29):**
+  - `obtener_producto` en el repositorio (solo activos: un producto dado de baja responde “no
+    encontrado”) y `obtener_detalle` / `talles_por_color` en el servicio.
+  - `DetalleEstado` lee el id de `router.page.params`, no de una selección en memoria. Los talles
+    llegan con `agotado` ya resuelto, así que la página no compara cantidades.
+  - La tarjeta del catálogo es un `rx.link` a `/producto/[id]`: click en cualquier punto abre el
+    detalle y sigue siendo un ancla real.
+  - Página con imagen 3:4, marca, nombre, precio, picker de color y de talle (los agotados se
+    muestran deshabilitados, no se ocultan), `StockBadge` de la **variante elegida** y descripción
+    debajo de la línea de compra (design.md 4.4).
+  - Estados: skeleton con la forma del contenido, error con “Reintentar” y “no encontrado” con
+    “Ver catalogo”.
+- **Qué se hizo (2026-10-30):** el CTA “Agregar al carrito” quedó conectado a
+  `CarritoEstado.agregar(DetalleEstado.variante_id, 1)`: usa el id de la variante elegida, no el
+  del producto. Un invitado va a `/login?next=/producto/[id]` y vuelve al mismo detalle. Sin stock
+  el botón se deshabilita y explica por qué.
 - **AC propuestos:**
   - [x] Ruta única `/producto/[producto_id]`.
+        → `@rx.page(route="/producto/[producto_id]")`; `/detalle_producto` ya no existe.
   - [x] El handler `on_load` busca el producto en la DB por ID.
+        → `DetalleEstado.on_load` lee el id de la ruta y llama a `obtener_detalle`.
   - [x] Refresh y link directo funcionan.
+        → verificado en el navegador: `/producto/1` directo y con refresh muestran el producto.
   - [x] Producto inexistente → estado “no encontrado” con link al catálogo.
+        → `/producto/9999` y `/producto/abc` caen en el mismo `EmptyState` con “Ver catalogo”.
   - [x] “Agregar al carrito” usa el ID real de la variante elegida (D-009).
+        → verificado en el navegador: desde `/producto/1` (Blanco 42) el carrito muestra la línea
+        “Zapatilla Running Air · Color Blanco · Talle 42”.
   - [x] El detalle es visible para invitados; agregar al carrito exige login (D-002).
+        → invitado ve el detalle; al agregar, `CarritoEstado.agregar` redirige a
+        `/login?next=/producto/[id]` y el login vuelve al origen.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-024 y D-002.
 - **Depende de:** T-030, T-061

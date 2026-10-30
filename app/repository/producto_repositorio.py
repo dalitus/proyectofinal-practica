@@ -123,6 +123,24 @@ def contar_productos(
         ).one()
 
 
+def obtener_producto(producto_id: int) -> Producto | None:
+    """One active product with its variants and category, or ``None``.
+
+    Inactive products answer ``None`` as well: a soft-deleted product (D-028)
+    must not be reachable by guessing its id.
+    """
+    with get_session() as session:
+        consulta = (
+            select(Producto)
+            .where(Producto.id == producto_id, Producto.activo.is_(True))
+            .options(
+                selectinload(Producto.stocks),
+                selectinload(Producto.categoria),
+            )
+        )
+        return session.exec(consulta).first()
+
+
 def listar_categorias() -> list[Categoria]:
     """Categories with at least one active product, ordered by name."""
     with get_session() as session:
