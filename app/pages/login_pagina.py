@@ -10,6 +10,7 @@ Layout only: the visuals come from ``app/ui``.
 
 import reflex as rx
 
+from app.pages.cuenta_menu import nav_de_cuenta
 from app.state.login_estado import LoginEstado
 from app.ui import Alert, AppShell, Button, Card, Container, Input, PageHeader
 
@@ -73,5 +74,6 @@ def login_pagina() -> rx.Component:
                 ),
                 class_name="ui-column",
             ),
-        )
+        ),
+        nav=nav_de_cuenta(),
     )

@@ -11,6 +11,7 @@ from typing import Any
 
 import reflex as rx
 
+from app.pages.cuenta_menu import nav_de_cuenta
 from app.service.catalogo_servicio import ORDENES
 from app.state.catalogo_estado import CatalogoEstado
 from app.ui import (
@@ -266,5 +267,6 @@ def catalogo_pagina() -> rx.Component:
             _listado(),
             _paginacion(),
             class_name="ui-stack",
-        )
+        ),
+        nav=nav_de_cuenta(),
     )

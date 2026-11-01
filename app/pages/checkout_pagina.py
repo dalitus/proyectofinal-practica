@@ -12,6 +12,7 @@ from typing import Any
 
 import reflex as rx
 
+from app.pages.cuenta_menu import nav_de_cuenta
 from app.state.checkout_estado import CheckoutEstado
 from app.ui import (
     Alert,
@@ -266,5 +267,6 @@ def checkout_pagina() -> rx.Component:
             PageHeader("Finalizar compra", CheckoutEstado.resumen),
             _contenido(),
             class_name="ui-stack",
-        )
+        ),
+        nav=nav_de_cuenta(),
     )

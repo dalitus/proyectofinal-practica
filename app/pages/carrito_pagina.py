@@ -11,6 +11,7 @@ from typing import Any
 
 import reflex as rx
 
+from app.pages.cuenta_menu import nav_de_cuenta
 from app.state.carrito_estado import CarritoEstado
 from app.ui import (
     Alert,
@@ -217,5 +218,6 @@ def carrito_pagina() -> rx.Component:
             PageHeader("Carrito", CarritoEstado.resumen),
             _contenido(),
             class_name="ui-stack",
-        )
+        ),
+        nav=nav_de_cuenta(),
     )

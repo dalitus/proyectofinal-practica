@@ -139,6 +139,27 @@ _SHELL = """
 
 .ui-topnav__link:hover { color: var(--color-text); }
 
+.ui-topnav__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ui-topnav__link--muted {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-topnav__link--button {
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
 .ui-page-header {
   display: flex;
   flex-wrap: wrap;
@@ -1037,6 +1058,179 @@ _CHECKOUT = """
 .ui-checkout__details dd { margin: 0; text-align: right; color: var(--color-text); }
 """
 
+_ADMIN = """
+/* Panel del admin (design.md 5): tabs, filtros, tabla y paginacion. */
+.ui-admin__tabs {
+  display: flex;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ui-admin__tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-xs);
+  border-bottom: 2px solid transparent;
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.ui-admin__tab:hover { color: var(--color-text); }
+
+.ui-admin__tab--active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.ui-admin__filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: end;
+}
+
+@media (min-width: 768px) {
+  .ui-admin__filters {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+.ui-admin__search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: end;
+}
+
+.ui-admin__search .ui-field { flex: 1 1 260px; }
+
+.ui-admin__filter-actions {
+  display: flex;
+  gap: var(--space-xs);
+  padding-bottom: 1px;
+}
+
+.ui-admin__data {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .ui-admin__data { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.ui-admin__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.ui-admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.ui-admin__totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: baseline;
+  justify-content: flex-end;
+  padding: var(--space-sm) var(--space-xs);
+}
+
+.ui-admin__total {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.ui-admin__message {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ui-textarea {
+  min-height: 140px;
+  padding: var(--space-sm) var(--space-md);
+  resize: vertical;
+}
+
+.ui-table-wrap {
+  overflow-x: auto;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.ui-table th {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.ui-table td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+  color: var(--color-text);
+}
+
+.ui-table__row:last-child td { border-bottom: 0; }
+.ui-table__row:hover { background: var(--color-surface); }
+
+.ui-table__num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.ui-table__strong { display: block; font-weight: 600; }
+
+.ui-table__muted {
+  display: block;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.ui-table__stack { min-width: 180px; }
+
+.ui-table__actions { text-align: right; white-space: nowrap; }
+
+.ui-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-pagination__info {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+"""
+
 _MOTION = """
 @media (prefers-reduced-motion: reduce) {
   .ui-btn, .ui-input, .ui-card--clickable, .ui-chip { transition: none; }
@@ -1058,6 +1252,7 @@ APP_CSS = "\n".join(
         _DETALLE,
         _CARRITO,
         _CHECKOUT,
+        _ADMIN,
         _MOTION,
     ]
 )

@@ -25,20 +25,11 @@ from app.service.catalogo_servicio import (
     obtener_detalle,
     talles_por_color,
 )
+from app.state.parametros import id_de_la_url
 
 logger = logging.getLogger(__name__)
 
 MENSAJE_ERROR = "No pudimos cargar el producto. Proba de nuevo en unos segundos."
-
-
-def _id_de_la_ruta(valor: Any) -> int | None:
-    """Turn the route parameter into a product id; ``None`` when it is not one."""
-    if isinstance(valor, list):
-        valor = valor[0] if valor else ""
-    try:
-        return int(str(valor).strip())
-    except (TypeError, ValueError):
-        return None
 
 
 class DetalleEstado(rx.State):
@@ -110,7 +101,7 @@ class DetalleEstado(rx.State):
         self.color = ""
         self.talle = ""
 
-        producto_id = _id_de_la_ruta(self.router.page.params.get("producto_id"))
+        producto_id = id_de_la_url(self.router.url)
         if producto_id is None:
             self._marcar_no_encontrado()
             return

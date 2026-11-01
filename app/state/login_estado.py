@@ -19,6 +19,8 @@ import reflex as rx
 from reflex_local_auth.local_auth import LocalAuthState
 
 from app.service.auth_servicio import ErrorDeAcceso, autenticar
+from app.state.parametros import valor_de_consulta
+from app.state.sesion_estado import SesionEstado
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class LoginEstado(LocalAuthState):
     @rx.event
     def on_load(self) -> None:
         """Read ``?next=`` so login can return to the page the guest wanted."""
-        pedido = self.router.page.params.get("next", "")
+        pedido = valor_de_consulta(self.router.url, "next")
         es_interna = pedido.startswith("/") and not pedido.startswith("//")
         self.destino = pedido if es_interna else DESTINO_POR_DEFECTO
         self.error = ""
@@ -52,7 +54,7 @@ class LoginEstado(LocalAuthState):
         self.password = value
 
     @rx.event
-    def enviar(self, form_data: dict[str, Any]):
+    async def enviar(self, form_data: dict[str, Any]):
         """Authenticate and go back to the origin page (T-021)."""
         self.error = ""
         self.enviando = True
@@ -74,4 +76,11 @@ class LoginEstado(LocalAuthState):
 
         self._login(user_id)
         self.email = ""
+
+        # El header vive en otro estado con su propia copia del token: se la
+        # pasamos para que la cuenta se recalcule ya, sin esperar el refresco
+        # periódico ni recargar la página (T-021).
+        sesion = await self.get_state(SesionEstado)
+        sesion.auth_token = self.auth_token
+
         return rx.redirect(self.destino)

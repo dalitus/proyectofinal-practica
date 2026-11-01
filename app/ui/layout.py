@@ -32,13 +32,15 @@ def TopNav(
     search: rx.Component | None = None,
     account: rx.Component | None = None,
     links: list[rx.Component] | None = None,
+    cart: bool = True,
     class_name: str | None = None,
 ) -> rx.Component:
     """Sticky header: brand, optional search, nav links, account area.
 
     ``account`` and ``search`` are slots. When ``account`` is omitted the header
     shows the guest entry points; a page with a session passes its own component
-    instead of the shell guessing.
+    instead of the shell guessing. ``cart=False`` is for the admin panel, where
+    the buyer's cart is not part of the job (T-023).
     """
     inner: list[Any] = [
         rx.el.a(brand, href=brand_href, class_name="ui-topnav__brand"),
@@ -56,7 +58,11 @@ def TopNav(
     inner.append(
         rx.el.nav(
             *(links or []),
-            rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link"),
+            *(
+                [rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link")]
+                if cart
+                else []
+            ),
             account,
             class_name="ui-topnav__nav",
         )
@@ -65,6 +71,38 @@ def TopNav(
     return rx.el.header(
         rx.el.div(*inner, class_name="ui-topnav__inner"),
         class_name=_join("ui-topnav", class_name),
+    )
+
+
+# Secciones del panel que ya existen. Productos llega con T-050 y se agrega aca,
+# no como un link muerto en la navegacion.
+SECCIONES_DE_ADMIN = (
+    ("pedidos", "Pedidos", "/admin/pedidos"),
+    ("consultas", "Consultas", "/admin/consultas"),
+)
+
+
+def AdminTabs(*, active: str, class_name: str | None = None) -> rx.Component:
+    """Admin section nav: the current tab is marked for sight and for screen readers."""
+    enlaces: list[rx.Component] = []
+    for clave, etiqueta, href in SECCIONES_DE_ADMIN:
+        activo = clave == active
+        enlaces.append(
+            rx.el.a(
+                etiqueta,
+                href=href,
+                class_name=_join(
+                    "ui-admin__tab",
+                    "ui-admin__tab--active" if activo else None,
+                ),
+                **({"aria-current": "page"} if activo else {}),
+            )
+        )
+
+    return rx.el.nav(
+        *enlaces,
+        class_name=_join("ui-admin__tabs", class_name),
+        **{"aria-label": "Secciones de administracion"},
     )
 
 

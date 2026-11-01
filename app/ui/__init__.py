@@ -1,7 +1,14 @@
 """UI components and tokens. Source of truth: docs/design.md."""
 
 from app.ui.feedback import ConfirmDialog, Drawer, Skeleton, Toast
-from app.ui.layout import AppShell, Container, Footer, PageHeader, TopNav
+from app.ui.layout import (
+    AdminTabs,
+    AppShell,
+    Container,
+    Footer,
+    PageHeader,
+    TopNav,
+)
 from app.ui.primitives import (
     ALERT_TONES,
     BADGE_TONES,
@@ -22,6 +29,7 @@ from app.ui.tokens import COLORS, FONT, RADIUS, SHADOW, SPACE, TYPE
 __all__ = [
     "ALERT_TONES",
     "APP_CSS",
+    "AdminTabs",
     "Alert",
     "AppShell",
     "BADGE_TONES",

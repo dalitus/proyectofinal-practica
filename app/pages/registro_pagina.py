@@ -10,6 +10,7 @@ Layout only: the visuals come from ``app/ui`` and the business rule lives in
 
 import reflex as rx
 
+from app.pages.cuenta_menu import nav_de_cuenta
 from app.state.registro_estado import RegistroState
 from app.ui import Alert, AppShell, Button, Card, Container, Input, PageHeader
 
@@ -79,5 +80,6 @@ def registro_pagina() -> rx.Component:
                 ),
                 class_name="ui-column",
             ),
-        )
+        ),
+        nav=nav_de_cuenta(),
     )

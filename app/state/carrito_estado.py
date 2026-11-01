@@ -22,6 +22,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.service import carrito_servicio
 from app.service.carrito_servicio import CarritoDeCompra, ErrorDeCarrito
 from app.service.sesion_servicio import usuario_autenticado
+from app.state.parametros import ruta_interna
 from app.ui import Toast
 
 logger = logging.getLogger(__name__)
@@ -70,6 +71,15 @@ class CarritoEstado(rx.State):
             return rx.redirect(RUTA_LOGIN + RUTA_CARRITO)
 
         self._cargar(usuario_id)
+
+    @rx.event
+    def limpiar_visible(self) -> None:
+        """Drop the rendered lines without touching the database (T-021).
+
+        Logout uses it: the cart stays saved for the buyer, but the screen cannot
+        keep showing lines that belong to a session that no longer exists.
+        """
+        self._limpiar_vars()
 
     @rx.event
     async def agregar(self, variante_id: int, cantidad: int = 1):
@@ -185,9 +195,4 @@ class CarritoEstado(rx.State):
 
     def _ruta_actual(self) -> str:
         """Browser path, so the login sends the buyer back here (D-002)."""
-        url = self.router.url
-        ruta = url.get("path", "") if isinstance(url, dict) else getattr(url, "path", "")
-        texto = str(ruta or "")
-        if not texto.startswith("/") or texto.startswith("//"):
-            return "/"
-        return texto
+        return ruta_interna(self.router.url, "/")
