@@ -50,9 +50,9 @@
 | T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | en curso |
 | T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | lista |
 | T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | lista |
-| T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | lista |
+| T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | hecha |
 | T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | hecha |
-| T-023 | Guardas de rutas por rol | 03 Sesión | P0 | en curso |
+| T-023 | Guardas de rutas por rol | 03 Sesión | P0 | hecha |
 | T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | en curso |
 | T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | hecha |
 | T-031 | Detalle de producto por URL (refresh-safe) | 04 Catálogo | P1 | hecha |
@@ -66,8 +66,8 @@
 | T-044 | Ciclo de vida y estados del pedido | 05 Carrito | P1 | hecha |
 | T-045 | Eliminar consulta automática al comprar | 05 Carrito | P2 | hecha |
 | T-050 | CRUD de productos y variantes (color + talle) | 06 Admin | P1 | lista |
-| T-051 | Administración de pedidos | 06 Admin | P1 | en curso |
-| T-052 | Administración de consultas | 06 Admin | P1 | en curso |
+| T-051 | Administración de pedidos | 06 Admin | P1 | hecha |
+| T-052 | Administración de consultas | 06 Admin | P1 | hecha |
 | T-053 | Operaciones sensibles y auditoría mínima | 06 Admin | P2 | en curso |
 | T-060 | Eliminar estados duplicados y código muerto | 07 Arquitectura | P1 | hecha |
 | T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | lista |

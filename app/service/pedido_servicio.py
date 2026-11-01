@@ -319,6 +319,17 @@ def normalizar_filtro(estado: str | None) -> str:
     return estado if estado in ESTADOS_DE_PEDIDO else ""
 
 
+def estados_siguientes(estado: str) -> list[dict[str, str]]:
+    """Allowed transitions from ``estado`` with their labels (T-044).
+
+    The detail page paints one button per entry; it never invents a transition.
+    """
+    return [
+        {"valor": siguiente, "texto": etiqueta_de_estado(siguiente)}
+        for siguiente in TRANSICIONES.get(estado, ())
+    ]
+
+
 def _fecha(momento: datetime) -> str:
     return momento.strftime("%d/%m/%Y %H:%M")
 

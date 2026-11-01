@@ -90,6 +90,34 @@ def test_las_paginas_no_acceden_a_datos(ruta: Path) -> None:
     )
 
 
+def test_las_pantallas_de_admin_declaran_su_propio_on_load() -> None:
+    """El evento heredado corre sobre la clase base y pierde los datos (T-023).
+
+    En Reflex un handler queda atado a la clase que lo define, asi que una
+    subclase con solo ``_cargar`` nunca lo ejecuta. El test corta esa regresion.
+    """
+    faltantes: list[str] = []
+
+    for ruta in _modulos("state"):
+        for nodo in ast.walk(_arbol(ruta)):
+            if not isinstance(nodo, ast.ClassDef) or nodo.name == "AdminEstado":
+                continue
+            bases = {ast.unparse(base) for base in nodo.bases}
+            if "AdminEstado" not in bases:
+                continue
+
+            metodos = {
+                hijo.name
+                for hijo in nodo.body
+                if isinstance(hijo, (ast.FunctionDef, ast.AsyncFunctionDef))
+            }
+            for evento in ("on_load", "reintentar", "_cargar"):
+                if evento not in metodos:
+                    faltantes.append(f"{ruta.name}:{nodo.name}.{evento}")
+
+    assert faltantes == []
+
+
 def test_sin_print_de_depuracion() -> None:
     """Los errores van a `logging`, no a la consola (T-064)."""
     culpables = [

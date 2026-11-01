@@ -6,10 +6,9 @@ registro son paginas propias: el plugin solo aporta ``LocalUser``,
 ingles, y ademas el alta suya solo crea la credencial (T-022) y sus errores no
 se pueden traducir sin reescribir el estado.
 
-Estado actual: el catalogo en la raiz, el detalle, el carrito, el checkout y las
-dos pantallas de sesion. El panel del admin se reconstruye en las fases
-siguientes, despues de que la Fase 5 borrara el codigo viejo que dependia de los
-modelos eliminados (T-060).
+Estado actual: el catalogo en la raiz, el detalle, el carrito, el checkout, las
+dos pantallas de sesion y el panel del admin (pedidos y consultas). Productos del
+admin llega con T-050.
 """
 
 import reflex as rx
@@ -17,12 +16,32 @@ import reflex as rx
 from app.pages.catalogo_pagina import catalogo_pagina  # noqa: F401  (registra "/")
 from app.pages.carrito_pagina import carrito_pagina  # noqa: F401  (registra "/carrito")
 from app.pages.checkout_pagina import checkout_pagina  # noqa: F401  (registra "/checkout")
+from app.pages.consulta_admin_pagina import (  # noqa: F401  (registra "/admin/consultas/[consulta_id]")
+    consulta_admin_pagina,
+)
+from app.pages.consultas_admin_pagina import (  # noqa: F401  (registra "/admin/consultas")
+    consultas_admin_pagina,
+)
 from app.pages.login_pagina import login_pagina  # noqa: F401  (registra "/login")
+from app.pages.no_autorizado_pagina import (  # noqa: F401  (registra "/403")
+    no_autorizado_pagina,
+)
+from app.pages.pedido_admin_pagina import (  # noqa: F401  (registra "/admin/pedidos/[pedido_id]")
+    pedido_admin_pagina,
+)
+from app.pages.pedidos_admin_pagina import (  # noqa: F401  (registra "/admin/pedidos")
+    pedidos_admin_pagina,
+)
 from app.pages.producto_pagina import (  # noqa: F401  (registra "/producto/[producto_id]")
     producto_pagina,
 )
 from app.pages.registro_pagina import registro_pagina  # noqa: F401  (registra "/register")
+from app.service.auditoria import configurar_destino
 from app.ui import APP_CSS, FONT_HEAD_COMPONENTS
+
+# Sin esto, las líneas de auditoría (D-031) se escriben en un logger sin destino
+# y se pierden: Reflex no configura el logging de la aplicación.
+configurar_destino()
 
 # La UI es solo clara: las paginas pintan fondos blancos, asi que hay que
 # neutralizar el modo oscuro que el navegador guardo en localStorage (el valor

@@ -18,6 +18,7 @@ venv/
 
 # Logs locales de ejecucion
 *.log
+logs/
 
 # Backups locales de la base de datos
 backups/

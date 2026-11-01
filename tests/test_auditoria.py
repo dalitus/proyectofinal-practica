@@ -20,6 +20,7 @@ from app.model.consulta_model import Consulta
 from app.model.product_model import Producto
 from app.model.stock_model import Stocks
 from app.service.carrito_servicio import agregar
+from app.service.auditoria import configurar_destino, registrar
 from app.service.consulta_servicio import eliminar as eliminar_consulta
 from app.service.consulta_servicio import responder as responder_consulta
 from app.service.pedido_servicio import (
@@ -119,6 +120,35 @@ def _consulta(session: Session) -> int:
     session.refresh(consulta)
     session.rollback()
     return consulta.id_consulta or 0
+
+
+def test_el_destino_en_archivo_recibe_una_linea_por_operacion(tmp_path) -> None:
+    """Sin handler, el ``logger.info`` no llega a ningún lado (D-031)."""
+    logger = logging.getLogger("app.auditoria")
+    antes = list(logger.handlers)
+    destino = tmp_path / "auditoria.log"
+
+    try:
+        assert configurar_destino(destino) == destino.resolve()
+        # Idempotente: el arranque de Reflex importa la app más de una vez.
+        assert configurar_destino(destino) == destino.resolve()
+
+        registrar(
+            accion="cambiar_estado",
+            entidad="pedido",
+            entidad_id=9,
+            admin_id=2,
+            detalle="en espera -> enviado",
+        )
+        lineas = destino.read_text(encoding="utf-8").strip().splitlines()
+    finally:
+        for handler in list(logger.handlers):
+            if handler not in antes:
+                logger.removeHandler(handler)
+                handler.close()
+
+    assert len(lineas) == 1
+    assert json.loads(lineas[0])["accion"] == "cambiar_estado"
 
 
 def test_cambiar_estado_registra_admin_accion_y_entidad(

@@ -29,9 +29,9 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-021 · Flujo de login/logout/registro y redirecciones
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 03
-- **Archivos:** `pages/users_page.py:142-168`, `pages/andmin_page.py`,
-  `state/users_state.py:57-97`, `state/catalogo_state.py:89-91`
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 03
+- **Archivos:** `app/state/login_estado.py`, `app/state/sesion_estado.py`,
+  `app/pages/cuenta_menu.py`, `app/pages/login_pagina.py`
 - **Problema:** login de usuario y de admin están separados y con campos distintos
   (`password` vs `contrasenia`); las redirecciones apuntan a rutas duplicadas; no hay retorno a
   la página original.
@@ -39,11 +39,31 @@ que las contraseñas no se guarden en texto plano.
   ni recuperación por email.
 - **AC propuestos:**
   - [x] Un solo contrato de credenciales (`email` + `password`).
-  - [ ] Al loguearse, el usuario vuelve a la página que intentaba ver (o al catálogo).
-  - [ ] Errores de credenciales son claros y no revelan si el email existe.
-  - [ ] Logout redirige y limpia carrito visible.
+  - [x] Al loguearse, el usuario vuelve a la página que intentaba ver (o al catálogo).
+        → `?next=` se lee de `router.url` (`app/state/parametros.py`) y solo se aceptan rutas
+        internas; verificado a mano: `/admin/pedidos` como invitado → login → vuelve a
+        `/admin/pedidos`.
+  - [x] Errores de credenciales son claros y no revelan si el email existe.
+        → `ErrorDeAcceso.MENSAJE_CREDENCIALES` es el mismo para email inexistente, contraseña
+        equivocada y cuenta deshabilitada; verificado en el navegador con un email que no existe.
+  - [x] Logout redirige y limpia carrito visible.
+        → `SesionEstado.cerrar_sesion` borra la fila de `localauthsession`, vacía `auth_token` y
+        llama a `CarritoEstado.limpiar_visible`; verificado: el token queda vacío en
+        `localStorage`, la tabla no tiene sesiones de ese usuario y vuelve al catálogo.
   - [x] El registro crea solo compradores; nunca administradores.
   - [x] Sin verificación de email ni recuperación automática.
+- **Qué se hizo (2026-10-31, UI de sesión):**
+  - `SesionEstado(cuenta)` es una var calculada con la caché del plugin: nombre, rol y bandera de
+    sesión, sin que cada página cargue un estado extra. Un token muerto (usuario borrado, sesión
+    vencida) cuenta como invitado.
+  - `app/pages/cuenta_menu.py` arma el área de cuenta del header: con sesión muestra el nombre, el
+    acceso al panel si el rol es admin y "Salir"; sin sesión, "Iniciar sesión" y "Crear cuenta".
+    Toda página usa `nav_de_cuenta()`.
+  - **Trampa encontrada:** el plugin `do_logout()` borra las filas de la base pero deja el token en
+    el navegador (`self.auth_token = self.auth_token`, un no-op). Acá se limpia a mano.
+  - **Trampa encontrada:** cada substado de `LocalAuthState` tiene su propia copia de
+    `auth_token`; tras el login el header seguía mostrando al usuario anterior hasta el refresco
+    de 10 minutos. `LoginEstado.enviar` le pasa el token nuevo a `SesionEstado`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-018.
 - **Depende de:** T-020
@@ -100,9 +120,9 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-023 · Guardas de rutas por rol
 
-- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 03
-- **Archivos:** `app/service/sesion_servicio.py`, `tests/test_sesion_rol.py`, `app/app.py`
-  (registro de rutas, todavía sin tocar)
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 03
+- **Archivos:** `app/service/sesion_servicio.py`, `tests/test_sesion_rol.py`,
+  `app/state/admin_estado.py`, `app/pages/no_autorizado_pagina.py`, `app/app.py`
 - **Problema:** cualquier visitante puede abrir las rutas del admin por URL. Las páginas de usuario
   no exigen login de forma consistente.
 - **Decisión (D-021):** invitado → login con `redirect_to`; sin permiso → 403; chequeo server-side.
@@ -115,18 +135,33 @@ que las contraseñas no se guarden en texto plano.
     ausencia de perfil.
   - `tests/test_sesion_rol.py` (8 tests): sin token, token desconocido, sesión vencida, comprador,
     admin, guarda por rol, guarda sin roles y cuenta sin perfil.
+- **Qué se hizo (2026-10-31, UI y guardas):**
+  - `AdminEstado` es la base de las cuatro pantallas del panel: `_iniciar` resuelve el rol antes de
+    pintar y `_exigir_admin` se repite en cada acción que escribe (cambiar estado, responder,
+    eliminar), así una sesión vencida con la página abierta no puede operar.
+  - **Trampa encontrada:** en Reflex un `EventHandler` heredado queda atado a la clase que lo
+    define (`EventHandler.state`). El `on_load` de la base corría sobre una instancia de
+    `AdminEstado` y llamaba al `_cargar` base (`NotImplementedError`); el detalle quedaba vacío.
+    Cada subclase declara su `on_load`/`reintentar` sobre `_iniciar`. `tests/test_arquitectura.py`
+    lo verifica sobre el AST.
+  - Invitado → `/login?next=<ruta>`; comprador → `/403`; admin → la pantalla. Verificado a mano con
+    las tres cuentas.
+  - El header del panel no muestra el carrito (`nav_de_cuenta(cart=False)`) y sí el acceso a las
+    secciones y el "Salir" de T-021.
 - **AC propuestos:**
-  - [ ] `on_load` valida sesión y rol en cada ruta protegida.
-        **Pendiente:** la guarda existe en el servicio; falta el estado base y las rutas de admin
-        (T-051/T-052).
-  - [ ] Invitado → login; usuario sin permiso → página 403; admin OK.
-        **Pendiente:** falta la página 403 y el registro de rutas en `app/app.py`.
+  - [x] `on_load` valida sesión y rol en cada ruta protegida.
+        → `AdminEstado._iniciar`, declarado en `PedidosAdminEstado`, `PedidoAdminEstado`,
+        `ConsultasAdminEstado` y `ConsultaAdminEstado`.
+  - [x] Invitado → login; usuario sin permiso → página 403; admin OK.
+        → verificado en el navegador: invitado en `/admin/pedidos` termina en
+        `/login?next=/admin/pedidos`; el comprador demo en `/403`; el admin ve el listado.
   - [x] La validación es server-side (no solo ocultar botones).
         → `rol()` consulta la base en cada llamada; no hay ninguna var de rol en el cliente.
-  - [ ] Tests manuales con URL directa para cada rol.
-        **Pendiente:** no hay ruta protegida que probar todavía.
-  - [ ] El admin tiene su panel y no ve carrito/checkout.
-        **Pendiente:** el panel de admin es T-051/T-052; las páginas viejas se borraron en T-060.
+  - [x] Tests manuales con URL directa para cada rol.
+        → las tres cuentas sobre `/admin/pedidos` y `/admin/pedidos/1`.
+  - [x] El admin tiene su panel y no ve carrito/checkout.
+        → `/admin/pedidos`, `/admin/pedidos/[id]`, `/admin/consultas`,
+        `/admin/consultas/[id]`, sin link al carrito.
 - **Nota (corrección 2026-10-30):** los AC de esta tarea estaban marcados `[x]` sobre las páginas
   anteriores al rediseño. Esas páginas ya no existen (T-060), así que hoy no hay ninguna ruta
   protegida: se destildó lo que no se puede verificar en el código actual.

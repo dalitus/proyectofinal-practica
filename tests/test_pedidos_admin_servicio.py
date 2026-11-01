@@ -273,6 +273,21 @@ def test_detalle_de_pedido_inexistente_falla() -> None:
     assert "No existe el pedido #9999" in str(error.value)
 
 
+def test_las_acciones_del_detalle_salen_del_ciclo_de_vida() -> None:
+    """La pagina pinta solo transiciones validas; no inventa botones (T-044)."""
+    assert pedido_servicio.estados_siguientes("en espera") == [
+        {"valor": "enviado", "texto": "Enviado"},
+        {"valor": "cancelado", "texto": "Cancelado"},
+    ]
+    assert [opcion["valor"] for opcion in pedido_servicio.estados_siguientes("enviado")] == [
+        "entregado",
+        "cancelado",
+    ]
+    assert pedido_servicio.estados_siguientes("entregado") == []
+    assert pedido_servicio.estados_siguientes("cancelado") == []
+    assert pedido_servicio.estados_siguientes("inventado") == []
+
+
 def test_el_filtro_usa_los_estados_del_ciclo_de_vida() -> None:
     """El panel no inventa estados: ofrece los mismos de TRANSICIONES (T-044)."""
     assert [opcion["valor"] for opcion in opciones_de_estado()] == list(ESTADOS_DE_PEDIDO)
