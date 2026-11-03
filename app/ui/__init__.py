@@ -1,6 +1,7 @@
 """UI components and tokens. Source of truth: docs/design.md."""
 
 from app.ui.feedback import ConfirmDialog, Drawer, Skeleton, Toast
+from app.ui.imagenes import src_de_imagen
 from app.ui.layout import (
     AdminTabs,
     AppShell,
@@ -19,6 +20,7 @@ from app.ui.primitives import (
     ButtonLink,
     Card,
     EmptyState,
+    ImageField,
     Input,
     Select,
     SizeChip,
@@ -46,6 +48,7 @@ __all__ = [
     "FONT",
     "FONT_HEAD_COMPONENTS",
     "Footer",
+    "ImageField",
     "Input",
     "PageHeader",
     "RADIUS",
@@ -53,6 +56,7 @@ __all__ = [
     "SPACE",
     "Select",
     "SizeChip",
+    "src_de_imagen",
     "Skeleton",
     "TYPE",
     "Toast",

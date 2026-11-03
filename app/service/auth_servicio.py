@@ -194,3 +194,67 @@ def perfil_por_email(email: str) -> UserProfile | None:
         return session.exec(
             select(UserProfile).where(UserProfile.email == limpio)
         ).one_or_none()
+
+
+def cambiar_password(
+    local_user_id: int,
+    *,
+    password_actual: str,
+    password_nueva: str,
+) -> None:
+    """Change a user's password, validating the current one first."""
+    with get_session() as session:
+        usuario = session.get(LocalUser, local_user_id)
+        if usuario is None:
+            raise ValueError("No existe el usuario.")
+        if not usuario.verify(password_actual):
+            raise ValueError("La contraseña actual es incorrecta.")
+
+        password_limpia = validar_password(password_nueva)
+        usuario.password_hash = LocalUser.hash_password(password_limpia)
+        session.add(usuario)
+        session.commit()
+
+
+def desactivar_usuario(local_user_id: int) -> None:
+    """Disable a user while protecting the last administrator.
+
+    A store must keep at least one enabled admin account. If the user is admin and
+    it is the last enabled admin, the action is rejected.
+    """
+    with get_session() as session:
+        usuario = session.get(LocalUser, local_user_id)
+        if usuario is None:
+            raise ValueError("No existe el usuario.")
+
+        perfil = session.exec(
+            select(UserProfile).where(UserProfile.local_user_id == local_user_id)
+        ).one_or_none()
+
+        if perfil is not None and perfil.is_admin:
+            admins = session.exec(
+                select(UserProfile).where(UserProfile.is_admin.is_(True))
+            ).all()
+            admins_habilitados = [
+                admin
+                for admin in admins
+                if session.get(LocalUser, admin.local_user_id) is not None
+                and session.get(LocalUser, admin.local_user_id).enabled
+            ]
+            if len(admins_habilitados) <= 1:
+                raise ValueError("No se puede desactivar al último administrador.")
+
+        usuario.enabled = False
+        session.add(usuario)
+        session.commit()
+
+
+def activar_usuario(local_user_id: int) -> None:
+    """Re-enable a disabled user account."""
+    with get_session() as session:
+        usuario = session.get(LocalUser, local_user_id)
+        if usuario is None:
+            raise ValueError("No existe el usuario.")
+        usuario.enabled = True
+        session.add(usuario)
+        session.commit()

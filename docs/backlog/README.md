@@ -38,44 +38,44 @@
 
 | ID | Título | Épica | Prioridad | Estado |
 |---|---|---|---|---|
-| T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | en curso |
+| T-001 | La app no arranca en producción (`@rx.event`) | 01 Arranque | P0 | hecha |
 | T-002 | Configuración única de base de datos y engine | 01 Arranque | P0 | hecha |
 | T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | hecha |
-| T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | en curso |
+| T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | hecha |
 | T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |
 | T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | lista |
-| T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | en curso |
+| T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | hecha |
 | T-011 | Identidad y rol del administrador | 02 Datos | P0 | lista |
 | T-012 | Integridad de datos (FK, cascadas, unique email) | 02 Datos | P1 | lista |
-| T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | en curso |
+| T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | hecha |
 | T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | lista |
 | T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | lista |
 | T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | hecha |
 | T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | hecha |
 | T-023 | Guardas de rutas por rol | 03 Sesión | P0 | hecha |
-| T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | en curso |
+| T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | hecha |
 | T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | hecha |
 | T-031 | Detalle de producto por URL (refresh-safe) | 04 Catálogo | P1 | hecha |
 | T-032 | Precio final y formato en la UI | 04 Catálogo | P1 | lista |
 | T-033 | Visibilidad, filtros y orden del catálogo | 04 Catálogo | P2 | hecha |
-| T-034 | Imágenes: placeholder, upload, Drive, create/edit | 04 Catálogo | P1 | lista |
+| T-034 | Imágenes: placeholder, upload, Drive, create/edit | 04 Catálogo | P1 | hecha |
 | T-040 | Estado único de carrito y vars inexistentes | 05 Carrito | P1 | hecha |
 | T-041 | Política de invitados vs logueados en carrito | 05 Carrito | P1 | hecha |
 | T-042 | Validación y descuento de stock | 05 Carrito | P1 | hecha |
 | T-043 | Checkout: datos de entrega y creación de pedido | 05 Carrito | P1 | hecha |
 | T-044 | Ciclo de vida y estados del pedido | 05 Carrito | P1 | hecha |
 | T-045 | Eliminar consulta automática al comprar | 05 Carrito | P2 | hecha |
-| T-050 | CRUD de productos y variantes (color + talle) | 06 Admin | P1 | lista |
+| T-050 | CRUD de productos y variantes (color + talle) | 06 Admin | P1 | hecha |
 | T-051 | Administración de pedidos | 06 Admin | P1 | hecha |
 | T-052 | Administración de consultas | 06 Admin | P1 | hecha |
-| T-053 | Operaciones sensibles y auditoría mínima | 06 Admin | P2 | en curso |
+| T-053 | Operaciones sensibles y auditoría mínima | 06 Admin | P2 | hecha |
 | T-060 | Eliminar estados duplicados y código muerto | 07 Arquitectura | P1 | hecha |
 | T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | lista |
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | hecha |
 | T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | hecha |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | lista |
-| T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | en curso |
+| T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | hecha |
 | T-071 | Lint, formato, pre-commit y CI | 08 Calidad | P2 | lista |
 | T-072 | Documentación y `.env.example` | 08 Calidad | P2 | lista |
 | T-073 | Revisión de secretos y `.gitignore` | 08 Calidad | P0 | hecha |

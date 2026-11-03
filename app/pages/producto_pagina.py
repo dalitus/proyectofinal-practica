@@ -27,6 +27,7 @@ from app.ui import (
     EmptyState,
     SizeChip,
     Skeleton,
+    src_de_imagen,
 )
 
 
@@ -41,7 +42,7 @@ def _media() -> rx.Component:
         rx.cond(
             DetalleEstado.producto["imagen"] != "",
             rx.image(
-                src=DetalleEstado.producto["imagen"],
+                src=src_de_imagen(DetalleEstado.producto["imagen"]),
                 alt=DetalleEstado.producto["nombre"],
                 class_name="ui-detail__image",
             ),

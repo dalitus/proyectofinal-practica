@@ -26,6 +26,7 @@ from app.ui import (
     PageHeader,
     Select,
     Skeleton,
+    src_de_imagen,
 )
 
 # design.md 4.3: the grid renders 8 skeletons while loading.
@@ -129,7 +130,7 @@ def _tarjeta(producto: Any) -> rx.Component:
                 rx.cond(
                     producto["imagen"] != "",
                     rx.image(
-                        src=producto["imagen"],
+                        src=src_de_imagen(producto["imagen"]),
                         alt=producto["nombre"],
                         loading="lazy",
                         class_name="ui-product__image",

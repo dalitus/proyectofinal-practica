@@ -1239,6 +1239,107 @@ _MOTION = """
 }
 """
 
+# CRUD de productos (T-050): formulario en dos columnas, filas de variantes y
+# zona de carga de imagen. Mismas variables que el resto del sistema.
+_ADMIN_PRODUCTOS = """
+.ui-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .ui-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ui-form-grid__full { grid-column: 1 / -1; }
+}
+
+.ui-field__help {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.ui-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  text-align: center;
+}
+
+.ui-upload:hover { border-color: var(--color-muted); }
+
+.ui-upload__hint {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.ui-upload__current {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.ui-upload__preview {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.ui-variant-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ui-variant-row:last-child { border-bottom: 0; }
+
+@media (min-width: 900px) {
+  .ui-variant-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 120px auto;
+    gap: var(--space-md);
+    align-items: start;
+  }
+}
+
+.ui-variant-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+  padding-top: var(--space-xs);
+}
+
+.ui-variant-row__error {
+  font-size: var(--text-caption);
+  color: var(--color-danger);
+}
+
+.ui-variant-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-sm);
+  align-items: end;
+  padding-top: var(--space-md);
+}
+
+@media (min-width: 900px) {
+  .ui-variant-add {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 120px auto;
+    gap: var(--space-md);
+  }
+}
+"""
+
 APP_CSS = "\n".join(
     [
         ":root {",
@@ -1253,6 +1354,7 @@ APP_CSS = "\n".join(
         _CARRITO,
         _CHECKOUT,
         _ADMIN,
+        _ADMIN_PRODUCTOS,
         _MOTION,
     ]
 )

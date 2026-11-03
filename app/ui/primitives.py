@@ -127,7 +127,11 @@ def Input(
     The label is always visible (docs/design.md 7: no placeholder-as-label) and
     ``aria-invalid`` follows ``error`` so the border and the screen reader agree.
     """
-    element_id = input_id or f"ui-input-{next(_INPUT_IDS)}"
+    # El id puede ser un Var (filas de variantes generadas en un foreach),
+    # asi que no se puede usar ``or`` aca: un Var no tiene valor booleano.
+    element_id = (
+        input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
+    )
 
     if error is None:
         invalid = False
@@ -246,7 +250,11 @@ def Select(
     comes from the database. The native element keeps keyboard and
     assistive-technology behaviour for free.
     """
-    element_id = input_id or f"ui-input-{next(_INPUT_IDS)}"
+    # El id puede ser un Var (filas de variantes generadas en un foreach),
+    # asi que no se puede usar ``or`` aca: un Var no tiene valor booleano.
+    element_id = (
+        input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
+    )
 
     if error is None:
         invalid = False
@@ -396,3 +404,73 @@ def EmptyState(
         children.append(action)
 
     return rx.el.div(*children, class_name=_join("ui-empty", class_name))
+
+
+def ImageField(
+    *,
+    upload_id: str,
+    on_drop: Any,
+    on_clear: Any,
+    preview: Any = "",
+    error: Any = None,
+    label: str = "Imagen",
+    help_text: str = "JPG, PNG o WebP de hasta 2 MB.",
+    alt: str = "Vista previa de la imagen del producto",
+) -> rx.Component:
+    """Image picker: drop zone, preview and the inline error.
+
+    ``rx.upload`` is only the file picker; what it accepts is revalidated on the
+    server (D-015), so ``accept`` here is an aid, not the rule. The preview is an
+    ``img`` with an ``alt`` that describes the product image (design.md 7).
+    """
+    if error is None:
+        invalid: Any = False
+        error_text: Any = ""
+    elif isinstance(error, rx.Var):
+        invalid = error != ""
+        error_text = error
+    else:
+        invalid = bool(error)
+        error_text = error
+
+    return rx.el.div(
+        rx.el.span(label, class_name="ui-field__label"),
+        rx.upload(
+            rx.el.span(
+                "Arrastra una imagen o hace click para elegirla.",
+                class_name="ui-upload__hint",
+            ),
+            id=upload_id,
+            multiple=False,
+            max_files=1,
+            accept={
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/png": [".png"],
+                "image/webp": [".webp"],
+            },
+            on_drop=on_drop,
+            class_name="ui-upload",
+            **{"aria-invalid": invalid},
+        ),
+        rx.el.span(help_text, class_name="ui-field__help"),
+        rx.cond(
+            preview != "",
+            rx.el.div(
+                rx.el.img(
+                    src=preview,
+                    alt=alt,
+                    class_name="ui-upload__preview",
+                ),
+                Button("Quitar imagen", variant="ghost", on_click=on_clear),
+                class_name="ui-upload__current",
+            ),
+            rx.fragment(),
+        ),
+        rx.cond(
+            error_text != "",
+            rx.el.span(error_text, class_name="ui-field__error", role="alert"),
+            rx.fragment(),
+        ),
+        class_name="ui-field",
+    )
+

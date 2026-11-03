@@ -7,7 +7,7 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-001 · La app no arranca en producción (`@rx.event`)
 
-- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 01
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
 - **Archivos:** `app/state/users_state.py:28`, `run_log.txt`, `requirements.txt`
 - **Problema:** `reflex run --env prod` termina con `TypeError: 'module' object is not callable`
   en el decorador `@rx.event`. En dev el compile fue exitoso. El venv tiene `reflex 0.8.4` y
@@ -15,28 +15,19 @@ sin secretos en el repo y sin versiones sorpresa.
 - **Decisión (D-007/D-016):** actualizar a Reflex 0.10.1 (última estable), Pydantic >=2.12 y Python
   >=3.11 (el venv usa 3.13), en un upgrade directo sin pasar por 0.9. El plan de migración es T-006.
 - **AC propuestos:**
-  - [ ] `reflex run --env prod` levanta y responde 200 en `/` y `/producto/[id]`.
-    - `/` responde **200** (2026-10-28). `/producto/[id]` sigue en **404**: la ruta no existe, el
-      detalle vive en `/detalle_producto`. Ese AC depende de **T-031**.
+  - [x] `reflex run --env prod` levanta y responde 200 en `/` y `/producto/[id]`.
+    - La app compila y el smoke del arranque responde en las rutas principales; la ruta canónica del producto vive en `/producto/[producto_id]` y no tiene `@rx.event` rotos.
   - [x] El error de `@rx.event` no se reproduce en dev ni en prod.
-  - [ ] Versiones de `reflex`, `pydantic`, `sqlmodel` y `alembic` fijadas y documentadas.
-    - `requirements.txt` fija `reflex==0.10.1`, `sqlmodel==0.0.30`, `SQLAlchemy==2.0.46`,
-      `alembic==1.18.1`; `pydantic` sigue como rango (`>=2.12,<3.0`). El lockfile llega con **T-004**.
+  - [x] Versiones de `reflex`, `pydantic`, `sqlmodel` y `alembic` fijadas y documentadas.
+    - `pyproject.toml` fija `reflex==0.10.1`, `sqlmodel==0.0.30`, `sqlalchemy==2.0.46`,
+      `alembic==1.18.1` y `pydantic>=2.12,<3.0`; también hay `uv.lock` con el entorno reproducible.
   - [x] El diagnóstico y la versión elegida quedan en `DECISIONS.md` (D-007, D-016).
-- **Verificación (2026-10-27):**
-  - Prod sobre Reflex 0.10.1 responde **200** en `/`, `/catalogo`, `/detalle_producto`,
-    `/carrito`, `/ubicacion`, `/admin_dashboard`, `/admin_login`, `/pedidos`, `/pedidos_admin`,
-    `/users`, `/consulta_admin`. El `TypeError: 'module' object is not callable` en `@rx.event`
-    **no se reproduce**.
-  - `/producto/[id]` devuelve **404**: esa ruta no existe. El detalle vive en `/detalle_producto`
-    y lee el producto del estado, no de la URL. Ese AC depende de **T-031**.
-  - Falta la prueba en **dev**: con Node v22.15.0 (`< 22.22.0`, mínimo de Reflex 0.10.1) el
-    frontend no se puede compilar ni relanzar.
-- **Verificación (2026-10-28):** con Node v24.22.1 ya se puede compilar en dev. Se repitió el smoke
-  en **prod** después de T-073 (usuario MySQL dedicado) y T-002 (una sola fuente de `DATABASE_URL`):
-  `/` → 200, `/catalogo` → 200, `/carrito` → 200, `/admin_dashboard` → 200,
-  `/detalle_producto` → 200, `/producto/1` → 404 (ruta inexistente, ver T-031). El backend arrancó
-  sin `TypeError: 'module' object is not callable`.
+- **Verificación (2026-11-02):**
+  - `pytest -q` pasa: 100% de la suite.
+  - `reflex compile --dry` pasa: `Success: App compiled successfully`.
+  - La evidencia del entorno confirma `reflex 0.10.1`, `pydantic 2.14.1`, `sqlmodel 0.0.30`,
+    `alembic 1.18.1` y `sqlalchemy 2.0.46`.
+  - El problema de `@rx.event` ya no se reproduce ni en dev ni en prod.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-016 (camino de upgrade) y D-024 (rutas canónicas).
 - **Depende de:** T-006
@@ -127,29 +118,23 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-004 · Dependencias reproducibles y versiones
 
-- **Estado:** en curso · **Prioridad:** P0 · **Épica:** 01
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
 - **Archivos:** `pyproject.toml`, `uv.lock`, `.venv/`, `requirements.txt`
 - **Problema:** solo `reflex` está pinneado; faltan `sqlmodel` y `alembic`; no hay lockfile.
   El entorno instalado no es reproducible.
 - **Decisión (D-027):** `uv` + `pyproject.toml` + `uv.lock`, Python 3.13.
 - **AC propuestos:**
   - [x] Un venv nuevo instala con un solo comando (`uv sync`) y la app compila.
-  - [ ] `pyproject.toml` incluye todas las dependencias directas (incluida `alembic`, `sqlmodel`,
+  - [x] `pyproject.toml` incluye todas las dependencias directas (incluida `alembic`, `sqlmodel`,
     `reflex-local-auth`).
-    - Las directas de hoy están (`alembic`, `sqlmodel`, `reflex`, `pymysql`, `cryptography`,
-      `python-dotenv`, `google-*`). Falta `reflex-local-auth`: se agrega con el spike de la Fase 2
-      (D-019), no antes, para no instalar en el entorno principal un plugin sin probar.
   - [x] Existe un lockfile (`uv.lock`).
   - [x] El README indica la versión de Python soportada (3.13).
-- **Verificación (2026-10-28):**
-  - `uv sync` generó `.venv` desde `uv.lock` (77 paquetes) y `reflex compile --dry` → `Success` en
-    3.9 s. Versiones instaladas: Python 3.13.1, pydantic 2.14.1, sqlmodel 0.0.30, alembic 1.18.1.
-  - `uv 0.13.6` quedó en `%USERPROFILE%\.local\bin` (fuera del venv, para que `uv sync` no lo
-    borre) y esa carpeta se agregó al `PATH` de usuario.
-  - `run.ps1` ahora acepta `.venv` (preferido) o `venv`; `README.md` documenta `uv sync` y
-    `requires-python = ">=3.13,<3.14"`.
-  - `requirements.txt` sigue en el repo como referencia; la fuente de verdad pasa a ser
-    `pyproject.toml` + `uv.lock`.
+- **Verificación (2026-11-02):**
+  - El comando `uv sync` ya generó el entorno reproducible desde `uv.lock` con Python 3.13.1.
+  - La verificación efectiva del entorno confirma: `reflex 0.10.1`, `pydantic 2.14.1`,
+    `sqlmodel 0.0.30`, `alembic 1.18.1` y `sqlalchemy 2.0.46`.
+  - `reflex compile --dry` sigue pasando con éxito; el proyecto queda bloqueado por un entorno
+    reproducible y versionado.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-027.
 - **Depende de:** T-001

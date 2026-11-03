@@ -23,6 +23,7 @@ from app.ui import (
     EmptyState,
     PageHeader,
     Skeleton,
+    src_de_imagen,
 )
 
 # Misma forma que una linea real: miniatura alta y tres renglones.
@@ -35,7 +36,7 @@ def _miniatura(linea: Any) -> rx.Component:
         rx.cond(
             linea["imagen"] != "",
             rx.image(
-                src=linea["imagen"],
+                src=src_de_imagen(linea["imagen"]),
                 alt=linea["nombre"],
                 loading="lazy",
                 class_name="ui-cart__image",

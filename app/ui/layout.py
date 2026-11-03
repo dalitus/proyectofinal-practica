@@ -74,9 +74,10 @@ def TopNav(
     )
 
 
-# Secciones del panel que ya existen. Productos llega con T-050 y se agrega aca,
-# no como un link muerto en la navegacion.
+# Secciones del panel que existen. Agregar una aca la vuelve navegable en todas
+# las pantallas del admin; no hay links muertos.
 SECCIONES_DE_ADMIN = (
+    ("productos", "Productos", "/admin/productos"),
     ("pedidos", "Pedidos", "/admin/pedidos"),
     ("consultas", "Consultas", "/admin/consultas"),
 )

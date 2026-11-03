@@ -53,7 +53,7 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 ## D-004 · Stock
 
 - **Tarea:** T-042
-- **Estado:** decidida (queda abierta la granularidad en T-050)
+- **Estado:** decidida (la granularidad quedó cerrada en D-049)
 - **Opciones:** reservar en checkout / descontar al confirmar / permitir sobreventa
 - **Decisión:** se valida stock al agregar y se revalida al confirmar. El descuento se hace en una
   transacción al crear el pedido; si no alcanza, el pedido no se crea y se informa el producto que
@@ -834,3 +834,29 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 - **Consecuencias:** migración `c4d8f1a9e2b6` altera las dos columnas; el listado del admin sigue
   mostrando un resumen de 140 caracteres para que la tabla no crezca con mensajes largos.
 - **Fecha:** 2026-10-30
+
+---
+
+## D-049 · CRUD de productos: variantes por fila e imagen local
+
+- **Tarea:** T-050
+- **Estado:** decidida
+- **Opciones:** matriz color × talle / filas por variante
+- **Decisión:**
+  - Las variantes se editan **por filas**: cada fila es una combinación `(color, talle)` con su
+    stock, su botón de guardar y su botón de eliminar, más un bloque aparte para agregar una nueva.
+  - El alta guarda el producto y sus variantes en una sola transacción: si una fila repite
+    `(color, talle)` o el stock no es válido, no se escribe nada.
+  - La imagen se sube con `rx.upload`, se valida en el servidor (JPG, PNG o WebP de hasta 2 MB) y
+    se guarda con nombre único en el directorio de subidas de Reflex (`uploaded_files/`), que el
+    framework sirve en `/_upload/<archivo>`; la DB persiste esa ruta relativa.
+- **Motivo:** una fila es una operación (crear, editar o borrar una variante) y se audita como tal;
+  la matriz obliga a guardar celdas que nadie tocó y esconde qué cambió. Para la imagen,
+  `upload_dir` de `rx.Config` ya no se usa en Reflex 0.10.1: `rx.get_upload_dir()` devuelve
+  `uploaded_files/` y la app monta ahí `StaticFiles` en `/_upload/`, así que guardar en
+  `assets/uploads/` obligaría a esperar una recompilación para ver el archivo.
+- **Consecuencias:** la ruta `assets/uploads/` de D-015 queda reemplazada por la carpeta de subidas
+  de Reflex; el formulario de alta (`/admin/productos/nuevo`) y el de edición
+  (`/admin/productos/[producto_id]`) son pantallas distintas y no comparten modal; el borrado del
+  producto es lógico (`activo`, D-028) y la reactivación también se audita.
+- **Fecha:** 2026-11-01

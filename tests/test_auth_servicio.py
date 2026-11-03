@@ -13,7 +13,9 @@ from sqlmodel import Session, select
 from app.model import UserProfile
 from app.service.auth_servicio import (
     ErrorDeRegistro,
+    cambiar_password,
     crear_admin_si_no_existe,
+    desactivar_usuario,
     normalizar_email,
     obtener_perfil,
     perfil_por_email,
@@ -121,3 +123,54 @@ def test_obtener_perfil_por_id_de_usuario() -> None:
     assert encontrado is not None
     assert encontrado.email == "buscar@example.com"
     assert obtener_perfil(999999) is None
+
+
+def test_cambiar_password_actualiza_hash_con_la_contrasena_nueva(
+    session: Session,
+) -> None:
+    perfil = registrar_comprador(email="clave@example.com", password="Clave-12345")
+
+    cambiar_password(
+        perfil.local_user_id,
+        password_actual="Clave-12345",
+        password_nueva="Clave-Nueva-999",
+    )
+
+    usuario = session.exec(
+        select(LocalUser).where(LocalUser.id == perfil.local_user_id)
+    ).one()
+    assert usuario.verify("Clave-Nueva-999") is True
+    assert usuario.verify("Clave-12345") is False
+
+    with pytest.raises(ValueError, match="actual"):
+        cambiar_password(
+            perfil.local_user_id,
+            password_actual="incorrecta",
+            password_nueva="Otra-Clave-1",
+        )
+
+
+def test_ultimo_admin_no_se_puede_desactivar(session: Session) -> None:
+    created = crear_admin_si_no_existe(
+        email="admin1@zapateria.com", password="Secreta-123"
+    )
+    assert created is True
+    admin1 = perfil_por_email("admin1@zapateria.com")
+    assert admin1 is not None
+
+    with pytest.raises(ValueError, match="último administrador"):
+        desactivar_usuario(admin1.local_user_id)
+
+    created_2 = crear_admin_si_no_existe(
+        email="admin2@zapateria.com", password="Secreta-456"
+    )
+    assert created_2 is True
+    admin2 = perfil_por_email("admin2@zapateria.com")
+    assert admin2 is not None
+
+    desactivar_usuario(admin2.local_user_id)
+
+    usuario = session.exec(
+        select(LocalUser).where(LocalUser.id == admin2.local_user_id)
+    ).one()
+    assert usuario.enabled is False

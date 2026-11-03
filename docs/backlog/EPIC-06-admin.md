@@ -7,26 +7,31 @@ poder romper la integridad del negocio.
 
 ## T-050 · CRUD de productos y variantes (color + talle)
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 06
-- **Archivos:** `pages/adnmin_shouder_page.py:14-237,274-493`,
-  `service/producto_servicio.py`, `service/servicio_stock.py`
-- **Problema:** crear y editar comparten estado de modal (`agregar_color` abre el modal de edición),
-  el campo de imagen no coincide (`imagen_url` vs `imagen`), y el borrado de stocks se hace a mano
-  fuera de una transacción.
-- **Decisión (D-009/D-015/D-023):** variante `(producto, color, talle)`; una imagen local por
-  producto; categoría fija + marca libre.
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 06
+- **Archivos:** `app/repository/producto_repositorio.py`, `app/service/producto_servicio.py`,
+  `app/service/imagen_servicio.py`, `app/state/productos_admin_estado.py`,
+  `app/pages/productos_admin_pagina.py`, `app/pages/producto_nuevo_pagina.py`,
+  `app/pages/producto_admin_pagina.py`, `tests/test_productos_admin_servicio.py`
+- **Problema:** crear y editar compartían estado de modal (`agregar_color` abría el modal de
+  edición), el campo de imagen no coincidía (`imagen_url` vs `imagen`), y el borrado de stocks se
+  hacía a mano fuera de una transacción. Las páginas viejas se borraron en T-060 y la pantalla se
+  rehace sobre la arquitectura actual.
+- **Decisión (D-009/D-015/D-023/D-028/D-049):** variante `(producto, color, talle)` editada por
+  filas; una imagen local por producto; categoría fija + marca libre; borrado lógico del producto.
 - **AC propuestos:**
   - [x] Modelo de variante `(producto, color, talle)` con cantidad y unique compuesto.
   - [x] `Producto` sin `talle`; la DB se recrea (D-012), no hay migración de datos.
-  - [x] El admin crea/edita/elimina variantes y el borrado del producto limpia sus variantes.
   - [x] Carrito y pedido referencian la variante, no solo el producto.
   - [x] El detalle permite elegir color + talle antes de agregar al carrito.
-  - [x] Crear y editar son flujos separados y no se pisan.
-  - [x] Los campos del formulario coinciden con el modelo.
-  - [x] Errores de validación visibles y sin perder lo cargado.
   - [x] Categoría desde tabla `Categoria`; marca como texto libre.
+  - [x] El admin crea/edita/elimina variantes por fila, y dar de baja el producto no borra filas.
+  - [x] Crear y editar son pantallas separadas y no comparten estado de formulario.
+  - [x] Los campos del formulario coinciden con el modelo (precio, categoría, imagen, marca).
+  - [x] Errores de validación visibles junto al campo y sin perder lo cargado.
+  - [x] La imagen se sube con `rx.upload` y se valida en el servidor (JPG/PNG/WebP, ≤ 2 MB).
+  - [x] El producto se desactiva con confirmación y se puede reactivar; ambas operaciones se auditan.
 - **Grill / preguntas abiertas:**
-  - Ninguna: cerrado en D-009, D-015 y D-023.
+  - Ninguna: cerrado en D-009, D-015, D-023, D-028 y D-049.
 - **Depende de:** T-010, T-034
 
 ---
@@ -136,9 +141,10 @@ poder romper la integridad del negocio.
 
 ## T-053 · Operaciones sensibles y auditoría mínima
 
-- **Estado:** en curso · **Prioridad:** P2 · **Épica:** 06
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 06
 - **Archivos:** `app/service/auditoria.py`, `app/service/pedido_servicio.py`,
-  `app/service/consulta_servicio.py`, `tests/test_auditoria.py`
+  `app/service/consulta_servicio.py`, `app/service/producto_servicio.py`,
+  `tests/test_auditoria.py`, `tests/test_auth_servicio.py`
 - **Problema:** operaciones destructivas (borrar producto, cambiar estado, borrar consulta) no
   dejan rastro ni tienen protecciones más allá de un diálogo.
 - **Decisión (D-031):** logging estructurado por operación sensible; sin tabla de auditoría;
@@ -150,32 +156,25 @@ poder romper la integridad del negocio.
   - `cambiar_estado` registra `cambiar_estado` con el detalle `en espera -> enviado`;
     `cancelar_pedido` registra su propia acción `cancelar_pedido` (D-031 las distingue).
   - `responder` y `eliminar` de consultas registran `responder_consulta` y `eliminar_consulta`.
-  - `admin_id` es opcional mientras no exista la guarda de rol (T-023): se audita aunque falte el
-    autor, con `admin_id: null`.
-  - `tests/test_auditoria.py` (7 tests): campos de la línea, acción propia de cancelar, transición
-    rechazada sin rastro, respuesta, borrado, operación sin autor y destino en archivo.
-- **Qué se hizo (2026-10-31, destino del log):**
-  - **Trampa encontrada:** Reflex no configura el logging de la aplicación. El `logger.info` de
-    `app.auditoria` no tenía handler y la línea se perdía al ejecutar: la auditoría existía en el
-    código y no dejaba rastro. `auditoria.configurar_destino()` agrega un `FileHandler` a
-    `logs/auditoria.log` (una línea JSON por operación) y `app/app.py` lo llama al arrancar.
-  - La línea sigue propagando al logging normal, así que `caplog` la ve sin conocer el archivo; el
-    test nuevo verifica la escritura y que configurar dos veces no duplique líneas.
-  - Verificado con el panel real: `responder_consulta` y `eliminar_consulta` quedaron en el archivo
-    con `admin_id` 6.
+  - `crear_producto`, `actualizar_producto`, `agregar_variante`, `actualizar_variante`,
+    `eliminar_variante`, `desactivar_producto` y `reactivar_producto` registran auditoría
+    quedando el flujo de productos completo.
+- **Qué se hizo (2026-11-02, cierre real):**
+  - `desactivar_usuario()` no permite desactivar al último admin activo, protegiendo el
+    bootstrap de la tienda.
+  - `cambiar_password()` valida la contraseña actual antes de rehashing y actualiza la credencial
+    con la nueva contraseña.
+  - El archivo `logs/auditoria.log` sigue siendo el destino real, con `configurar_destino()`
+    invocado desde `app/app.py` y con idempotencia en el handler.
 - **AC propuestos:**
   - [x] Confirmación explícita en toda operación destructiva.
-        → `ConfirmDialog` en cancelar pedido, eliminar consulta y en cada cambio de estado.
-        **Pendiente:** el borrado lógico de productos (T-050) y de usuarios (T-024) heredan el
-        diálogo cuando existan esas pantallas.
+        → `ConfirmDialog` en cancelar pedido, eliminar consulta y cambio de estado.
   - [x] Registro estructurado (quién, qué, entidad, cuándo) en el log.
-        → línea JSON con los cinco campos, escrita en `logs/auditoria.log`; cubierto por
-        `tests/test_auditoria.py` (7 tests).
-  - [ ] Protección del último admin (T-024).
-        **Pendiente:** no hay borrado de usuarios todavía (T-024).
-  - [ ] Borrado lógico de productos y desactivación de usuarios (D-028).
-        **Parcial:** `Producto.activo` existe y el catálogo lo respeta; falta el CRUD (T-050) y la
-        baja de usuarios.
+        → línea JSON con los cinco campos, escrita en `logs/auditoria.log`.
+  - [x] Protección del último admin (T-024).
+        → `desactivar_usuario()` rechaza la desactivación si ese admin es el último habilitado.
+  - [x] Borrado lógico de productos y desactivación de usuarios (D-028).
+        → `cambiar_activo()` y `desactivar_usuario()` soportan el flujo real sin romper la regla del negocio.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-028, D-031 y D-024.
 - **Depende de:** T-012, T-024

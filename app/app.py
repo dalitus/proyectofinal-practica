@@ -32,6 +32,15 @@ from app.pages.pedido_admin_pagina import (  # noqa: F401  (registra "/admin/ped
 from app.pages.pedidos_admin_pagina import (  # noqa: F401  (registra "/admin/pedidos")
     pedidos_admin_pagina,
 )
+from app.pages.producto_admin_pagina import (  # noqa: F401  (registra "/admin/productos/[producto_id]")
+    producto_admin_pagina,
+)
+from app.pages.producto_nuevo_pagina import (  # noqa: F401  (registra "/admin/productos/nuevo")
+    producto_nuevo_pagina,
+)
+from app.pages.productos_admin_pagina import (  # noqa: F401  (registra "/admin/productos")
+    productos_admin_pagina,
+)
 from app.pages.producto_pagina import (  # noqa: F401  (registra "/producto/[producto_id]")
     producto_pagina,
 )

@@ -130,7 +130,7 @@ imágenes que no se rompan.
 
 ## T-034 · Imágenes: placeholder, upload, Drive, create/edit
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 04
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 04
 - **Archivos:** `pages/adnmin_shouder_page.py:108-110,198-201,383-385`,
   `service/producto_servicio.py:32-46,67-76`, `service/gdrive_service.py`,
   `rxconfig.py:12`, `assets/`

@@ -6,15 +6,15 @@
 
 ## T-070 · Tests de servicios y repositorios
 
-- **Estado:** en curso · **Prioridad:** P2 · **Épica:** 08
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 08
 - **Archivos:** `tests/conftest.py`, `tests/test_esquema.py`, `pyproject.toml`
 - **Problema:** no hay tests automatizados; los `test_*.py` de la raíz son scripts manuales.
 - **Decisión (D-036):** `pytest` contra MySQL `zapateria_test`; flujos críticos obligatorios.
 - **AC propuestos:**
   - [x] `pytest` corre en local con un comando.
-  - [ ] Tests de los flujos críticos: login, alta de producto, carrito, pedido, stock, consultas.
+  - [x] Tests de los flujos críticos: login, alta de producto, carrito, pedido, stock, consultas.
   - [x] DB de test aislada (`zapateria_test`) creada y limpiada por fixtures.
-  - [ ] Un test de smoke levanta la app/compila.
+  - [x] Un test de smoke levanta la app/compila.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-036.
 - **Verificación (2026-10-28):** `pytest` corre con un comando y da 19/19 en verde. Las fixtures

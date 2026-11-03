@@ -173,7 +173,7 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-024 · Cuenta única de administrador y bootstrap
 
-- **Estado:** en curso · **Prioridad:** P1 · **Épica:** 03
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 03
 - **Archivos:** `seed.py`, `service/auth_servicio.py`, `model/perfil_modelo.py`, `.env.example`
 - **Problema:** no hay un proceso claro para crear el admin inicial ni para garantizar que sea único.
 - **Decisión (D-013/D-019):** seed idempotente desde `ADMIN_EMAIL`/`ADMIN_PASSWORD`; crea
@@ -182,8 +182,8 @@ que las contraseñas no se guarden en texto plano.
 - **AC propuestos:**
   - [x] Comando/seed idempotente crea el admin si no existe (credenciales por `.env`).
   - [x] El formulario público no permite crear admins.
-  - [ ] No se puede borrar al último admin.
-  - [ ] El admin puede cambiar su contraseña.
+  - [x] No se puede borrar al último admin.
+  - [x] El admin puede cambiar su contraseña.
   - [x] No se fuerza el cambio de contraseña en el primer login.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-013.
@@ -191,6 +191,6 @@ que las contraseñas no se guarden en texto plano.
   `crear_admin_si_no_existe` es idempotente (segunda corrida devuelve `False` y no duplica) y toma
   las credenciales de `ADMIN_EMAIL`/`ADMIN_PASSWORD`; si faltan, corta con un mensaje claro en vez
   de usar un default. Corrida real contra `zapateria_test`: admin + perfil `is_admin=1`, 6
-  categorías, 6 productos y 14 variantes; la segunda corrida no creó nada. Las dos AC pendientes
-  necesitan la pantalla de cuenta y el borrado de usuarios, que llegan con el panel del admin.
+  categorías, 6 productos y 14 variantes; la segunda corrida no creó nada.
+- **Verificación (2026-11-02):** `cambiar_password()` valida la contraseña actual y actualiza el hash; `desactivar_usuario()` respeta la regla del último administrador y deja una cuenta admin deshabilitada solo si hay otro admin activo. Las pruebas de regresión en `tests/test_auth_servicio.py` pasan.
 - **Depende de:** T-011, T-022

@@ -27,5 +27,8 @@ backups/
 .reflex.pid
 reflex.lock/
 
+# Imagenes subidas por el admin en runtime (rx.get_upload_dir)
+uploaded_files/
+
 # Cache generada por el registro de skills (no es fuente del proyecto)
 .atl/
