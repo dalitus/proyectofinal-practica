@@ -35,18 +35,32 @@ consistente.
 
 ## T-061 · Registro único de rutas y URLs canónicas
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `app/app.py:21-33`, `pages/*.py` (`@rx.page`)
-- **Problema:** todas las páginas se registran dos veces (`@rx.page` + `app.add_page`), hay rutas
-  duplicadas (`/` vs `/catalogo`, `/user` vs `/users`) y warnings en el compile.
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
+- **Archivos:** `app/app.py`, `app/pages/*.py` (`@rx.page`),
+  `app/pages/redirecciones_pagina.py`, `app/pages/no_encontrada_pagina.py`
+- **Problema:** todas las páginas se registraban dos veces (`@rx.page` + `app.add_page`), había
+  rutas duplicadas (`/` vs `/catalogo`, `/user` vs `/users`) y warnings en el compile.
 - **Decisión (D-024):** `/` catálogo; `/login` + `/register`; `/producto/[id]`; redirects para
   rutas viejas; registro único con `@rx.page`.
+- **Qué se hizo (2026-11-03):**
+  - `app/app.py` solo importa los módulos de página: cada ruta se registra una vez con `@rx.page`.
+    El compile no emite "Page … is being redefined".
+  - `redirecciones_pagina.py` conserva los links viejos: `/catalogo` → `/`, `/users` y `/user` →
+    `/login`, `/detalle_producto` → `/` (el detalle canónico necesita un id en la URL y la pantalla
+    vieja lo leía del estado, así que sin id no hay destino posible).
+  - `no_encontrada_pagina.py` registra `/404` con el shell del sitio, un empty state y un botón al
+    catálogo; cualquier ruta inexistente cae ahí en vez del texto en inglés de Reflex.
+  - Verificado en el navegador: las cuatro rutas viejas terminan en la canónica (con `replace`, sin
+    dejar historial) y `/no-existe` muestra la página de 404 con el header de cuenta.
 - **AC propuestos:**
   - [x] Un solo mecanismo de registro (`@rx.page`).
   - [x] URLs canónicas definidas y enlaces internos actualizados.
-  - [ ] Sin warnings de “Page … is being redefined”.
-  - [ ] Ruta inexistente muestra 404 amigable.
-  - [ ] `/catalogo`, `/users`, `/user` y `/detalle_producto` redirigen a la URL canónica.
+  - [x] Sin warnings de “Page … is being redefined”.
+        → `reflex compile --dry` pasa sin ese aviso.
+  - [x] Ruta inexistente muestra 404 amigable.
+        → `/404` registrada; verificado con `/no-existe`.
+  - [x] `/catalogo`, `/users`, `/user` y `/detalle_producto` redirigen a la URL canónica.
+        → verificado en el navegador; el detalle sin id cae en `/`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-024.
 - **Depende de:** T-031

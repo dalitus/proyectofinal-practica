@@ -29,6 +29,9 @@ from app.pages.mis_consultas_pagina import (  # noqa: F401  (registra "/consulta
 from app.pages.no_autorizado_pagina import (  # noqa: F401  (registra "/403")
     no_autorizado_pagina,
 )
+from app.pages.no_encontrada_pagina import (  # noqa: F401  (registra "/404")
+    no_encontrada_pagina,
+)
 from app.pages.pedido_admin_pagina import (  # noqa: F401  (registra "/admin/pedidos/[pedido_id]")
     pedido_admin_pagina,
 )
@@ -46,6 +49,12 @@ from app.pages.productos_admin_pagina import (  # noqa: F401  (registra "/admin/
 )
 from app.pages.producto_pagina import (  # noqa: F401  (registra "/producto/[producto_id]")
     producto_pagina,
+)
+from app.pages.redirecciones_pagina import (  # noqa: F401  (rutas viejas -> URL canonica)
+    redireccion_catalogo,
+    redireccion_detalle,
+    redireccion_user,
+    redireccion_users,
 )
 from app.pages.registro_pagina import registro_pagina  # noqa: F401  (registra "/register")
 from app.service.auditoria import configurar_destino

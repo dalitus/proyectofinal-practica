@@ -70,7 +70,7 @@
 | T-052 | Administración de consultas | 06 Admin | P1 | hecha |
 | T-053 | Operaciones sensibles y auditoría mínima | 06 Admin | P2 | hecha |
 | T-060 | Eliminar estados duplicados y código muerto | 07 Arquitectura | P1 | hecha |
-| T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | lista |
+| T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | hecha |
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | hecha |
 | T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | hecha |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
