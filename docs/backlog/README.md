@@ -1,6 +1,6 @@
 # Backlog del proyecto — Tienda
 
-> Última actualización: 2026-10-30
+> Última actualización: 2026-11-03
 > **Sesión nueva: leer primero `docs/HANDOFF.md`** (estado real verificado + roadmap por fases).
 > Origen: scan de código + `compile_log.txt` / `run_log.txt`.
 > Este backlog es la fuente de verdad para bugs y refactorizaciones. Cada tarea se cierra con
@@ -74,7 +74,7 @@
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | hecha |
 | T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | hecha |
 | T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
-| T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | lista |
+| T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | hecha |
 | T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | hecha |
 | T-071 | Lint, formato, pre-commit y CI | 08 Calidad | P2 | lista |
 | T-072 | Documentación y `.env.example` | 08 Calidad | P2 | lista |

@@ -27,6 +27,8 @@ class ErrorDeConsulta(ValueError):
 
 CONSULTAS_POR_PAGINA = 10
 MAXIMO_RESPUESTA = 2000
+MAXIMO_ASUNTO = 120
+MAXIMO_MENSAJE = 2000
 LARGO_DEL_RESUMEN = 140
 
 # Filtro del panel: valor del select -> etiqueta.
@@ -87,6 +89,37 @@ class DetalleDeConsulta:
     fecha_respuesta: str
     estado: str
     estado_etiqueta: str
+
+
+@dataclass(frozen=True)
+class MiConsulta:
+    """One question of the buyer's own history, ready to render (T-065)."""
+
+    id: int
+    asunto: str
+    mensaje: str
+    fecha: str
+    estado: str
+    estado_etiqueta: str
+    respuesta: str
+    respondida_por: str
+    fecha_respuesta: str
+
+
+@dataclass(frozen=True)
+class PaginaDeMisConsultas:
+    consultas: list[MiConsulta]
+    total: int
+    pagina: int
+    total_paginas: int
+
+    @property
+    def hay_anterior(self) -> bool:
+        return self.pagina > 1
+
+    @property
+    def hay_siguiente(self) -> bool:
+        return self.pagina < self.total_paginas
 
 
 def opciones_de_filtro() -> list[dict[str, str]]:
@@ -154,6 +187,24 @@ def _a_consulta_en_lista(
     )
 
 
+def _a_mi_consulta(consulta: Consulta, administrador: UserProfile | None) -> MiConsulta:
+    """One buyer row: the answer is shown only when it exists (T-065)."""
+    estado = estado_de_consulta(consulta)
+    respondida_por, _ = _persona(administrador, consulta.respondido_por_id)
+
+    return MiConsulta(
+        id=consulta.id_consulta or 0,
+        asunto=consulta.asunto,
+        mensaje=consulta.mensaje,
+        fecha=_fecha(consulta.fecha_creacion),
+        estado=estado,
+        estado_etiqueta=etiqueta_de_consulta(estado),
+        respuesta=consulta.respuesta or "",
+        respondida_por=respondida_por,
+        fecha_respuesta=_fecha(consulta.fecha_respuesta),
+    )
+
+
 def listar_consultas(*, filtro: str = "", pagina: int = 1) -> PaginaDeConsultas:
     """One page of questions with the pending/answered filter applied in SQL."""
     estado = normalizar_filtro(filtro)
@@ -200,6 +251,68 @@ def obtener_detalle(consulta_id: int) -> DetalleDeConsulta:
         estado=estado,
         estado_etiqueta=etiqueta_de_consulta(estado),
     )
+
+
+def listar_mis_consultas(
+    usuario_id: int,
+    *,
+    pagina: int = 1,
+) -> PaginaDeMisConsultas:
+    """One page of the buyer's own questions, scoped by the session id (T-065)."""
+    if usuario_id <= 0:
+        raise ErrorDeConsulta("Necesitas iniciar sesion para ver tus consultas.")
+
+    total = consulta_repositorio.contar_consultas_de_usuario(usuario_id=usuario_id)
+    total_paginas = max(1, math.ceil(total / CONSULTAS_POR_PAGINA))
+    actual = min(max(1, int(pagina or 1)), total_paginas)
+
+    filas = consulta_repositorio.listar_consultas_de_usuario(
+        usuario_id,
+        offset=(actual - 1) * CONSULTAS_POR_PAGINA,
+        limite=CONSULTAS_POR_PAGINA,
+    )
+
+    return PaginaDeMisConsultas(
+        consultas=[_a_mi_consulta(consulta, admin) for consulta, admin in filas],
+        total=total,
+        pagina=actual,
+        total_paginas=total_paginas,
+    )
+
+
+def crear(usuario_id: int, asunto: str, mensaje: str) -> int:
+    """Validate and store the buyer's question; return the new id (T-065).
+
+    The author is the id resolved from the session token, so an anonymous call
+    is impossible and the form cannot post on behalf of someone else (D-002).
+    """
+    if usuario_id <= 0:
+        raise ErrorDeConsulta("Necesitas iniciar sesion para enviar una consulta.")
+
+    titulo = (asunto or "").strip()
+    texto = (mensaje or "").strip()
+
+    if not titulo:
+        raise ErrorDeConsulta("Escribi un asunto.")
+    if len(titulo) > MAXIMO_ASUNTO:
+        raise ErrorDeConsulta(
+            f"El asunto no puede superar los {MAXIMO_ASUNTO} caracteres."
+        )
+    if not texto:
+        raise ErrorDeConsulta("Escribi tu consulta.")
+    if len(texto) > MAXIMO_MENSAJE:
+        raise ErrorDeConsulta(
+            f"La consulta no puede superar los {MAXIMO_MENSAJE} caracteres."
+        )
+
+    consulta_id = consulta_repositorio.crear_consulta(
+        usuario_id=usuario_id,
+        asunto=titulo,
+        mensaje=texto,
+        ahora=datetime.now(),
+    )
+
+    return consulta_id
 
 
 def responder(consulta_id: int, respuesta: str, admin_id: int) -> str:

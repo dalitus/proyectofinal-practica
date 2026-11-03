@@ -7,8 +7,8 @@ ingles, y ademas el alta suya solo crea la credencial (T-022) y sus errores no
 se pueden traducir sin reescribir el estado.
 
 Estado actual: el catalogo en la raiz, el detalle, el carrito, el checkout, las
-dos pantallas de sesion y el panel del admin (pedidos y consultas). Productos del
-admin llega con T-050.
+dos pantallas de sesion, las consultas del comprador y el panel del admin
+(productos, pedidos y consultas).
 """
 
 import reflex as rx
@@ -23,6 +23,9 @@ from app.pages.consultas_admin_pagina import (  # noqa: F401  (registra "/admin/
     consultas_admin_pagina,
 )
 from app.pages.login_pagina import login_pagina  # noqa: F401  (registra "/login")
+from app.pages.mis_consultas_pagina import (  # noqa: F401  (registra "/consultas")
+    mis_consultas_pagina,
+)
 from app.pages.no_autorizado_pagina import (  # noqa: F401  (registra "/403")
     no_autorizado_pagina,
 )

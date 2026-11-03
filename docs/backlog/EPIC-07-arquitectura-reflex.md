@@ -171,17 +171,36 @@ consistente.
 
 ## T-065 · Consultas de usuario (login obligatorio)
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
-- **Archivos:** `pages/consulta_usuario_page.py:7-52`, `state/users_state.py`
-- **Problema:** si no hay sesión se usa `usuario_id = 1`, así que cualquiera escribe consultas a
-  nombre de otro usuario. Además se lee `UsersState.id` como si fuera un valor, no un Var.
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
+- **Archivos:** `app/repository/consulta_repositorio.py`, `app/service/consulta_servicio.py`,
+  `app/state/mis_consultas_estado.py`, `app/pages/mis_consultas_pagina.py`,
+  `app/pages/cuenta_menu.py`, `tests/test_mis_consultas_servicio.py`
+- **Problema:** la pantalla vieja se borró en T-060 y el comprador no tenía dónde consultar; el
+  riesgo original era que sin sesión se usara `usuario_id = 1`, así que cualquiera escribía a
+  nombre de otro usuario.
 - **Decisión (D-002):** las consultas requieren login; no hay consultas anónimas.
+- **Qué se hizo (2026-11-03):**
+  - `/consultas` con formulario de alta e historial propio paginado a 10, con estado
+    pendiente/respondida y la respuesta del admin (nombre y fecha) en la misma tarjeta (D-030).
+  - El autor sale de `sesion_servicio.usuario_con_rol(token)`: el formulario no manda
+    `usuario_id` y el servicio rechaza `usuario_id <= 0`, así que no hay alta anónima ni suplantación.
+  - El filtro por dueño está en SQL (`WHERE usuario_id = :id`), no en la página: pedir otro id
+    devuelve las filas del otro usuario, nunca las ajenas.
+  - Invitado → `/login?next=/consultas`; verificado en el navegador como visitante.
+  - El header muestra "Mis consultas" a los compradores conectados y "Panel" a los admins.
+  - Validación por campo (asunto y mensaje obligatorios, 120/2000 caracteres) con el error junto al
+    campo y sin perder lo escrito.
 - **AC propuestos:**
   - [x] Solo un usuario logueado puede crear consultas.
+        → `crear()` rechaza `usuario_id <= 0`; el estado resuelve el id desde el token.
   - [x] El `usuario_id` sale de `LocalAuthState`/`UserProfile`, nunca de un default.
+        → `usuario_con_rol` lo lee de `localauthsession`; el formulario no lo envía.
   - [x] El usuario solo ve sus propias consultas.
+        → `listar_mis_consultas` filtra por id en SQL; test con dos compradores en verde.
   - [x] Invitado → redirect al login.
+        → verificado en el navegador: `/consultas` → `/login?next=/consultas`.
   - [x] No se aceptan consultas anónimas con email.
+        → el alta no recibe email; el autor es la sesión.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-002.
 - **Depende de:** T-020, T-023
