@@ -210,3 +210,48 @@ completar un pedido con stock consistente.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-006.
 - **Depende de:** T-043
+
+---
+
+## T-076 · Historial de pedidos del comprador
+
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 05
+- **Archivos:** `app/repository/pedido_repositorio.py`, `app/service/pedido_servicio.py`,
+  `app/state/comprador_estado.py`, `app/state/mis_pedidos_estado.py`,
+  `app/pages/mis_pedidos_pagina.py`, `app/pages/mi_pedido_pagina.py`,
+  `app/pages/cuenta_menu.py`, `tests/test_mis_pedidos_servicio.py`
+- **Problema:** el actor comprador tiene que “ver sus pedidos” (README, D-002) y el admin sí tenía
+  su panel, pero el comprador no tenía ninguna pantalla: compraba y el pedido desaparecía de su
+  vista. El backlog no tenía la tarea; se creó acá.
+- **Decisión (D-002, D-030):** el comprador consulta sus pedidos con login obligatorio, solo los
+  propios y sin acciones de escritura (el ciclo de vida lo mueve el admin, T-044).
+- **Qué se hizo (2026-11-03):**
+  - `/pedidos`: tabla paginada a 10 con número, fecha, estado, unidades y total; el badge usa los
+    mismos estados del ciclo de vida (T-044). Vacío, carga (`Skeleton`) y error propios.
+  - `/pedidos/[pedido_id]`: datos del pedido, dirección de entrega, líneas con snapshot de color,
+    talle, precio y subtotal, y el total. Un pedido ajeno o inexistente muestra “no existe”, no un
+    error de permisos: así no se confirman ids de otras cuentas.
+  - El `usuario_id` sale de `sesion_servicio.usuario_con_rol(token)`; el filtro por dueño está en
+    SQL (`WHERE usuario_id = :id`), no en la página. La pantalla no manda ids desde el cliente.
+  - `CompradorEstado` es la base compartida con `MisConsultasEstado`: guarda de sesión y redirect a
+    `/login?next=...` en un solo lugar (T-065).
+  - El header muestra “Mis pedidos” y “Mis consultas” a los compradores; el admin sigue viendo
+    “Panel”.
+  - `_detalle_de` se extrajo de `obtener_detalle` para que admin y comprador pinten el mismo
+    detalle desde una sola implementación.
+- **AC propuestos:**
+  - [x] Un comprador logueado ve su historial de pedidos.
+        → `/pedidos` con tabla paginada; verificado en el navegador con una sesión de comprador.
+  - [x] Solo ve sus propios pedidos: un id ajeno no es legible.
+        → filtro por dueño en SQL; `obtener_mi_pedido` trata el id ajeno como inexistente;
+        `test_detalle_de_otro_usuario_es_inexistente` en verde.
+  - [x] El invitado va al login y vuelve a `/pedidos`.
+        → `CompradorEstado` redirige a `/login?next=/pedidos`; verificado como visitante.
+  - [x] El detalle muestra líneas, entrega y total con el mismo formato de precio.
+        → `_detalle_de` + `formatear_precio` (T-032); `test_detalle_trae_lineas_y_envio` en verde.
+  - [x] Estados vacío, carga y error en las dos pantallas.
+        → `EmptyState`, `Skeleton` y `Alert` + reintento.
+- **Grill / preguntas abiertas:**
+  - Ninguna: cerrado en D-002 y D-030 (sin correo; se lee en la web).
+- **Depende de:** T-043, T-044, T-065
+

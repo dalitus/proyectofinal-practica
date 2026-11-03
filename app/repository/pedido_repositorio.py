@@ -394,3 +394,61 @@ def listar_lineas(pedido_id: int) -> list[tuple[PedidoItem, Producto | None]]:
             .order_by(PedidoItem.id)
         )
         return [tuple(fila) for fila in session.exec(consulta).all()]  # type: ignore[misc]
+
+
+def listar_pedidos_de_usuario(
+    usuario_id: int,
+    *,
+    offset: int = 0,
+    limite: int = 10,
+) -> list[tuple[Pedido, int]]:
+    """One page of a buyer's own orders, newest first (T-076).
+
+    The filter is in SQL, so asking for another id returns that buyer's rows and
+    never a mix.
+    """
+    with get_session() as session:
+        consulta = (
+            select(Pedido, _UNIDADES)
+            .where(Pedido.usuario_id == usuario_id)
+            .order_by(Pedido.fecha_pedido.desc(), Pedido.id_pedido.desc())
+            .offset(offset)
+            .limit(limite)
+        )
+        return [tuple(fila) for fila in session.exec(consulta).all()]  # type: ignore[misc]
+
+
+def contar_pedidos_de_usuario(*, usuario_id: int) -> int:
+    """Total of orders owned by one buyer, for the pagination."""
+    with get_session() as session:
+        return session.exec(
+            select(func.count())
+            .select_from(Pedido)
+            .where(Pedido.usuario_id == usuario_id)
+        ).one()
+
+
+def obtener_pedido_de_usuario(
+    pedido_id: int,
+    usuario_id: int,
+) -> tuple[Pedido, UserProfile | None] | None:
+    """One order only when it belongs to ``usuario_id``; ``None`` otherwise.
+
+    The ownership check lives in the WHERE, so a guessed id cannot read someone
+    else's order (T-076).
+    """
+    with get_session() as session:
+        consulta = (
+            select(Pedido, UserProfile)
+            .join(
+                UserProfile,
+                UserProfile.local_user_id == Pedido.usuario_id,
+                isouter=True,
+            )
+            .where(
+                Pedido.id_pedido == pedido_id,
+                Pedido.usuario_id == usuario_id,
+            )
+        )
+        fila = session.exec(consulta).first()
+        return tuple(fila) if fila else None  # type: ignore[misc]

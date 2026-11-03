@@ -16,7 +16,6 @@ from dataclasses import asdict
 from typing import Any
 
 import reflex as rx
-from reflex_local_auth.local_auth import LocalAuthState
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.service import consulta_servicio
@@ -25,8 +24,7 @@ from app.service.consulta_servicio import (
     MAXIMO_MENSAJE,
     ErrorDeConsulta,
 )
-from app.service.sesion_servicio import usuario_con_rol
-from app.state.parametros import ruta_interna
+from app.state.comprador_estado import CompradorEstado
 from app.ui import Toast
 
 logger = logging.getLogger(__name__)
@@ -34,17 +32,9 @@ logger = logging.getLogger(__name__)
 MENSAJE_CARGA = "No pudimos cargar tus consultas. Proba de nuevo en unos segundos."
 MENSAJE_ENVIO = "No pudimos enviar la consulta. Proba de nuevo en unos segundos."
 
-RUTA_LOGIN = "/login?next="
-RUTA_CONSULTAS = "/consultas"
 
-
-class MisConsultasEstado(rx.State):
+class MisConsultasEstado(CompradorEstado):
     """Historial propio y alta de consultas del comprador conectado."""
-
-    autorizado: bool = False
-    cargando: bool = True
-    error: str = ""
-    usuario_id: int = 0
 
     consultas: list[dict[str, Any]] = []
     total: int = 0
@@ -169,30 +159,6 @@ class MisConsultasEstado(rx.State):
             )
 
         return not self.error_asunto and not self.error_mensaje
-
-    async def _iniciar(self):
-        """Resolve the session and load the list, or redirect to the login."""
-        self.cargando = True
-        self.error = ""
-        self.autorizado = False
-
-        destino = await self._exigir_sesion()
-        if destino is not None:
-            return destino
-
-        self._cargar()
-        return None
-
-    async def _exigir_sesion(self):
-        """Return a redirect for a guest, or ``None`` with the user id set."""
-        auth = await self.get_state(LocalAuthState)
-        usuario_id = usuario_con_rol(auth.auth_token)
-        if usuario_id is None:
-            return rx.redirect(RUTA_LOGIN + ruta_interna(self.router.url, RUTA_CONSULTAS))
-
-        self.usuario_id = usuario_id
-        self.autorizado = True
-        return None
 
     def _cargar(self) -> None:
         try:

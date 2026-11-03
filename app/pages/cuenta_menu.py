@@ -26,10 +26,18 @@ def MenuDeCuenta() -> rx.Component:
             rx.cond(
                 SesionEstado.cuenta["es_admin"],
                 rx.el.a("Panel", href="/admin/pedidos", class_name="ui-topnav__link"),
-                rx.el.a(
-                    "Mis consultas",
-                    href="/consultas",
-                    class_name="ui-topnav__link",
+                rx.el.div(
+                    rx.el.a(
+                        "Mis pedidos",
+                        href="/pedidos",
+                        class_name="ui-topnav__link",
+                    ),
+                    rx.el.a(
+                        "Mis consultas",
+                        href="/consultas",
+                        class_name="ui-topnav__link",
+                    ),
+                    class_name="ui-topnav__account",
                 ),
             ),
             rx.el.span(

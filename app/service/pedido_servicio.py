@@ -22,6 +22,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 
+from app.model.pedido_model import Pedido
 from app.model.perfil_modelo import UserProfile
 from app.repository import pedido_repositorio
 from app.repository.pedido_repositorio import (
@@ -301,6 +302,34 @@ class DetalleDePedido:
     lineas: list[LineaDePedido]
 
 
+@dataclass(frozen=True)
+class MiPedido:
+    """One order in the buyer's own history, ready to render (T-076)."""
+
+    id: int
+    fecha: str
+    estado: str
+    estado_etiqueta: str
+    total: str
+    unidades: int
+
+
+@dataclass(frozen=True)
+class PaginaDeMisPedidos:
+    pedidos: list[MiPedido]
+    total: int
+    pagina: int
+    total_paginas: int
+
+    @property
+    def hay_anterior(self) -> bool:
+        return self.pagina > 1
+
+    @property
+    def hay_siguiente(self) -> bool:
+        return self.pagina < self.total_paginas
+
+
 def etiqueta_de_estado(estado: str) -> str:
     """Human label for a state; unknown values fall back to the raw text."""
     return ETIQUETAS_DE_ESTADO.get(estado, estado)
@@ -397,13 +426,8 @@ def listar_pedidos(
     )
 
 
-def obtener_detalle(pedido_id: int) -> DetalleDePedido:
-    """Order detail with its snapshot lines, address and totals (D-029, D-030)."""
-    fila = pedido_repositorio.obtener_pedido(pedido_id)
-    if fila is None:
-        raise ErrorDePedido(f"No existe el pedido #{pedido_id}.")
-
-    pedido, perfil = fila
+def _detalle_de(pedido: Pedido, perfil: UserProfile | None) -> DetalleDePedido:
+    """Build the ready-to-render detail from one order row (admin and buyer)."""
     cliente, email = _cliente(perfil, pedido.usuario_id)
 
     lineas = [
@@ -415,7 +439,7 @@ def obtener_detalle(pedido_id: int) -> DetalleDePedido:
             precio_unitario=formatear_precio(item.precio_unitario),
             subtotal=formatear_precio(item.precio_unitario * item.cantidad),
         )
-        for item, producto in pedido_repositorio.listar_lineas(pedido_id)
+        for item, producto in pedido_repositorio.listar_lineas(pedido.id_pedido or 0)
     ]
 
     partes_del_envio = [
@@ -438,4 +462,64 @@ def obtener_detalle(pedido_id: int) -> DetalleDePedido:
         envio=", ".join(parte for parte in partes_del_envio if parte),
         lineas=lineas,
     )
+
+
+def listar_mis_pedidos(
+    usuario_id: int,
+    *,
+    pagina: int = 1,
+) -> PaginaDeMisPedidos:
+    """One page of the buyer's own orders, scoped by the session id (T-076)."""
+    if usuario_id <= 0:
+        raise ErrorDePedido("Necesitas iniciar sesion para ver tus pedidos.")
+
+    total = pedido_repositorio.contar_pedidos_de_usuario(usuario_id=usuario_id)
+    total_paginas = max(1, math.ceil(total / PEDIDOS_POR_PAGINA))
+    actual = min(max(1, int(pagina or 1)), total_paginas)
+
+    filas = pedido_repositorio.listar_pedidos_de_usuario(
+        usuario_id,
+        offset=(actual - 1) * PEDIDOS_POR_PAGINA,
+        limite=PEDIDOS_POR_PAGINA,
+    )
+
+    return PaginaDeMisPedidos(
+        pedidos=[
+            MiPedido(
+                id=pedido.id_pedido or 0,
+                fecha=_fecha(pedido.fecha_pedido),
+                estado=pedido.estado,
+                estado_etiqueta=etiqueta_de_estado(pedido.estado),
+                total=formatear_precio(pedido.total),
+                unidades=int(unidades or 0),
+            )
+            for pedido, unidades in filas
+        ],
+        total=total,
+        pagina=actual,
+        total_paginas=total_paginas,
+    )
+
+
+def obtener_mi_pedido(pedido_id: int, usuario_id: int) -> DetalleDePedido:
+    """The buyer's own order; another user's id is treated as nonexistent."""
+    if usuario_id <= 0:
+        raise ErrorDePedido("Necesitas iniciar sesion para ver tus pedidos.")
+
+    fila = pedido_repositorio.obtener_pedido_de_usuario(pedido_id, usuario_id)
+    if fila is None:
+        raise ErrorDePedido(f"No existe el pedido #{pedido_id}.")
+
+    pedido, perfil = fila
+    return _detalle_de(pedido, perfil)
+
+
+def obtener_detalle(pedido_id: int) -> DetalleDePedido:
+    """Order detail with its snapshot lines, address and totals (D-029, D-030)."""
+    fila = pedido_repositorio.obtener_pedido(pedido_id)
+    if fila is None:
+        raise ErrorDePedido(f"No existe el pedido #{pedido_id}.")
+
+    pedido, perfil = fila
+    return _detalle_de(pedido, perfil)
 
