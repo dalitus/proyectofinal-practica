@@ -82,17 +82,31 @@ imágenes que no se rompan.
 
 ## T-032 · Precio final y formato en la UI
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 04
-- **Archivos:** `pages/catalogo_page.py:83`, `pages/producto_detalle_page.py:24`,
-  `pages/carrito_page.py:19-21`, `pages/pedidos_page.py:53`
-- **Problema:** el precio se muestra de formas distintas y no hay una definición única de “precio
-  final”. El comprador debe ver el precio final sin sorpresas.
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 04
+- **Archivos:** `app/service/formato_moneda.py`, `app/service/catalogo_servicio.py`,
+  `app/service/carrito_servicio.py`, `app/service/pedido_servicio.py`,
+  `tests/test_precio_consistencia.py`
+- **Problema:** el precio se mostraba de formas distintas y no había una definición única de
+  “precio final”. El comprador debe ver el precio final sin sorpresas.
 - **Decisión (D-003):** precio final ARS con IVA incluido, formato es-AR, sin descuentos.
+- **Qué se hizo (2026-11-03):**
+  - `formatear_precio` es el único formateador: ARS, separador de miles con `.`, decimales con
+    `,` y dos decimales. Catálogo, detalle, carrito, checkout y pedidos lo usan; ninguna página
+    arma el string por su cuenta.
+  - El precio del carrito sale de `producto.precio` (`Decimal`), la misma columna que leen el
+    catálogo y el detalle, así que no puede haber dos precios para el mismo producto.
+  - `confirmar_pedido` usa `carrito.subtotal_valor` como `total` del pedido: el total del pedido
+    es literalmente el subtotal que el comprador vio en el carrito, no un segundo cálculo.
+  - `test_precio_consistencia.py` recorre catálogo → detalle → carrito → pedido y falla si una
+    pantalla reimplementa el formato o si el total del pedido difiere del carrito.
 - **AC propuestos:**
   - [x] Un helper único de formato (moneda, separador de miles, decimales).
-  - [ ] Catálogo, detalle, carrito y pedidos muestran el mismo precio para el mismo producto.
+        → `app/service/formato_moneda.py`; `test_formatear_precio` en `test_catalogo_servicio.py`.
+  - [x] Catálogo, detalle, carrito y pedidos muestran el mismo precio para el mismo producto.
+        → `test_el_mismo_producto_muestra_el_mismo_precio_en_todas_las_pantallas`.
   - [x] El precio final se define una vez (D-003) y se documenta.
-  - [ ] El total del carrito y del pedido sale del mismo cálculo.
+  - [x] El total del carrito y del pedido sale del mismo cálculo.
+        → `confirmar_pedido` pasa `carrito.subtotal_valor`; `test_el_total_del_pedido_es_el_subtotal_del_carrito`.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-003.
 - **Depende de:** T-014

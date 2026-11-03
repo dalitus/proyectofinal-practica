@@ -56,7 +56,7 @@
 | T-024 | Cuenta única de administrador y bootstrap | 03 Sesión | P1 | hecha |
 | T-030 | Estado de carga y listado del catálogo | 04 Catálogo | P1 | hecha |
 | T-031 | Detalle de producto por URL (refresh-safe) | 04 Catálogo | P1 | hecha |
-| T-032 | Precio final y formato en la UI | 04 Catálogo | P1 | lista |
+| T-032 | Precio final y formato en la UI | 04 Catálogo | P1 | hecha |
 | T-033 | Visibilidad, filtros y orden del catálogo | 04 Catálogo | P2 | hecha |
 | T-034 | Imágenes: placeholder, upload, Drive, create/edit | 04 Catálogo | P1 | hecha |
 | T-040 | Estado único de carrito y vars inexistentes | 05 Carrito | P1 | hecha |
