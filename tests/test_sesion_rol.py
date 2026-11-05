@@ -23,6 +23,7 @@ from app.service.sesion_servicio import (
     es_admin,
     rol,
     usuario_con_rol,
+    usuario_puede_comprar,
 )
 
 
@@ -119,6 +120,16 @@ def test_guarda_sin_roles_pide_solo_estar_logueado(session: Session) -> None:
 
     assert usuario_con_rol(token) == administrador_id
     assert usuario_con_rol("", COMPRADOR) is None
+
+
+def test_solo_el_comprador_puede_comprar(session: Session) -> None:
+    """D-050: the purchase flows belong to buyer accounts."""
+    comprador_id = _comprador(session)
+    admin_id = _admin(session)
+
+    assert usuario_puede_comprar(comprador_id) is True
+    assert usuario_puede_comprar(admin_id) is False
+    assert usuario_puede_comprar(None) is False
 
 
 def test_una_cuenta_sin_perfil_no_es_admin(session: Session) -> None:

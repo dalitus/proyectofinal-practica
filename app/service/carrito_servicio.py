@@ -11,7 +11,8 @@ the same numbers, so a subtotal can never disagree with what the buyer pays
 order.
 
 Every function opens and closes its own session through the repository (D-033);
-the state layer only calls these functions (T-062).
+the state layer only calls these functions (T-062). The admin does not buy: the
+mutations reject an admin account even when called directly (D-050).
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from app.model.product_model import Producto
 from app.model.stock_model import Stocks
 from app.repository import carrito_repositorio
 from app.service.formato_moneda import formatear_precio
+from app.service.sesion_servicio import MENSAJE_SOLO_COMPRADOR, usuario_puede_comprar
 
 MENSAJE_VARIANTE = "Ese producto ya no esta disponible."
 MENSAJE_LINEA = "Ese producto ya no esta en el carrito."
@@ -67,6 +69,16 @@ class CarritoDeCompra:
     @property
     def vacio(self) -> bool:
         return not self.lineas
+
+
+def _exigir_comprador(usuario_id: int) -> None:
+    """Reject the admin even when a cart action is invoked directly (D-050).
+
+    The role is read from the database on every call: hiding the button in the
+    product page is not the permission (D-021).
+    """
+    if not usuario_puede_comprar(usuario_id):
+        raise ErrorDeCarrito(MENSAJE_SOLO_COMPRADOR)
 
 
 def _cantidad_valida(cantidad: int) -> int:
@@ -148,6 +160,7 @@ def agregar(usuario_id: int, variante_id: int, cantidad: int = 1) -> CarritoDeCo
     The stock check counts what is already in the cart: asking for 2 twice with
     3 units on the shelf must fail the second time instead of hiding an overrun.
     """
+    _exigir_comprador(usuario_id)
     cantidad = _cantidad_valida(cantidad)
 
     encontrada = carrito_repositorio.obtener_variante(variante_id)
@@ -182,6 +195,7 @@ def cambiar_cantidad(
     cantidad: int,
 ) -> CarritoDeCompra:
     """Set the quantity of a line, scoped to its owner and capped by stock."""
+    _exigir_comprador(usuario_id)
     cantidad = _cantidad_valida(cantidad)
 
     linea = carrito_repositorio.obtener_linea_por_id(usuario_id, linea_id)
@@ -202,6 +216,7 @@ def cambiar_cantidad(
 
 def quitar(usuario_id: int, linea_id: int) -> CarritoDeCompra:
     """Remove a line; a line from another cart is ignored, not deleted."""
+    _exigir_comprador(usuario_id)
     linea = carrito_repositorio.obtener_linea_por_id(usuario_id, linea_id)
     if linea is not None:
         carrito_repositorio.borrar_linea(linea_id)
@@ -210,5 +225,6 @@ def quitar(usuario_id: int, linea_id: int) -> CarritoDeCompra:
 
 def vaciar(usuario_id: int) -> CarritoDeCompra:
     """Empty the cart."""
+    _exigir_comprador(usuario_id)
     carrito_repositorio.vaciar(usuario_id)
     return ver_carrito(usuario_id)

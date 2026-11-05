@@ -33,6 +33,7 @@ from app.repository.pedido_repositorio import (
 from app.service import carrito_servicio
 from app.service.auditoria import registrar as registrar_auditoria
 from app.service.formato_moneda import formatear_precio
+from app.service.sesion_servicio import MENSAJE_SOLO_COMPRADOR, usuario_puede_comprar
 
 
 class ErrorDePedido(ValueError):
@@ -117,6 +118,9 @@ def confirmar_pedido(usuario_id: int, entrega: DatosDeEntrega) -> int:
     The cart is read again here: the checkout always sells what is in the
     database now, not what the page rendered minutes ago (D-004).
     """
+    if not usuario_puede_comprar(usuario_id):
+        raise ErrorDePedido(MENSAJE_SOLO_COMPRADOR)
+
     carrito = carrito_servicio.ver_carrito(usuario_id)
     if carrito.vacio:
         raise ErrorDePedido("Tu carrito esta vacio.")

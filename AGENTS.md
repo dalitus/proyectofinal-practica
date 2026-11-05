@@ -7,7 +7,8 @@ Contexto para agentes que trabajen en este repositorio. Leer esto antes de tocar
 Tienda online de indumentaria/calzado hecha con **Reflex + MySQL**. Dos actores:
 
 - **Comprador registrado:** ve catálogo y precios, agrega al carrito, compra, consulta sus pedidos.
-- **Administrador:** gestiona productos, stock, pedidos y consultas. No compra.
+- **Administrador:** gestiona productos, stock, pedidos y consultas. No puede agregar productos
+  al carrito ni iniciar o completar compras (D-050).
 
 Comprar requiere cuenta (no hay carrito de invitado). Ver `docs/backlog/DECISIONS.md` (D-002).
 
@@ -17,7 +18,7 @@ Comprar requiere cuenta (no hay carrito de invitado). Ver `docs/backlog/DECISION
 |---|---|
 | `docs/backlog/README.md` | Índice de tareas, estados y Definition of Done |
 | `docs/backlog/EPIC-*.md` | Detalle de cada tarea con criterios de aceptación |
-| `docs/backlog/DECISIONS.md` | Decisiones cerradas (D-001 a D-020) |
+| `docs/backlog/DECISIONS.md` | Decisiones cerradas (D-001 a D-050) |
 | `docs/design.md` | Sistema de diseño obligatorio para toda la UI |
 
 **Regla:** no se implementa una tarea con preguntas abiertas o AC sin confirmar. Si aparece una

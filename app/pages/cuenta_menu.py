@@ -61,5 +61,12 @@ def MenuDeCuenta() -> rx.Component:
 
 
 def nav_de_cuenta(*, cart: bool = True) -> rx.Component:
-    """Header for every page; ``cart=False`` in the admin panel (T-023)."""
-    return TopNav(account=MenuDeCuenta(), cart=cart)
+    """Header for every page; the admin panel hides the cart (T-023, D-050).
+
+    On buyer pages the cart link is hidden for the admin once the role resolves,
+    even though the add-to-cart action is rejected server-side anyway.
+    """
+    return TopNav(
+        account=MenuDeCuenta(),
+        cart=~SesionEstado.cuenta["es_admin"] if cart else False,
+    )

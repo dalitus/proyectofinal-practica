@@ -13,6 +13,7 @@ from reflex_local_auth.local_auth import LocalUser
 from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
+from app.model.perfil_modelo import UserProfile
 from app.model.product_model import Producto
 from app.model.stock_model import Stocks
 from app.service.carrito_servicio import (
@@ -34,6 +35,20 @@ def _crear_comprador(session: Session, email: str = "ana@example.com") -> LocalU
     session.add(usuario)
     session.commit()
     session.refresh(usuario)
+    return usuario
+
+
+def _crear_admin(session: Session, email: str = "admin@example.com") -> LocalUser:
+    usuario = _crear_comprador(session, email)
+    session.add(
+        UserProfile(
+            local_user_id=usuario.id,
+            nombre="Admin",
+            email=email,
+            is_admin=True,
+        )
+    )
+    session.commit()
     return usuario
 
 
@@ -198,6 +213,29 @@ def test_quitar_y_vaciar(session: Session) -> None:
 
     assert vaciar(usuario_id).vacio is True
     assert ver_carrito(usuario_id).vacio is True
+
+
+def test_admin_no_puede_agregar_ni_tocar_el_carrito(session: Session) -> None:
+    """D-050: the server rejects the admin even if the event is invoked directly."""
+    admin = _crear_admin(session)
+    _, stocks = _crear_producto(session, variantes=[("Blanco", "40", 5)])
+    admin_id = admin.id or 0
+    variante_id = stocks[0].id_stock or 0
+
+    with pytest.raises(ErrorDeCarrito) as error:
+        agregar(admin_id, variante_id, 1)
+
+    assert str(error.value) == "El administrador no puede comprar."
+    assert ver_carrito(admin_id).vacio is True
+
+    with pytest.raises(ErrorDeCarrito):
+        cambiar_cantidad(admin_id, 1, 2)
+
+    with pytest.raises(ErrorDeCarrito):
+        quitar(admin_id, 1)
+
+    with pytest.raises(ErrorDeCarrito):
+        vaciar(admin_id)
 
 
 def test_subtotal_suma_varias_lineas(session: Session) -> None:

@@ -6,7 +6,7 @@
 > Este backlog es la fuente de verdad para bugs y refactorizaciones. Cada tarea se cierra con
 > criterios de aceptación (AC) verificados y, cuando aplique, tests.
 
-## Actores (cerrado en D-002, D-018 y D-019)
+## Actores (cerrado en D-002, D-018, D-019 y D-050)
 
 | Actor | Descripción | Puede |
 |---|---|---|
@@ -66,6 +66,7 @@
 | T-044 | Ciclo de vida y estados del pedido | 05 Carrito | P1 | hecha |
 | T-045 | Eliminar consulta automática al comprar | 05 Carrito | P2 | hecha |
 | T-076 | Historial de pedidos del comprador | 05 Carrito | P1 | hecha |
+| T-077 | Restringir compras al administrador | 05 Carrito | P1 | hecha |
 | T-050 | CRUD de productos y variantes (color + talle) | 06 Admin | P1 | hecha |
 | T-051 | Administración de pedidos | 06 Admin | P1 | hecha |
 | T-052 | Administración de consultas | 06 Admin | P1 | hecha |

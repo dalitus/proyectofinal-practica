@@ -29,7 +29,11 @@ from app.service.pedido_servicio import (
     errores_de_entrega,
     validar_entrega,
 )
-from app.service.sesion_servicio import usuario_autenticado
+from app.service.sesion_servicio import (
+    COMPRADOR,
+    rol_de_usuario,
+    usuario_autenticado,
+)
 from app.ui import Toast
 
 logger = logging.getLogger(__name__)
@@ -40,6 +44,7 @@ MENSAJE_CONFIRMAR = "No pudimos confirmar el pedido. Proba de nuevo en unos segu
 RUTA_CARRITO = "/carrito"
 RUTA_LOGIN = "/login?next=/checkout"
 RUTA_CATALOGO = "/"
+RUTA_SIN_PERMISO = "/403"
 
 # Los cuatro obligatorios de `pedido_servicio`: campo -> var de error.
 CAMPOS_CON_ERROR = ("direccion", "numero", "ciudad", "provincia")
@@ -101,9 +106,9 @@ class CheckoutEstado(rx.State):
         self.error = ""
         self.error_confirmacion = ""
 
-        usuario_id = await self._usuario()
-        if usuario_id is None:
-            return rx.redirect(RUTA_LOGIN)
+        usuario_id, destino = await self._comprador()
+        if destino is not None:
+            return destino
 
         self._cargar(usuario_id)
         if not self.lineas:
@@ -147,9 +152,9 @@ class CheckoutEstado(rx.State):
         self.error_confirmacion = ""
         self._limpiar_errores()
 
-        usuario_id = await self._usuario()
-        if usuario_id is None:
-            return rx.redirect(RUTA_LOGIN)
+        usuario_id, destino = await self._comprador()
+        if destino is not None:
+            return destino
 
         faltantes = errores_de_entrega(form_data)
         if faltantes:
@@ -196,9 +201,19 @@ class CheckoutEstado(rx.State):
         self.subtotal = ""
         return Toast("Pedido confirmado")
 
-    async def _usuario(self) -> int | None:
+    async def _comprador(self):
+        """Resolve the buyer id or the redirect for a guest / the admin (D-050).
+
+        A guest goes to the login; an admin gets 403 instead of an empty checkout,
+        because buying is not part of the admin's job (D-050).
+        """
         auth = await self.get_state(LocalAuthState)
-        return usuario_autenticado(auth.auth_token)
+        usuario_id = usuario_autenticado(auth.auth_token)
+        if usuario_id is None:
+            return None, rx.redirect(RUTA_LOGIN)
+        if rol_de_usuario(usuario_id) != COMPRADOR:
+            return None, rx.redirect(RUTA_SIN_PERMISO)
+        return usuario_id, None
 
     def _cargar(self, usuario_id: int) -> None:
         try:

@@ -255,3 +255,49 @@ completar un pedido con stock consistente.
   - Ninguna: cerrado en D-002 y D-030 (sin correo; se lee en la web).
 - **Depende de:** T-043, T-044, T-065
 
+---
+
+## T-077 · Restringir compras al administrador
+
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 05
+- **Archivos:** `app/state/carrito_estado.py`, `app/state/checkout_estado.py`,
+  `app/service/sesion_servicio.py`, `app/service/carrito_servicio.py`,
+  `app/service/pedido_servicio.py`, `app/ui/layout.py`, `app/pages/cuenta_menu.py`,
+  `app/pages/producto_pagina.py`, `tests/test_sesion_rol.py`,
+  `tests/test_carrito_servicio.py`, `tests/test_pedido_servicio.py`
+- **Problema:** el administrador debe dedicarse a gestionar la tienda y no puede participar en los
+  flujos de compra. La restricción debe ser efectiva aunque intente invocar directamente acciones
+  de carrito o checkout.
+- **Decisión (D-050):** solo las cuentas de comprador pueden agregar productos al carrito e iniciar
+  o completar compras. La gestión administrativa de pedidos no cambia.
+- **Qué se hizo (2026-11-05):**
+  - `sesion_servicio.rol_de_usuario(usuario_id)` resuelve el rol desde la base para los servicios,
+    que reciben el id y no el token; `usuario_puede_comprar` es la única respuesta que consultan
+    las reglas de compra.
+  - `carrito_servicio` rechaza al admin en `agregar`, `cambiar_cantidad`, `quitar` y `vaciar`;
+    `pedido_servicio.confirmar_pedido` hace lo mismo antes de leer el carrito. El mensaje es
+    `El administrador no puede comprar.` y sale como `ErrorDeCarrito` / `ErrorDePedido`.
+  - `CarritoEstado` y `CheckoutEstado` resuelven el rol desde el token en cada `on_load`, `agregar`
+    y `confirmar`: el invitado va al login, el admin a `/403`. Editar una var del cliente no cambia
+    el rol.
+  - La interfaz del admin no ofrece compra: el CTA del detalle se oculta con
+    `SesionEstado.cuenta["es_admin"]` y el link “Carrito” del header se oculta por rol (el panel ya
+    pasaba `cart=False`).
+- **AC propuestos:**
+  - [x] Las acciones de servidor de carrito y checkout rechazan al administrador, incluso si se
+        invocan directamente.
+        → guardas en `carrito_servicio` y `pedido_servicio`; `test_admin_no_puede_agregar_ni_tocar_el_carrito`
+        y `test_admin_no_puede_confirmar_pedido` en verde.
+  - [x] La interfaz del administrador no ofrece acciones para agregar al carrito, abrir el carrito
+        como comprador ni iniciar checkout.
+        → CTA oculto en el detalle y link del carrito oculto por rol; verificado en el navegador con
+        una sesión de admin.
+  - [x] El comprador conserva sus flujos de carrito y compra sin cambios.
+        → suite completa en verde (224 tests), incluidos los tests de carrito y checkout existentes.
+  - [x] Tests cubren el rechazo al administrador en carrito y checkout y el acceso permitido al
+        comprador.
+        → `test_solo_el_comprador_puede_comprar`, `test_admin_no_puede_agregar_ni_tocar_el_carrito`,
+        `test_admin_no_puede_confirmar_pedido`; los tests previos siguen cubriendo al comprador.
+- **Grill / preguntas abiertas:**
+  - Ninguna: cerrado en D-050.
+- **Depende de:** T-023, T-041, T-043

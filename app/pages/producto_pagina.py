@@ -17,6 +17,7 @@ import reflex as rx
 from app.pages.cuenta_menu import nav_de_cuenta
 from app.state.carrito_estado import CarritoEstado
 from app.state.detalle_estado import DetalleEstado
+from app.state.sesion_estado import SesionEstado
 from app.ui import (
     Alert,
     AppShell,
@@ -66,23 +67,28 @@ def _comprar() -> rx.Component:
     """Primary CTA: adds the chosen variant, not the product (D-009).
 
     A guest is sent to the login and comes back here (D-002); the cart state owns
-    that decision, so the page does not branch on the session.
+    that decision, so the page does not branch on the session. The admin does not
+    buy, so the CTA is not offered (D-050); the server rejects it regardless.
     """
-    return rx.el.div(
-        Button(
-            "Agregar al carrito",
-            on_click=CarritoEstado.agregar(DetalleEstado.variante_id, 1),
-            disabled=~DetalleEstado.puede_comprar,
-        ),
-        rx.cond(
-            DetalleEstado.puede_comprar,
-            rx.fragment(),
-            rx.el.p(
-                "Elegi otro talle para poder comprar.",
-                class_name="ui-text ui-text--muted ui-text--small",
+    return rx.cond(
+        SesionEstado.cuenta["es_admin"],
+        rx.fragment(),
+        rx.el.div(
+            Button(
+                "Agregar al carrito",
+                on_click=CarritoEstado.agregar(DetalleEstado.variante_id, 1),
+                disabled=~DetalleEstado.puede_comprar,
             ),
+            rx.cond(
+                DetalleEstado.puede_comprar,
+                rx.fragment(),
+                rx.el.p(
+                    "Elegi otro talle para poder comprar.",
+                    class_name="ui-text ui-text--muted ui-text--small",
+                ),
+            ),
+            class_name="ui-detail__buy",
         ),
-        class_name="ui-detail__buy",
     )
 
 

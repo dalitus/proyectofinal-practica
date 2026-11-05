@@ -32,15 +32,15 @@ def TopNav(
     search: rx.Component | None = None,
     account: rx.Component | None = None,
     links: list[rx.Component] | None = None,
-    cart: bool = True,
+    cart: bool | rx.Var = True,
     class_name: str | None = None,
 ) -> rx.Component:
     """Sticky header: brand, optional search, nav links, account area.
 
     ``account`` and ``search`` are slots. When ``account`` is omitted the header
     shows the guest entry points; a page with a session passes its own component
-    instead of the shell guessing. ``cart=False`` is for the admin panel, where
-    the buyer's cart is not part of the job (T-023).
+    instead of the shell guessing. ``cart=False`` hides the link entirely (the
+    admin panel, T-023); a Var lets a page hide it per role (D-050).
     """
     inner: list[Any] = [
         rx.el.a(brand, href=brand_href, class_name="ui-topnav__brand"),
@@ -55,14 +55,17 @@ def TopNav(
             rx.el.a("Crear cuenta", href="/register", class_name="ui-topnav__link"),
         )
 
+    nav_items: list[Any] = list(links or [])
+    if cart is not False:
+        cart_link = rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link")
+        if isinstance(cart, bool):
+            nav_items.append(cart_link)
+        else:
+            nav_items.append(rx.cond(cart, cart_link, rx.fragment()))
+
     inner.append(
         rx.el.nav(
-            *(links or []),
-            *(
-                [rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link")]
-                if cart
-                else []
-            ),
+            *nav_items,
             account,
             class_name="ui-topnav__nav",
         )

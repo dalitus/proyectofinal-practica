@@ -26,6 +26,10 @@ COMPRADOR = "comprador"
 ADMIN = "admin"
 ROLES = (INVITADO, COMPRADOR, ADMIN)
 
+# Un solo texto para las dos puertas de compra (carrito y checkout), asi el
+# rechazo no cambia segun desde donde se intente (D-050).
+MENSAJE_SOLO_COMPRADOR = "El administrador no puede comprar."
+
 
 def usuario_autenticado(token: str) -> int | None:
     """Return the ``LocalUser.id`` behind a live token, or ``None``.
@@ -48,14 +52,12 @@ def usuario_autenticado(token: str) -> int | None:
     return int(usuario_id) if usuario_id is not None else None
 
 
-def rol(token: str) -> str:
-    """Return ``invitado``, ``comprador`` or ``admin`` for a session token.
+def rol_de_usuario(usuario_id: int | None) -> str:
+    """Return the role of a known ``LocalUser.id``; ``None`` is a guest.
 
-    The role is read from the database on every call: hiding a button is not a
-    permission (D-021). A session without a profile counts as ``comprador``; an
-    admin is only a profile with ``is_admin`` (D-013).
+    Services receive the id instead of the token, so purchase rules resolve the
+    live role here instead of trusting a client-side flag (D-021, D-050).
     """
-    usuario_id = usuario_autenticado(token)
     if usuario_id is None:
         return INVITADO
 
@@ -65,9 +67,24 @@ def rol(token: str) -> str:
     return COMPRADOR
 
 
+def rol(token: str) -> str:
+    """Return ``invitado``, ``comprador`` or ``admin`` for a session token.
+
+    The role is read from the database on every call: hiding a button is not a
+    permission (D-021). A session without a profile counts as ``comprador``; an
+    admin is only a profile with ``is_admin`` (D-013).
+    """
+    return rol_de_usuario(usuario_autenticado(token))
+
+
 def es_admin(token: str) -> bool:
     """Shorthand for the admin guard: the only role allowed in the panel."""
     return rol(token) == ADMIN
+
+
+def usuario_puede_comprar(usuario_id: int | None) -> bool:
+    """Only buyer accounts add to the cart or place orders (D-050)."""
+    return rol_de_usuario(usuario_id) == COMPRADOR
 
 
 def usuario_con_rol(token: str, *permitidos: str) -> int | None:
@@ -81,10 +98,7 @@ def usuario_con_rol(token: str, *permitidos: str) -> int | None:
     if usuario_id is None:
         return None
 
-    if permitidos:
-        perfil = auth_servicio.obtener_perfil(usuario_id)
-        actual = ADMIN if perfil is not None and perfil.is_admin else COMPRADOR
-        if actual not in permitidos:
-            return None
+    if permitidos and rol_de_usuario(usuario_id) not in permitidos:
+        return None
 
     return usuario_id

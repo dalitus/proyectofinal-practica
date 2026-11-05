@@ -21,7 +21,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.service import carrito_servicio
 from app.service.carrito_servicio import CarritoDeCompra, ErrorDeCarrito
-from app.service.sesion_servicio import usuario_autenticado
+from app.service.sesion_servicio import (
+    COMPRADOR,
+    rol_de_usuario,
+    usuario_autenticado,
+)
 from app.state.parametros import ruta_interna
 from app.ui import Toast
 
@@ -30,6 +34,7 @@ logger = logging.getLogger(__name__)
 MENSAJE_ERROR = "No pudimos actualizar el carrito. Proba de nuevo en unos segundos."
 RUTA_CARRITO = "/carrito"
 RUTA_LOGIN = "/login?next="
+RUTA_SIN_PERMISO = "/403"
 
 Operacion = Callable[[int], CarritoDeCompra]
 
@@ -65,10 +70,10 @@ class CarritoEstado(rx.State):
         self.cargando = True
         self.error = ""
 
-        usuario_id = await self._usuario()
-        if usuario_id is None:
+        usuario_id, destino = await self._comprador(RUTA_CARRITO)
+        if destino is not None:
             self._limpiar_vars()
-            return rx.redirect(RUTA_LOGIN + RUTA_CARRITO)
+            return destino
 
         self._cargar(usuario_id)
 
@@ -84,9 +89,9 @@ class CarritoEstado(rx.State):
     @rx.event
     async def agregar(self, variante_id: int, cantidad: int = 1):
         """Add units from the product detail; a guest returns here after login."""
-        usuario_id = await self._usuario()
-        if usuario_id is None:
-            return rx.redirect(RUTA_LOGIN + self._ruta_actual())
+        usuario_id, destino = await self._comprador(self._ruta_actual())
+        if destino is not None:
+            return destino
 
         resultado = self._ejecutar(
             lambda usuario: carrito_servicio.agregar(usuario, variante_id, cantidad),
@@ -138,10 +143,10 @@ class CarritoEstado(rx.State):
         )
 
     async def _aplicar(self, operacion: Operacion):
-        """Run a cart operation for the buyer; guests are sent to the login."""
-        usuario_id = await self._usuario()
-        if usuario_id is None:
-            return rx.redirect(RUTA_LOGIN + RUTA_CARRITO)
+        """Run a cart operation for the buyer; guest to login, admin to /403."""
+        usuario_id, destino = await self._comprador(RUTA_CARRITO)
+        if destino is not None:
+            return destino
         return self._ejecutar(operacion, usuario_id)
 
     def _ejecutar(self, operacion: Operacion, usuario_id: int):
@@ -160,10 +165,19 @@ class CarritoEstado(rx.State):
         self._guardar(carrito)
         return None
 
-    async def _usuario(self) -> int | None:
-        """Resolve the buyer id from the session token (never from a client var)."""
+    async def _comprador(self, volver_a: str):
+        """Resolve the buyer id or the redirect for a guest / the admin (D-050).
+
+        The role comes from the token and the database, never from a state var,
+        so a hand-made event cannot pretend to be a buyer.
+        """
         auth = await self.get_state(LocalAuthState)
-        return usuario_autenticado(auth.auth_token)
+        usuario_id = usuario_autenticado(auth.auth_token)
+        if usuario_id is None:
+            return None, rx.redirect(RUTA_LOGIN + volver_a)
+        if rol_de_usuario(usuario_id) != COMPRADOR:
+            return None, rx.redirect(RUTA_SIN_PERMISO)
+        return usuario_id, None
 
     def _cargar(self, usuario_id: int) -> None:
         try:

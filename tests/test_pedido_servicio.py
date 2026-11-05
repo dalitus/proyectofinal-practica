@@ -17,6 +17,7 @@ from app.model.categoria_modelo import Categoria
 from app.model.consulta_model import Consulta
 from app.model.pedido_item_modelo import PedidoItem
 from app.model.pedido_model import Pedido
+from app.model.perfil_modelo import UserProfile
 from app.model.product_model import Producto
 from app.model.stock_model import Stocks
 from app.service.carrito_servicio import agregar, ver_carrito
@@ -47,6 +48,20 @@ def _crear_comprador(session: Session, email: str = "ana@example.com") -> LocalU
     session.add(usuario)
     session.commit()
     session.refresh(usuario)
+    return usuario
+
+
+def _crear_admin(session: Session, email: str = "admin@example.com") -> LocalUser:
+    usuario = _crear_comprador(session, email)
+    session.add(
+        UserProfile(
+            local_user_id=usuario.id,
+            nombre="Admin",
+            email=email,
+            is_admin=True,
+        )
+    )
+    session.commit()
     return usuario
 
 
@@ -143,6 +158,19 @@ def test_confirmar_con_carrito_vacio_falla_sin_crear_pedido(session: Session) ->
         confirmar_pedido(usuario_id, validar_entrega(ENTREGA))
 
     assert "carrito esta vacio" in str(error.value)
+    assert session.exec(select(Pedido)).all() == []
+
+
+def test_admin_no_puede_confirmar_pedido(session: Session) -> None:
+    """D-050: the checkout rejects the admin even when the event is invoked directly."""
+    admin = _crear_admin(session)
+    admin_id = admin.id or 0
+
+    with pytest.raises(ErrorDePedido) as error:
+        confirmar_pedido(admin_id, validar_entrega(ENTREGA))
+
+    assert str(error.value) == "El administrador no puede comprar."
+    session.rollback()
     assert session.exec(select(Pedido)).all() == []
 
 

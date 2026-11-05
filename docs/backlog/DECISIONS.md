@@ -860,3 +860,19 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   (`/admin/productos/[producto_id]`) son pantallas distintas y no comparten modal; el borrado del
   producto es lógico (`activo`, D-028) y la reactivación también se audita.
 - **Fecha:** 2026-11-01
+
+---
+
+## D-050 · El administrador no compra
+
+- **Tarea:** T-077 (complementa T-041 y T-043)
+- **Estado:** decidida
+- **Opciones:** permitir compras a cualquier usuario autenticado / reservar compras para usuarios compradores
+- **Decisión:** el administrador no puede agregar productos al carrito ni iniciar o completar una
+  compra. Esta restricción aplica también a las acciones del servidor, no solo a los controles que
+  se muestran en la interfaz. La gestión de pedidos del administrador es independiente de comprar.
+- **Motivo:** el administrador opera la tienda y no participa como comprador; los flujos de compra
+  pertenecen a las cuentas de usuario comprador.
+- **Consecuencias:** las acciones de carrito y checkout deben rechazar al administrador aunque
+  intente invocarlas directamente; la interfaz tampoco debe ofrecerle esas acciones.
+- **Fecha:** 2026-11-03
