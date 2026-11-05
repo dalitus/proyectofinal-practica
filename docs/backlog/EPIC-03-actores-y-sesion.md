@@ -7,7 +7,7 @@ que las contraseñas no se guarden en texto plano.
 
 ## T-020 · Reemplazar `app_globals` por `AuthState` por sesión
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 03
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 03
 - **Archivos:** `state/app_globals.py:2`, `state/users_state.py:32-92`,
   `state/catalogo_state.py:56`, `state/carrito_state.py:63-185`, `pages/andmin_page.py:18`
 - **Problema:** `current_user_id` es una variable global de módulo compartida por todos los
@@ -23,6 +23,13 @@ que las contraseñas no se guarden en texto plano.
   - [x] La sesión persiste 7 días y sobrevive reinicios del servidor.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-019 y D-020.
+- **Verificación (2026-11-05):**
+  - No existe `app/state/app_globals.py` ni ninguna variable de módulo con el usuario: el rol y el
+    id salen del token de `LocalAuthSession` en cada evento (`app/service/sesion_servicio.py`).
+  - `tests/test_sesion_rol.py` cubre token vacío/desconocido/vencido, comprador, admin y la guarda
+    `usuario_con_rol`; el carrito se consulta por `usuario_id`, nunca por estado global.
+  - La prueba manual con dos navegadores es el gate de `docs/HANDOFF.md` y quedó registrada al
+    cerrar T-021/T-023 (cada sesión resuelve su propio token).
 - **Depende de:** T-010, T-011
 
 ---

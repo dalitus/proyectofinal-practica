@@ -45,11 +45,11 @@
 | T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |
 | T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | lista |
 | T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | hecha |
-| T-011 | Identidad y rol del administrador | 02 Datos | P0 | lista |
-| T-012 | Integridad de datos (FK, cascadas, unique email) | 02 Datos | P1 | lista |
+| T-011 | Identidad y rol del administrador | 02 Datos | P0 | hecha |
+| T-012 | Integridad de datos (FK, cascadas, unique email) | 02 Datos | P1 | hecha |
 | T-013 | Tablas legado `rx.Model` y alcance | 02 Datos | P2 | hecha |
-| T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | lista |
-| T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | lista |
+| T-014 | Contrato de precios (Decimal, moneda, formato) | 02 Datos | P1 | hecha |
+| T-020 | Reemplazar `app_globals` por `AuthState` por sesión | 03 Sesión | P0 | hecha |
 | T-021 | Flujo de login/logout/registro y redirecciones | 03 Sesión | P0 | hecha |
 | T-022 | Hash de contraseñas y persistencia de sesión | 03 Sesión | P0 | hecha |
 | T-023 | Guardas de rutas por rol | 03 Sesión | P0 | hecha |
