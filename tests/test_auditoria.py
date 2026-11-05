@@ -20,7 +20,8 @@ from app.model.consulta_model import Consulta
 from app.model.product_model import Producto
 from app.model.stock_model import Stocks
 from app.service.carrito_servicio import agregar
-from app.service.auditoria import configurar_destino, registrar
+from app.service.auditoria import registrar
+from app.service.configuracion_logs import configurar_logs
 from app.service.consulta_servicio import eliminar as eliminar_consulta
 from app.service.consulta_servicio import responder as responder_consulta
 from app.service.pedido_servicio import (
@@ -122,16 +123,20 @@ def _consulta(session: Session) -> int:
     return consulta.id_consulta or 0
 
 
-def test_el_destino_en_archivo_recibe_una_linea_por_operacion(tmp_path) -> None:
-    """Sin handler, el ``logger.info`` no llega a ningún lado (D-031)."""
-    logger = logging.getLogger("app.auditoria")
+def test_el_destino_stdout_recibe_una_linea_por_operacion(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """D-035: la auditoría va a stdout, sin archivo (T-064)."""
+    monkeypatch.setenv("REFLEX_ENV_MODE", "dev")
+    logger = logging.getLogger("app")
+    nivel_anterior = logger.level
     antes = list(logger.handlers)
-    destino = tmp_path / "auditoria.log"
 
     try:
-        assert configurar_destino(destino) == destino.resolve()
+        configurar_logs()
         # Idempotente: el arranque de Reflex importa la app más de una vez.
-        assert configurar_destino(destino) == destino.resolve()
+        configurar_logs()
 
         registrar(
             accion="cambiar_estado",
@@ -140,15 +145,21 @@ def test_el_destino_en_archivo_recibe_una_linea_por_operacion(tmp_path) -> None:
             admin_id=2,
             detalle="en espera -> enviado",
         )
-        lineas = destino.read_text(encoding="utf-8").strip().splitlines()
+        salida = capsys.readouterr().out
     finally:
         for handler in list(logger.handlers):
             if handler not in antes:
                 logger.removeHandler(handler)
                 handler.close()
+        logger.setLevel(nivel_anterior)
 
+    lineas = [
+        linea for linea in salida.strip().splitlines() if "app.auditoria" in linea
+    ]
     assert len(lineas) == 1
-    assert json.loads(lineas[0])["accion"] == "cambiar_estado"
+    assert json.loads(lineas[0].split("app.auditoria: ", 1)[1])["accion"] == (
+        "cambiar_estado"
+    )
 
 
 def test_cambiar_estado_registra_admin_accion_y_entidad(

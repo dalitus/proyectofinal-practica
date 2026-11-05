@@ -165,18 +165,38 @@ consistente.
 
 ## T-064 · Notificaciones y logging
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 07
-- **Archivos:** `service/notifail.py`, `state/users_state.py:80-97`, `service/*`, `pages/*`
-- **Problema:** se devuelven componentes desde handlers (error de Reflex), se usa `print()` y
-  `traceback.print_exc()` en producción, y los errores se muestran crudos al usuario.
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 07
+- **Archivos:** `app/service/configuracion_logs.py`, `app/app.py`,
+  `app/service/auditoria.py`, `app/state/*`, `tests/test_configuracion_logs.py`,
+  `tests/test_auditoria.py`, `tests/test_arquitectura.py`
+- **Problema:** se devolvían componentes desde handlers (error de Reflex), se usaba `print()` y
+  `traceback.print_exc()` en producción, y los errores se mostraban crudos al usuario.
 - **Decisión (D-035):** logging solo por consola, `INFO` en prod y `DEBUG` en dev; sin servicio
   externo ni identificador de error.
+- **Qué se hizo (2026-11-05):**
+  - `app/service/configuracion_logs.py` cuelga un único `StreamHandler(sys.stdout)` del logger
+    `app`, con formato `fecha nivel logger: mensaje`, y fija el nivel con `REFLEX_ENV_MODE`:
+    `DEBUG` en dev, `INFO` en prod y preview. Es idempotente: Reflex importa la app más de una vez.
+  - `app/app.py` llama a `configurar_logs()` en el arranque. Antes no había ningún handler para los
+    loggers de la app, así que los `logger.exception` de los estados no llegaban a stdout.
+  - `app/service/auditoria.py` deja de escribir `logs/auditoria.log`: las líneas JSON salen por el
+    mismo stdout que el resto (D-035), sin archivo ni handler propio.
+  - Los estados siguen capturando `SQLAlchemyError`, registrando el detalle técnico con
+    `logger.exception` y mostrando un mensaje amigable; el feedback usa `Toast`/vars, nunca
+    componentes devueltos desde un handler.
+  - `tests/test_arquitectura.py` corta regresiones de `print()` y `traceback` crudo en `app/`.
 - **AC propuestos:**
   - [x] Feedback con `rx.toast` o vars de estado, nunca componentes desde handlers.
+        → `Toast` en carrito, checkout y panel; los handlers devuelven eventos o `None`.
   - [x] `logging` configurado; sin `print()` de depuración.
+        → `configurar_logs()` en `app/app.py`; `test_sin_print_de_depuracion` en verde.
   - [x] Errores técnicos al log; mensaje amigable al usuario.
+        → `logger.exception` + `MENSAJE_*` en los estados; el detalle no se pinta en pantalla.
   - [x] `notifail_component` eliminado o convertido en componente de UI válido.
+        → eliminado con el código legacy (T-060); no queda ninguna referencia en `app/`.
   - [x] Los logs van solo a stdout, con nivel por entorno.
+        → `configurar_logs()` + `nivel_de_log()`; `test_configuracion_logs.py` y
+        `test_el_destino_stdout_recibe_una_linea_por_operacion` en verde.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-035.
 - **Depende de:** T-060, T-062

@@ -164,13 +164,13 @@ poder romper la integridad del negocio.
     bootstrap de la tienda.
   - `cambiar_password()` valida la contraseña actual antes de rehashing y actualiza la credencial
     con la nueva contraseña.
-  - El archivo `logs/auditoria.log` sigue siendo el destino real, con `configurar_destino()`
-    invocado desde `app/app.py` y con idempotencia en el handler.
+  - El destino de la auditoría es stdout, configurado una sola vez desde `app/app.py` con
+    `configurar_logs()` (D-035, T-064): sin archivo ni handler duplicado.
 - **AC propuestos:**
   - [x] Confirmación explícita en toda operación destructiva.
         → `ConfirmDialog` en cancelar pedido, eliminar consulta y cambio de estado.
   - [x] Registro estructurado (quién, qué, entidad, cuándo) en el log.
-        → línea JSON con los cinco campos, escrita en `logs/auditoria.log`.
+        → línea JSON con los cinco campos, escrita en stdout (D-035, T-064).
   - [x] Protección del último admin (T-024).
         → `desactivar_usuario()` rechaza la desactivación si ese admin es el último habilitado.
   - [x] Borrado lógico de productos y desactivación de usuarios (D-028).

@@ -63,12 +63,12 @@ from app.pages.redirecciones_pagina import (  # noqa: F401  (rutas viejas -> URL
     redireccion_users,
 )
 from app.pages.registro_pagina import registro_pagina  # noqa: F401  (registra "/register")
-from app.service.auditoria import configurar_destino
+from app.service.configuracion_logs import configurar_logs
 from app.ui import APP_CSS, FONT_HEAD_COMPONENTS
 
-# Sin esto, las líneas de auditoría (D-031) se escriben en un logger sin destino
-# y se pierden: Reflex no configura el logging de la aplicación.
-configurar_destino()
+# Reflex solo configura su propio logger: sin esto, los logger.info/exception de
+# la app (incluida la auditoria de D-031) no llegan a stdout (T-064, D-035).
+configurar_logs()
 
 # La UI es solo clara: las paginas pintan fondos blancos, asi que hay que
 # neutralizar el modo oscuro que el navegador guardo en localStorage (el valor

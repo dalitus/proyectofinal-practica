@@ -75,7 +75,7 @@
 | T-061 | Registro único de rutas y URLs canónicas | 07 Arquitectura | P1 | hecha |
 | T-062 | Capa de servicios y event handlers | 07 Arquitectura | P1 | hecha |
 | T-063 | Sistema de diseño: tokens, shell y primitivos | 07 Arquitectura | P1 | hecha |
-| T-064 | Notificaciones y logging | 07 Arquitectura | P2 | lista |
+| T-064 | Notificaciones y logging | 07 Arquitectura | P2 | hecha |
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | hecha |
 | T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | hecha |
 | T-071 | Lint, formato, pre-commit y CI | 08 Calidad | P2 | lista |
