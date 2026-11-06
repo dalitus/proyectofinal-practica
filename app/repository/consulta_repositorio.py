@@ -16,9 +16,9 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 from sqlmodel import select
 
-from app.model.consulta_model import Consulta
+from app.model.consulta_modelo import Consulta
 from app.model.perfil_modelo import UserProfile
-from app.repository.conect_db import get_session
+from app.repository.base_de_datos import get_session
 
 
 class ConsultaNoEncontrada(Exception):

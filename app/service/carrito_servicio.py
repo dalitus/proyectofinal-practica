@@ -20,9 +20,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
-from app.model.carrito_model import Carrito
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.carrito_modelo import Carrito
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.repository import carrito_repositorio
 from app.service.formato_moneda import formatear_precio
 from app.service.sesion_servicio import MENSAJE_SOLO_COMPRADOR, usuario_puede_comprar

@@ -5,7 +5,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.model.categoria_modelo import Categoria
-    from app.model.stock_model import Stocks
+    from app.model.variante_modelo import Stocks
 
 
 class Producto(SQLModel, table=True):

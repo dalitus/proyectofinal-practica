@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from app.model.product_model import Producto
+    from app.model.producto_modelo import Producto
 
 
 class Categoria(SQLModel, table=True):

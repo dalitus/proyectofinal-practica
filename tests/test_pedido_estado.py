@@ -15,9 +15,9 @@ from reflex_local_auth.local_auth import LocalUser
 from sqlmodel import Session, select
 
 from app.model.categoria_modelo import Categoria
-from app.model.pedido_model import Pedido
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.pedido_modelo import Pedido
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.repository import pedido_repositorio
 from app.repository.pedido_repositorio import EstadoCambiado
 from app.service.carrito_servicio import agregar

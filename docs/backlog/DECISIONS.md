@@ -876,3 +876,22 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 - **Consecuencias:** las acciones de carrito y checkout deben rechazar al administrador aunque
   intente invocarlas directamente; la interfaz tampoco debe ofrecerle esas acciones.
 - **Fecha:** 2026-11-03
+
+---
+
+## D-051 · Módulos transversales sin sufijo de capa
+
+- **Tarea:** T-075 (complementa D-040)
+- **Estado:** decidida
+- **Opciones:** renombrar todo a `<dominio>_<capa>.py` / dejar sin sufijo los módulos que no son de dominio
+- **Decisión:** la convención `<dominio>_<capa>.py` aplica a los módulos de dominio de cada capa. Los
+  helpers transversales que no representan un dominio del negocio conservan su nombre:
+  `service/auditoria.py`, `service/formato_moneda.py`, `service/configuracion_logs.py`,
+  `state/parametros.py` y `pages/cuenta_menu.py`. Los primitivos de `app/ui/` siguen la convención
+  que fijó T-063 (`tokens`, `primitives`, `feedback`, `layout`, `styles`, `imagenes`).
+- **Motivo:** `formato_moneda_servicio.py` o `configuracion_logs_servicio.py` agregan ruido sin
+  aportar dominio, y esos módulos se usan desde varias capas como utilidades. El rename de T-075
+  queda acotado a los archivos legacy que sí tienen dominio y capa claros.
+- **Consecuencias:** el AC "todas las capas usan `<dominio>_<capa>.py`" se interpreta sobre módulos
+  de dominio; la excepción vive acá para no reabrirla en cada pantalla nueva.
+- **Fecha:** 2026-11-06

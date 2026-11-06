@@ -22,7 +22,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.model.pedido_model import Pedido
+from app.model.pedido_modelo import Pedido
 from app.model.perfil_modelo import UserProfile
 from app.repository import pedido_repositorio
 from app.repository.pedido_repositorio import (

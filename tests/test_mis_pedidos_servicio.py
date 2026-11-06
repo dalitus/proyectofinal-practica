@@ -15,9 +15,9 @@ from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
 from app.model.pedido_item_modelo import PedidoItem
-from app.model.pedido_model import Pedido
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.pedido_modelo import Pedido
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service.formato_moneda import formatear_precio
 from app.service.pedido_servicio import (
     ErrorDePedido,

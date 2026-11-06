@@ -17,9 +17,9 @@ from dotenv import load_dotenv
 from sqlmodel import Session, select
 
 from app.model.categoria_modelo import Categoria
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
-from app.repository.conect_db import get_session
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
+from app.repository.base_de_datos import get_session
 from app.service.auth_servicio import ErrorDeRegistro, crear_admin_si_no_existe
 
 load_dotenv()

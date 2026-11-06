@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from sqlmodel import CheckConstraint, Field, Relationship, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from app.model.product_model import Producto
+    from app.model.producto_modelo import Producto
 
 
 class Stocks(SQLModel, table=True):

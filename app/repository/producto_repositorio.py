@@ -20,12 +20,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from app.model.carrito_model import Carrito
+from app.model.carrito_modelo import Carrito
 from app.model.categoria_modelo import Categoria
 from app.model.pedido_item_modelo import PedidoItem
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
-from app.repository.conect_db import get_session
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
+from app.repository.base_de_datos import get_session
 
 # Sort key -> ORDER BY clauses. The name tiebreaker keeps pages stable.
 _ORDENAMIENTOS = {

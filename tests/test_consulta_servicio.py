@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import pytest
 from sqlmodel import Session
 
-from app.model.consulta_model import Consulta
+from app.model.consulta_modelo import Consulta
 from app.service.auth_servicio import crear_admin_si_no_existe, perfil_por_email, registrar_comprador
 from app.service.consulta_servicio import (
     ErrorDeConsulta,

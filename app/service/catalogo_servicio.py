@@ -11,7 +11,7 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-from app.model.product_model import Producto
+from app.model.producto_modelo import Producto
 from app.repository import producto_repositorio
 from app.service.formato_moneda import formatear_precio
 

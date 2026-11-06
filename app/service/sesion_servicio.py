@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from reflex_local_auth.local_auth import LocalAuthSession
 from sqlmodel import select
 
-from app.repository.conect_db import get_session
+from app.repository.base_de_datos import get_session
 from app.service import auth_servicio
 
 # Los tres roles que existen (D-021). El invitado no tiene fila en la base: es la

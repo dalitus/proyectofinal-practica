@@ -14,8 +14,8 @@ from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
 from app.model.perfil_modelo import UserProfile
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service.carrito_servicio import (
     ErrorDeCarrito,
     agregar,

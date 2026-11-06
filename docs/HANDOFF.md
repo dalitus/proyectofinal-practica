@@ -115,7 +115,7 @@ importando los modelos borrados, así que la app no compila en `wip/esquema`.
 
 🟢 **Cerrada la limpieza (2026-10-28).** **T-060 hecha:** se borró todo `app/pages/` y
 `app/state/`, y todos los `app/service/*` y `app/repository/*` salvo `auth_servicio.py` y
-`conect_db.py`. Sobreviven `app/model/` (11 tablas), `app/ui/tokens.py` y el alta de comprador.
+`conect_db.py` (hoy `base_de_datos.py`). Sobreviven `app/model/` (11 tablas), `app/ui/tokens.py` y el alta de comprador.
 La app compila otra vez (17 módulos contra 34 antes) y levanta: `/` es una home provisoria,
 `/login` es la página del plugin y `/register` es propia (D-044) porque la del plugin no crea
 `UserProfile`. `seed.py` arreglado y corrido sobre `zapateria_db` recreada.
@@ -194,7 +194,7 @@ Siempre con el `.venv` activo (o prefijando `.venv\Scripts` al `PATH`), si no Re
 | `docs/backlog/DECISIONS.md` | D-001..D-040, la fuente de verdad de producto |
 | `docs/design.md` | sistema de diseño obligatorio |
 | `AGENTS.md` | reglas de código, comandos y trampas |
-| `rxconfig.py`, `app/repository/conect_db.py` | configuración de DB (ambos deben leer `.env`) |
+| `rxconfig.py`, `app/repository/base_de_datos.py` | configuración de DB (ambos deben leer `.env`) |
 | `alembic.ini`, `alembic/env.py` | migraciones |
 
 ## 9. Riesgos abiertos

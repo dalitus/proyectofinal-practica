@@ -243,7 +243,7 @@ consistente.
 
 ## T-075 · Nombres de archivo: ortografía y función
 
-- **Estado:** lista · **Prioridad:** P1 · **Épica:** 07
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
 - **Archivos:** todo `app/**/*.py`
 - **Problema:** varios módulos tienen palabras mal escritas o nombres que no dicen qué hacen
   (`adnmin_shouder_page.py`, `andmin_page.py`, `ubicaccion_page.py`, `consulta_repocitory.py`,
@@ -303,13 +303,24 @@ consistente.
   `global_state.py`, `compras_admin_state.py`, `compras_admin_page.py`, `ui_helpers.py`.
 - **AC propuestos:**
   - [x] Convención definida: español para archivos, inglés para clases (D-040).
-  - [ ] Ningún nombre de archivo contiene una palabra mal escrita.
-  - [ ] Todas las capas usan `<dominio>_<capa>.py` con el sufijo en español.
-  - [ ] No quedan dos archivos que representen lo mismo (`ubicacion_page.py` vs `ubicaccion_page.py`).
-  - [ ] Los `import` están actualizados; `rg` de los nombres viejos no devuelve nada.
-  - [ ] `reflex compile` pasa sin warnings nuevos y los tests corren.
-  - [ ] El rename va en un commit aislado (solo movimientos + imports) para poder revisarlo.
-  - [ ] Cada nombre permite adivinar capa y dominio sin abrir el archivo.
+  - [x] Ningún nombre de archivo contiene una palabra mal escrita.
+  - [x] Todas las capas usan `<dominio>_<capa>.py` con el sufijo en español.
+  - [x] No quedan dos archivos que representen lo mismo (`ubicacion_page.py` vs `ubicaccion_page.py`).
+  - [x] Los `import` están actualizados; `rg` de los nombres viejos no devuelve nada.
+  - [x] `reflex compile` pasa sin warnings nuevos y los tests corren.
+  - [x] El rename va en un commit aislado (solo movimientos + imports) para poder revisarlo.
+  - [x] Cada nombre permite adivinar capa y dominio sin abrir el archivo.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-040.
+- **Verificación (2026-11-06):**
+  - Renombrados con `git mv` (commit aislado, solo movimientos + imports):
+    `product_model.py` → `producto_modelo.py`, `stock_model.py` → `variante_modelo.py`,
+    `consulta_model.py` → `consulta_modelo.py`, `pedido_model.py` → `pedido_modelo.py`,
+    `carrito_model.py` → `carrito_modelo.py`, `ubicacion_model.py` → `ubicacion_modelo.py`,
+    `conect_db.py` → `base_de_datos.py`.
+  - `rg` de los nombres viejos no devuelve nada en `app/`, `tests/` ni `seed.py`.
+  - `reflex compile --dry` → `Success`; `pytest` → 229 tests en verde.
+  - Los módulos transversales (`service/auditoria.py`, `service/formato_moneda.py`,
+    `service/configuracion_logs.py`, `state/parametros.py`, `pages/cuenta_menu.py`) conservan su
+    nombre por D-051; los primitivos de `app/ui/` siguen la convención de T-063.
 - **Depende de:** T-005, T-013, T-019, T-060, T-061

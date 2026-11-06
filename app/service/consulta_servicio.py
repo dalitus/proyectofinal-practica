@@ -11,7 +11,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.model.consulta_model import Consulta
+from app.model.consulta_modelo import Consulta
 from app.model.perfil_modelo import UserProfile
 from app.repository import consulta_repositorio
 from app.repository.consulta_repositorio import (

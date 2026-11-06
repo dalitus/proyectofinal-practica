@@ -15,8 +15,8 @@ import pytest
 from sqlmodel import Session, select
 
 from app.model.categoria_modelo import Categoria
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service import catalogo_servicio, producto_servicio
 from app.service.carrito_servicio import agregar
 from app.service.producto_servicio import ErrorDeProducto

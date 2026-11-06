@@ -1,6 +1,6 @@
 # Backlog del proyecto — Tienda
 
-> Última actualización: 2026-11-03
+> Última actualización: 2026-11-06
 > **Sesión nueva: leer primero `docs/HANDOFF.md`** (estado real verificado + roadmap por fases).
 > Origen: scan de código + `compile_log.txt` / `run_log.txt`.
 > Este backlog es la fuente de verdad para bugs y refactorizaciones. Cada tarea se cierra con
@@ -82,7 +82,7 @@
 | T-072 | Documentación y `.env.example` | 08 Calidad | P2 | lista |
 | T-073 | Revisión de secretos y `.gitignore` | 08 Calidad | P0 | hecha |
 | T-074 | Accesibilidad y responsive básico | 08 Calidad | P2 | lista |
-| T-075 | Nombres de archivo: ortografía y función | 07 Arquitectura | P1 | lista |
+| T-075 | Nombres de archivo: ortografía y función | 07 Arquitectura | P1 | hecha |
 
 ## Archivos del backlog
 

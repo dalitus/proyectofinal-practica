@@ -18,7 +18,7 @@ from sqlmodel import Session, select
 from reflex_local_auth import LocalUser
 
 from app.model.perfil_modelo import UserProfile
-from app.repository.conect_db import get_session
+from app.repository.base_de_datos import get_session
 
 MIN_PASSWORD_LENGTH = 8
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")

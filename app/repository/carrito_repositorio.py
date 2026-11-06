@@ -12,10 +12,10 @@ from __future__ import annotations
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
-from app.model.carrito_model import Carrito
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
-from app.repository.conect_db import get_session
+from app.model.carrito_modelo import Carrito
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
+from app.repository.base_de_datos import get_session
 
 
 def listar_lineas(usuario_id: int) -> list[tuple[Carrito, Stocks, Producto]]:

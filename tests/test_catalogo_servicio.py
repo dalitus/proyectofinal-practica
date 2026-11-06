@@ -13,8 +13,8 @@ import pytest
 from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service.catalogo_servicio import (
     PRODUCTOS_POR_PAGINA,
     categoria_desde_valor,

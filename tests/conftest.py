@@ -63,6 +63,6 @@ def _engine_de_test(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
     Services open their own sessions (D-033), so tests inject the test engine
     instead of passing sessions around. Nothing here can reach `zapateria_db`.
     """
-    from app.repository import conect_db
+    from app.repository import base_de_datos
 
-    monkeypatch.setattr(conect_db, "engine", engine)
+    monkeypatch.setattr(base_de_datos, "engine", engine)

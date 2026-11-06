@@ -16,9 +16,9 @@ from reflex_local_auth.local_auth import LocalUser
 from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
-from app.model.consulta_model import Consulta
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.consulta_modelo import Consulta
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service.carrito_servicio import agregar
 from app.service.auditoria import registrar
 from app.service.configuracion_logs import configurar_logs

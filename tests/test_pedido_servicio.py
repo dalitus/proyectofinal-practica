@@ -14,12 +14,12 @@ from reflex_local_auth.local_auth import LocalUser
 from sqlmodel import Session, select
 
 from app.model.categoria_modelo import Categoria
-from app.model.consulta_model import Consulta
+from app.model.consulta_modelo import Consulta
 from app.model.pedido_item_modelo import PedidoItem
-from app.model.pedido_model import Pedido
+from app.model.pedido_modelo import Pedido
 from app.model.perfil_modelo import UserProfile
-from app.model.product_model import Producto
-from app.model.stock_model import Stocks
+from app.model.producto_modelo import Producto
+from app.model.variante_modelo import Stocks
 from app.service.carrito_servicio import agregar, ver_carrito
 from app.service.pedido_servicio import (
     DatosDeEntrega,
