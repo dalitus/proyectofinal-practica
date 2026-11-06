@@ -79,7 +79,7 @@
 | T-065 | Consultas de usuario (login obligatorio) | 07 Arquitectura | P1 | hecha |
 | T-070 | Tests de servicios y repositorios | 08 Calidad | P2 | hecha |
 | T-071 | Lint, formato, pre-commit y CI | 08 Calidad | P2 | lista |
-| T-072 | Documentación y `.env.example` | 08 Calidad | P2 | lista |
+| T-072 | Documentación y `.env.example` | 08 Calidad | P2 | hecha |
 | T-073 | Revisión de secretos y `.gitignore` | 08 Calidad | P0 | hecha |
 | T-074 | Accesibilidad y responsive básico | 08 Calidad | P2 | lista |
 | T-075 | Nombres de archivo: ortografía y función | 07 Arquitectura | P1 | hecha |

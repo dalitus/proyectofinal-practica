@@ -48,7 +48,7 @@
 
 ## T-072 · Documentación y `.env.example`
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 08
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 08
 - **Archivos:** `readme.txt`, `.env.example` (nuevo), `README.md` (nuevo), `docs/`
 - **Problema:** el README está duplicado y desactualizado; no hay ejemplo de variables de entorno
   ni pasos claros de instalación/migración.
@@ -62,6 +62,15 @@
   - [x] No se documenta despliegue: se agrega cuando T-001 esté verificada en prod.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-038.
+- **Verificación (2026-11-06):**
+  - `README.md` es el único README (`readme.txt` ya no existe) y cubre stack, requisitos,
+    instalación con `uv`, variables de entorno, migraciones, arranque y estructura de capas.
+  - `.env.example` lista `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NOMBRE`; la
+    contraseña es un placeholder (`CAMBIAR-ESTA-CLAVE`), no un valor real.
+  - Se agregaron la tabla de actores y el flujo de compra de punta a punta, y el runbook de errores
+    comunes (granian global, `DATABASE_URL` ausente, base inexistente, catálogo vacío, drift de
+    Alembic, puerto ocupado, permisos de MySQL).
+  - No hay instrucciones de despliegue: quedan para cuando T-001 se verifique en prod.
 - **Depende de:** T-002, T-003
 
 ---

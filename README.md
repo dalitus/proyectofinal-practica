@@ -51,6 +51,29 @@ un `reflex` global: el backend toma `granian` del `PATH` y muere con
 
 Frontend en `http://localhost:3000`, backend en `http://localhost:8000`.
 
+## Variables de entorno
+
+Todas viven en `.env` (no se commitea). `.env.example` trae la plantilla sin credenciales reales.
+
+| Variable | Obligatoria | Para qué |
+|---|---|---|
+| `DATABASE_URL` | Sí | URL SQLAlchemy/MySQL de la app, los repositorios y Alembic (D-011). Formato `mysql+pymysql://USUARIO:PASSWORD@localhost:3306/zapateria_db`. Si falta, la app corta con un `RuntimeError` claro. |
+| `ADMIN_EMAIL` | Solo para `seed.py` | Email de la cuenta administradora inicial (D-013). |
+| `ADMIN_PASSWORD` | Solo para `seed.py` | Contraseña inicial del administrador; cambiala antes de usar la app fuera de tu máquina. |
+| `ADMIN_NOMBRE` | Solo para `seed.py` | Nombre visible del administrador. |
+
+## Actores y flujos
+
+| Actor | Puede | No puede |
+|---|---|---|
+| **Invitado** | Ver catálogo, precios y detalle de producto | Carrito, compra y consultas (lo manda a `/login` con `redirect_to`) |
+| **Comprador registrado** | Carrito, checkout, historial de pedidos, consultas | Panel de administración (403) |
+| **Administrador** | Productos y variantes, stock, pedidos, consultas y reportes | Comprar: carrito y checkout rechazan su rol (D-050) |
+
+Flujo de compra: catálogo (`/`) → detalle (`/producto/[id]`) → carrito (`/carrito`) → checkout
+(`/checkout`, datos de entrega) → pedido creado con el stock descontado → seguimiento en
+`/mis-pedidos`. El administrador cambia el estado del pedido desde `/admin/pedidos`.
+
 ## Estructura
 
 ```
@@ -72,3 +95,16 @@ model/ → repository/ → service/ → state/ → pages/
 | `docs/backlog/README.md` | índice de tareas, estados y Definition of Done |
 | `docs/backlog/DECISIONS.md` | decisiones cerradas (D-001 en adelante) |
 | `docs/design.md` | sistema de diseño obligatorio para la UI |
+
+## Problemas comunes
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| El backend muere con `TypeError: 'module' object is not callable` en `@rx.event` | Se lanzó el `reflex` global en vez del del venv y tomó otro `granian` | Activá `.venv` (`\.venv\Scripts\Activate.ps1`) o usá `.\run.ps1` |
+| `RuntimeError: DATABASE_URL is not set` | Falta `.env` o la variable está vacía | `Copy-Item .env.example .env` y completá `DATABASE_URL` |
+| `alembic upgrade head` falla con `Unknown database` | La base no existe | Creala en MySQL 8 (`CREATE DATABASE zapateria_db CHARACTER SET utf8mb4`) y reintentá |
+| El catálogo aparece vacío | La base no tiene productos | Corré `python seed.py` o cargá productos desde `/admin/productos` |
+| `reflex run --env prod` aborta con `Detected database schema changes` | La DB tiene tablas o columnas fuera de los modelos | `alembic upgrade head` y `alembic check` para ver el drift |
+| `Address already in use` en `3000`/`8000` | Quedó un proceso anterior | Cerrá el proceso o usá `.\run.ps1 -Port 3001` |
+| El login falla con error de acceso a MySQL | Credenciales o usuario sin permisos sobre la base | Revisá `DATABASE_URL` y los `GRANT` del usuario |
+
