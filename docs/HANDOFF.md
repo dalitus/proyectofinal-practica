@@ -1,6 +1,10 @@
 # Handoff — estado real y roadmap
 
-> Fecha: 2026-10-27. Para arrancar una sesión nueva sin releer todo el historial.
+> **Actualizado 2026-11-06:** el backlog está cerrado (45 tareas `hecha`). Las fases de este
+> documento ya se completaron; se conserva como historia del roadmap. Para el estado actual, la
+> fuente de verdad es `docs/backlog/README.md` y `docs/backlog/EPIC-*.md`.
+>
+> Fecha original: 2026-10-27. Para arrancar una sesión nueva sin releer todo el historial.
 > Antes de tocar código: leer `AGENTS.md`, `docs/backlog/README.md` y este archivo.
 
 ---
