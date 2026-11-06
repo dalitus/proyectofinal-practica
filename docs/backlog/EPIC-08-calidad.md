@@ -114,7 +114,7 @@
 
 ## T-074 · Accesibilidad y responsive básico
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 08
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 08
 - **Archivos:** `pages/*.py`, `app/ui/`
 - **Problema:** hay imágenes sin `alt`, formularios sin labels asociados y layouts con anchos fijos
   (`60vw`, `70vw`, `75%`) que se rompen en mobile.
@@ -128,4 +128,19 @@
   - [x] Se verifica con el checklist de `docs/design.md` antes de cerrar cada pantalla.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-034.
+- **Verificación (2026-11-06):**
+  - Auditoría sobre las 14 páginas: `Input`, `Select` y `TextArea` siempre reciben `label` visible
+    (el primitivo asocia `html_for` + `id` y expone el error con `role="alert"`); las tres únicas
+    imágenes (`catalogo`, `carrito`, `detalle`) pasan `alt` con el nombre del producto, y el
+    `Image` del panel lo exige por firma.
+  - Sin anchos fijos en `pages/`: solo porcentajes (`width="100%"`, `60%`, `75%`) y grillas
+    `minmax(0, 1fr)`; el layout es mobile-first con media queries en 768 y 1024 y el shell ya se
+    midió a 360px en T-063 (`scrollWidth == clientWidth`).
+  - Contraste: tokens sin cambios respecto de la medición de T-063 (texto/tarjeta 18.88:1,
+    muted/lienzo 4.97:1, danger 6.57:1, success 5.69:1) y foco visible de 2px en todos los
+    interactivos.
+  - Diálogos: `ConfirmDialog` y `Drawer` usan Radix (`alertdialog`/`dialog`) con foco atrapado,
+    cierre con Escape y botones reales.
+  - Se agregó `tests/test_accesibilidad.py` (61 casos, verde) que corta la regresión: campos sin
+    label, imágenes sin `alt`, anchos en px mayores a 320 y `rx.spinner` de página completa.
 - **Depende de:** T-063
