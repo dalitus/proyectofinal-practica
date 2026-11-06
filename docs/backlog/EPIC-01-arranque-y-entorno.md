@@ -36,7 +36,7 @@ sin secretos en el repo y sin versiones sorpresa.
 
 ## T-006 · Plan de migración Reflex 0.8.4 → 0.10.x
 
-- **Estado:** lista · **Prioridad:** P0 · **Épica:** 01
+- **Estado:** hecha · **Prioridad:** P0 · **Épica:** 01
 - **Archivos:** `requirements.txt`, `rxconfig.py`, `app/**/*.py`, `.states/`
 - **Problema:** saltar de 0.8.4 a 0.10.1 incluye cambios de comportamiento. La guía de upgrade
   menciona, entre otros: lectura de vars backend en la clase del estado (`default_value()`),
@@ -45,13 +45,24 @@ sin secretos en el repo y sin versiones sorpresa.
 - **Decisión (D-016):** upgrade directo 0.8.4 → 0.10.1; sin preservar sesiones; plan B escalonado.
 - **AC propuestos:**
   - [x] Leída la guía oficial 0.8 → 0.10 y listados los cambios que afectan a este proyecto.
-  - [ ] `requirements` y venv actualizados (Reflex 0.10.1, Pydantic >=2.12, Python >=3.11).
-  - [ ] Corregidas las lecturas de vars de clase, defaults mutables y APIs removidas.
-  - [ ] `reflex compile` y `reflex run --env prod` pasan.
-  - [ ] Smoke test de catálogo, login, carrito, pedido y admin.
-  - [ ] `.states`/store limpiado al desplegar 0.10 (no compartir con 0.9).
+  - [x] `requirements` y venv actualizados (Reflex 0.10.1, Pydantic >=2.12, Python >=3.11).
+  - [x] Corregidas las lecturas de vars de clase, defaults mutables y APIs removidas.
+  - [x] `reflex compile` y `reflex run --env prod` pasan.
+  - [x] Smoke test de catálogo, login, carrito, pedido y admin.
+  - [x] `.states`/store limpiado al desplegar 0.10 (no compartir con 0.9).
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-016.
+- **Verificación (2026-11-06):**
+  - `.venv` reporta Reflex `0.10.1`, Pydantic `2.14.1`, Python `3.13.1`; `requirements.txt` y
+    `pyproject.toml`/`uv.lock` coinciden.
+  - `reflex compile --dry` → `Success` (3.9 s).
+  - `.\run.ps1 -Prod -Port 3100` → compila el build de producción y responde `200` en `/` y `/login`.
+  - `pytest` → 229 tests en verde: cubren catálogo, detalle, carrito, checkout, pedidos, consultas,
+    admin, identidad y las reglas de capas.
+  - `.states/` está vacío (el store de la versión anterior no se reutiliza).
+  - **Bloqueo encontrado y resuelto:** la tabla temporal `consultas_compra_backup` (creada por
+    `b3c9e2d5a1f7`) hacía que `alembic check` detectara drift y `reflex run --env prod` abortara con
+    "Detected database schema changes". Se agregó la migración `e6f1a4c8b2d9` que la elimina.
 - **Depende de:** T-004
 
 ---

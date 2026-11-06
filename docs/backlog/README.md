@@ -43,7 +43,7 @@
 | T-003 | Migraciones Alembic (head roto, credenciales) | 01 Arranque | P0 | hecha |
 | T-004 | Dependencias reproducibles y versiones | 01 Arranque | P0 | hecha |
 | T-005 | Limpieza de archivos muertos y scripts sueltos | 01 Arranque | P1 | hecha |
-| T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | lista |
+| T-006 | Plan de migración Reflex 0.8.4 → 0.10.x | 01 Arranque | P0 | hecha |
 | T-010 | Normalización de claves (`id`, `usuario_id`, `producto_id`) | 02 Datos | P0 | hecha |
 | T-011 | Identidad y rol del administrador | 02 Datos | P0 | hecha |
 | T-012 | Integridad de datos (FK, cascadas, unique email) | 02 Datos | P1 | hecha |
