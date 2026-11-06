@@ -143,26 +143,20 @@ def _fila_variante(variante: Any) -> rx.Component:
             Input(
                 label="Color",
                 value=variante["color"],
-                on_change=ProductoEditarEstado.escribir_variante(
-                    identificador, "color"
-                ),
+                on_change=ProductoEditarEstado.escribir_variante(identificador, "color"),
                 input_id="variante-color-" + identificador.to_string(),
             ),
             Input(
                 label="Talle",
                 value=variante["talle"],
-                on_change=ProductoEditarEstado.escribir_variante(
-                    identificador, "talle"
-                ),
+                on_change=ProductoEditarEstado.escribir_variante(identificador, "talle"),
                 input_id="variante-talle-" + identificador.to_string(),
             ),
             Input(
                 label="Stock",
                 type="text",
                 value=variante["cantidad"],
-                on_change=ProductoEditarEstado.escribir_variante(
-                    identificador, "cantidad"
-                ),
+                on_change=ProductoEditarEstado.escribir_variante(identificador, "cantidad"),
                 input_id="variante-stock-" + identificador.to_string(),
                 inputmode="numeric",
             ),
@@ -181,9 +175,7 @@ def _fila_variante(variante: Any) -> rx.Component:
                         "con stock 0."
                     ),
                     confirm_label="Eliminar variante",
-                    on_confirm=ProductoEditarEstado.eliminar_variante(
-                        identificador
-                    ),
+                    on_confirm=ProductoEditarEstado.eliminar_variante(identificador),
                 ),
                 class_name="ui-variant-row__actions",
             ),

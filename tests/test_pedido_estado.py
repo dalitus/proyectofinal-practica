@@ -23,8 +23,8 @@ from app.repository.pedido_repositorio import EstadoCambiado
 from app.service.carrito_servicio import agregar
 from app.service.pedido_servicio import (
     ErrorDePedido,
-    cancelar_pedido,
     cambiar_estado,
+    cancelar_pedido,
     confirmar_pedido,
     validar_entrega,
 )
@@ -101,7 +101,7 @@ def _comprar(
     usuario_id = comprador.id or 0
     _, stocks = _crear_producto(session, variantes=variantes)
 
-    for variante, cantidad in zip(stocks, cantidades or [1] * len(stocks)):
+    for variante, cantidad in zip(stocks, cantidades or [1] * len(stocks), strict=False):
         agregar(usuario_id, variante.id_stock or 0, cantidad)
 
     pedido_id = confirmar_pedido(usuario_id, validar_entrega(ENTREGA))

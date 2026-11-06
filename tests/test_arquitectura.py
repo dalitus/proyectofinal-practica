@@ -154,8 +154,7 @@ def test_las_paginas_usan_el_sistema_de_diseno(ruta: Path) -> None:
     estilos = {
         palabra.arg
         for palabra in ast.walk(arbol)
-        if isinstance(palabra, ast.keyword)
-        and palabra.arg in {"box_shadow", "color_scheme"}
+        if isinstance(palabra, ast.keyword) and palabra.arg in {"box_shadow", "color_scheme"}
     }
 
     assert hexes == [], f"{ruta.name} usa colores literales {hexes}"

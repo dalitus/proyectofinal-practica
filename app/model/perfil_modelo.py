@@ -5,15 +5,13 @@ persona y el rol. El administrador se marca con `is_admin = True` en lugar de
 vivir en una tabla `gerentes` aparte.
 """
 
-from typing import Optional
-
 from sqlmodel import Field, SQLModel
 
 
 class UserProfile(SQLModel, table=True):
     __tablename__ = "user_profiles"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     local_user_id: int = Field(foreign_key="localuser.id", unique=True, index=True)
 
     nombre: str

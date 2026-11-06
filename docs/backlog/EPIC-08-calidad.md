@@ -31,7 +31,7 @@
 
 ## T-071 · Lint, formato, pre-commit y CI
 
-- **Estado:** lista · **Prioridad:** P2 · **Épica:** 08
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 08
 - **Archivos:** `pyproject.toml` (nuevo), `.pre-commit-config.yaml` (nuevo)
 - **Problema:** no hay linter, formateador ni controles locales.
 - **Decisión (D-037):** solo pre-commit local (ruff + format + pytest en pre-push); sin CI remoto.
@@ -42,6 +42,18 @@
   - [x] No se configura GitHub Actions ni branch protection.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-037.
+- **Verificación (2026-11-06):**
+  - `ruff 0.17.4` agregado al grupo `dev` de `pyproject.toml` (`uv.lock` actualizado) con
+    `target-version = "py313"`, `line-length = 100` y reglas `E,F,I,B,UP`. Se excluyen
+    `alembic/versions` (migraciones históricas) y la regla `E501` en `tools/tablero_backlog.py`
+    porque embebe CSS/JS en strings largas.
+  - `ruff check .` → `All checks passed!` y `ruff format --check .` → `113 files already formatted`
+    (33 archivos reformateados, sin cambios de comportamiento; `pytest` y `compile` siguen verdes).
+  - `.pre-commit-config.yaml` con `ruff-check --fix` y `ruff-format` en pre-commit, y `pytest` en
+    pre-push; ganchos instalados con `pre-commit install --hook-type pre-commit --hook-type pre-push`.
+  - `pre-commit run --all-files` → `Passed`; `pre-commit run pytest --hook-stage pre-push
+    --all-files` → `Passed`.
+  - Documentado en `README.md` (sección "Calidad y controles locales"). Sin GitHub Actions.
 - **Depende de:** T-070
 
 ---

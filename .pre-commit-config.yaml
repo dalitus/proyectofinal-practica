@@ -1,0 +1,19 @@
+# Controles locales (D-037): ruff en cada commit y pytest antes de empujar.
+# Instalacion: .venv\Scripts\pre-commit.exe install --hook-type pre-commit --hook-type pre-push
+# Ejecucion manual: .venv\Scripts\pre-commit.exe run --all-files
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.4
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: .venv/Scripts/python.exe -m pytest
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

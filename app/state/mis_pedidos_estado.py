@@ -18,7 +18,6 @@ from app.service import pedido_servicio
 from app.service.pedido_servicio import ErrorDePedido
 from app.state.comprador_estado import CompradorEstado
 from app.state.parametros import id_de_la_url
-from app.ui import Toast
 
 logger = logging.getLogger(__name__)
 

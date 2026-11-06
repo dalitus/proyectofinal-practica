@@ -58,9 +58,7 @@ def Button(
     Docs: docs/design.md 4.2 (variants, normal/hover/focus/disabled/loading).
     """
     if variant not in BUTTON_VARIANTS:
-        raise ValueError(
-            f"Unknown button variant {variant!r}; expected one of {BUTTON_VARIANTS}"
-        )
+        raise ValueError(f"Unknown button variant {variant!r}; expected one of {BUTTON_VARIANTS}")
 
     spinner = rx.cond(
         loading,
@@ -95,9 +93,7 @@ def ButtonLink(
     them apart means the keyboard and "open in new tab" behaviour stay correct.
     """
     if variant not in BUTTON_VARIANTS:
-        raise ValueError(
-            f"Unknown button variant {variant!r}; expected one of {BUTTON_VARIANTS}"
-        )
+        raise ValueError(f"Unknown button variant {variant!r}; expected one of {BUTTON_VARIANTS}")
 
     return rx.link(
         label,
@@ -129,9 +125,7 @@ def Input(
     """
     # El id puede ser un Var (filas de variantes generadas en un foreach),
     # asi que no se puede usar ``or`` aca: un Var no tiene valor booleano.
-    element_id = (
-        input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
-    )
+    element_id = input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
 
     if error is None:
         invalid = False
@@ -252,9 +246,7 @@ def Select(
     """
     # El id puede ser un Var (filas de variantes generadas en un foreach),
     # asi que no se puede usar ``or`` aca: un Var no tiene valor booleano.
-    element_id = (
-        input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
-    )
+    element_id = input_id if input_id is not None else f"ui-input-{next(_INPUT_IDS)}"
 
     if error is None:
         invalid = False
@@ -268,9 +260,7 @@ def Select(
 
     rendered_options: list[Any] = []
     if placeholder is not None:
-        rendered_options.append(
-            rx.el.option(placeholder, value="", disabled=True, hidden=True)
-        )
+        rendered_options.append(rx.el.option(placeholder, value="", disabled=True, hidden=True))
     for option in options:
         if isinstance(option, tuple):
             option_value, option_label = option
@@ -473,4 +463,3 @@ def ImageField(
         ),
         class_name="ui-field",
     )
-

@@ -12,10 +12,9 @@ from __future__ import annotations
 
 import re
 
+from reflex_local_auth import LocalUser
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
-
-from reflex_local_auth import LocalUser
 
 from app.model.perfil_modelo import UserProfile
 from app.repository.base_de_datos import get_session
@@ -49,9 +48,7 @@ def normalizar_email(email: str) -> str:
 def validar_password(password: str) -> str:
     """Return the password unchanged if it meets the minimum rules."""
     if not password or len(password) < MIN_PASSWORD_LENGTH:
-        raise ErrorDeRegistro(
-            f"La contraseña necesita al menos {MIN_PASSWORD_LENGTH} caracteres."
-        )
+        raise ErrorDeRegistro(f"La contraseña necesita al menos {MIN_PASSWORD_LENGTH} caracteres.")
     return password
 
 
@@ -191,9 +188,7 @@ def perfil_por_email(email: str) -> UserProfile | None:
         return None
 
     with get_session() as session:
-        return session.exec(
-            select(UserProfile).where(UserProfile.email == limpio)
-        ).one_or_none()
+        return session.exec(select(UserProfile).where(UserProfile.email == limpio)).one_or_none()
 
 
 def cambiar_password(
@@ -232,9 +227,7 @@ def desactivar_usuario(local_user_id: int) -> None:
         ).one_or_none()
 
         if perfil is not None and perfil.is_admin:
-            admins = session.exec(
-                select(UserProfile).where(UserProfile.is_admin.is_(True))
-            ).all()
+            admins = session.exec(select(UserProfile).where(UserProfile.is_admin.is_(True))).all()
             admins_habilitados = [
                 admin
                 for admin in admins

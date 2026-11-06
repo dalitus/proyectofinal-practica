@@ -9,15 +9,15 @@ conozcan todas las tablas. Incluye los modelos del plugin de autenticacion
 from reflex_local_auth import LocalUser
 from reflex_local_auth.auth_session import LocalAuthSession
 
+from app.model.carrito_modelo import Carrito
 from app.model.categoria_modelo import Categoria
+from app.model.consulta_modelo import Consulta
+from app.model.pedido_item_modelo import PedidoItem
+from app.model.pedido_modelo import Pedido
 from app.model.perfil_modelo import UserProfile
 from app.model.producto_modelo import Producto
-from app.model.variante_modelo import Stocks
-from app.model.carrito_modelo import Carrito
-from app.model.pedido_modelo import Pedido
-from app.model.pedido_item_modelo import PedidoItem
-from app.model.consulta_modelo import Consulta
 from app.model.ubicacion_modelo import UbicacionLocal
+from app.model.variante_modelo import Stocks
 
 __all__ = [
     "LocalUser",

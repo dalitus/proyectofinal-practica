@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlmodel import Field, SQLModel, UniqueConstraint
 
 
@@ -15,7 +13,7 @@ class Carrito(SQLModel, table=True):
         UniqueConstraint("usuario_id", "variante_id", name="uq_carrito_usuario_variante"),
     )
 
-    id_carrito: Optional[int] = Field(default=None, primary_key=True)
+    id_carrito: int | None = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="localuser.id", index=True)
     variante_id: int = Field(foreign_key="stocks.id_stock", index=True)
     cantidad: int = Field(default=1, ge=1)

@@ -54,7 +54,9 @@ def crear_producto(session: Session, nombre: str = "Zapatilla") -> Producto:
     return producto
 
 
-def crear_variante(session: Session, producto: Producto, color: str, talle: str, stock: int = 5) -> Stocks:
+def crear_variante(
+    session: Session, producto: Producto, color: str, talle: str, stock: int = 5
+) -> Stocks:
     variante = Stocks(
         producto_id=producto.id,
         color=color,
@@ -175,7 +177,9 @@ def test_pedido_guarda_snapshot_de_la_compra(session: Session) -> None:
     session.add(producto)
     session.commit()
 
-    guardado = session.exec(select(PedidoItem).where(PedidoItem.pedido_id == pedido.id_pedido)).one()
+    guardado = session.exec(
+        select(PedidoItem).where(PedidoItem.pedido_id == pedido.id_pedido)
+    ).one()
     assert guardado.precio_unitario == precio
     assert guardado.color == "negro"
     assert guardado.talle == "38"
@@ -213,11 +217,11 @@ def _revisiones() -> list[tuple[str, str | None]]:
     for archivo in Path("alembic/versions").glob("*.py"):
         texto = archivo.read_text(encoding="utf-8")
         revision = re.search(r"^revision: str = [\"']([^\"']+)[\"']", texto, re.MULTILINE)
-        padre = re.search(
-            r"^down_revision[^=]*= (None|[\"']([^\"']+)[\"'])", texto, re.MULTILINE
-        )
+        padre = re.search(r"^down_revision[^=]*= (None|[\"']([^\"']+)[\"'])", texto, re.MULTILINE)
         if revision:
-            down = None if padre and padre.group(1) == "None" else (padre.group(2) if padre else None)
+            down = (
+                None if padre and padre.group(1) == "None" else (padre.group(2) if padre else None)
+            )
             revisiones.append((revision.group(1), down))
     return revisiones
 

@@ -71,7 +71,7 @@ class Version:
 
 
 def read_text(path: Path) -> str:
-    with open(path, "r", encoding="utf-8", newline="") as handle:
+    with open(path, encoding="utf-8", newline="") as handle:
         return handle.read()
 
 
@@ -756,7 +756,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Tablero kanban en vivo del backlog markdown.")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--write", action="store_true", help="permite arrastrar tarjetas y reescribir el markdown")
+    parser.add_argument(
+        "--write", action="store_true", help="permite arrastrar tarjetas y reescribir el markdown"
+    )
     parser.add_argument("--open", action="store_true", help="abre el navegador por defecto")
     options = parser.parse_args()
 

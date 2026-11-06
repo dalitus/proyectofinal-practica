@@ -168,9 +168,7 @@ def ConfirmDialog(
     body.append(
         rx.el.div(
             rx.alert_dialog.cancel(Button(cancel_label, variant="ghost")),
-            rx.alert_dialog.action(
-                Button(confirm_label, variant=tone, on_click=on_confirm)
-            ),
+            rx.alert_dialog.action(Button(confirm_label, variant=tone, on_click=on_confirm)),
             class_name="ui-dialog__actions",
         )
     )

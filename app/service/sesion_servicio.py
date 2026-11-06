@@ -11,7 +11,7 @@ from the browser, so a session cannot be impersonated by editing a state var.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from reflex_local_auth.local_auth import LocalAuthSession
 from sqlmodel import select
@@ -45,7 +45,7 @@ def usuario_autenticado(token: str) -> int | None:
         usuario_id = session.exec(
             select(LocalAuthSession.user_id).where(
                 LocalAuthSession.session_id == limpio,
-                LocalAuthSession.expiration >= datetime.now(timezone.utc),
+                LocalAuthSession.expiration >= datetime.now(UTC),
             )
         ).first()
 

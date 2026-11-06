@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -15,14 +14,14 @@ class Pedido(SQLModel, table=True):
 
     __tablename__ = "pedidos"
 
-    id_pedido: Optional[int] = Field(default=None, primary_key=True)
+    id_pedido: int | None = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="localuser.id", index=True)
 
     estado: str = Field(default="en espera", index=True)
     total: Decimal
     fecha_pedido: datetime = Field(default_factory=datetime.now)
-    fecha_entrega: Optional[datetime] = None
-    fecha_cancelacion: Optional[datetime] = None
+    fecha_entrega: datetime | None = None
+    fecha_cancelacion: datetime | None = None
 
     direccion: str = ""
     numero: str = ""

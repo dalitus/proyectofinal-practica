@@ -147,16 +147,12 @@ class MisConsultasEstado(CompradorEstado):
         if not asunto:
             self.error_asunto = "Escribi un asunto."
         elif len(asunto) > MAXIMO_ASUNTO:
-            self.error_asunto = (
-                f"El asunto no puede superar los {MAXIMO_ASUNTO} caracteres."
-            )
+            self.error_asunto = f"El asunto no puede superar los {MAXIMO_ASUNTO} caracteres."
 
         if not mensaje:
             self.error_mensaje = "Escribi tu consulta."
         elif len(mensaje) > MAXIMO_MENSAJE:
-            self.error_mensaje = (
-                f"La consulta no puede superar los {MAXIMO_MENSAJE} caracteres."
-            )
+            self.error_mensaje = f"La consulta no puede superar los {MAXIMO_MENSAJE} caracteres."
 
         return not self.error_asunto and not self.error_mensaje
 

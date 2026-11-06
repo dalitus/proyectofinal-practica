@@ -39,8 +39,14 @@ def _estado() -> rx.Component:
         PedidoAdminEstado.pedido["estado"],
         ("en espera", Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="info", quiet=True)),
         ("enviado", Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="neutral", quiet=True)),
-        ("entregado", Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="success", quiet=True)),
-        ("cancelado", Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="danger", quiet=True)),
+        (
+            "entregado",
+            Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="success", quiet=True),
+        ),
+        (
+            "cancelado",
+            Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="danger", quiet=True),
+        ),
         Badge(PedidoAdminEstado.pedido["estado_etiqueta"], tone="neutral", quiet=True),
     )
 

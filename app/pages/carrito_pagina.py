@@ -102,7 +102,11 @@ def _linea(linea: Any) -> rx.Component:
                 "Quitar",
                 variant="ghost",
                 on_click=CarritoEstado.quitar(linea["id"]),
-                **{"aria-label": "Quitar " + linea["nombre"].to_string(use_json=False) + " del carrito"},
+                **{
+                    "aria-label": "Quitar "
+                    + linea["nombre"].to_string(use_json=False)
+                    + " del carrito"
+                },
             ),
             class_name="ui-cart__footer",
         ),

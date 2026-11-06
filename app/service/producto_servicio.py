@@ -164,9 +164,8 @@ def _a_precio(valor: object) -> Decimal:
     # no tiene tres digitos, era un decimal y no se redondea en silencio.
     if "." in texto:
         grupos = texto.split(".")
-        valido = (
-            1 <= len(grupos[0]) <= 3
-            and all(len(grupo) == 3 and grupo.isdigit() for grupo in grupos[1:])
+        valido = 1 <= len(grupos[0]) <= 3 and all(
+            len(grupo) == 3 and grupo.isdigit() for grupo in grupos[1:]
         )
         if not valido:
             raise ErrorDeProducto(
@@ -196,10 +195,7 @@ def _texto_de_precio(valor: Decimal) -> str:
 
 
 def opciones_de_estado() -> list[dict[str, str]]:
-    return [
-        {"valor": valor, "texto": etiqueta}
-        for valor, etiqueta in FILTROS_DE_ESTADO.items()
-    ]
+    return [{"valor": valor, "texto": etiqueta} for valor, etiqueta in FILTROS_DE_ESTADO.items()]
 
 
 def categorias_para_formulario() -> list[dict[str, str]]:
@@ -351,9 +347,7 @@ def validar_campos(datos: dict[str, object]) -> dict[str, object]:
 
 
 def _ids_de_categoria() -> set[int]:
-    return {
-        int(categoria["valor"]) for categoria in categorias_para_formulario()
-    }
+    return {int(categoria["valor"]) for categoria in categorias_para_formulario()}
 
 
 def _validar_variante(color: object, talle: object, cantidad: object) -> dict[str, object]:

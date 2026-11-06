@@ -233,9 +233,7 @@ class ProductoNuevoEstado(AdminEstado):
             self.error_variante = ""
         if campo in self.errores:
             self.errores = {
-                clave: mensaje
-                for clave, mensaje in self.errores.items()
-                if clave != campo
+                clave: mensaje for clave, mensaje in self.errores.items() if clave != campo
             }
 
     @rx.event
@@ -257,9 +255,7 @@ class ProductoNuevoEstado(AdminEstado):
             for variante in self.variantes
         )
         if repetida:
-            self.error_variante = (
-                f"Ya agregaste {fila['color']} talle {fila['talle']}."
-            )
+            self.error_variante = f"Ya agregaste {fila['color']} talle {fila['talle']}."
             return
 
         self.variantes = [
@@ -279,9 +275,7 @@ class ProductoNuevoEstado(AdminEstado):
     def quitar_variante(self, indice: int):
         """Drop a row that has not been saved yet."""
         self.variantes = [
-            variante
-            for posicion, variante in enumerate(self.variantes)
-            if posicion != indice
+            variante for posicion, variante in enumerate(self.variantes) if posicion != indice
         ]
 
     @rx.event
@@ -466,9 +460,7 @@ class ProductoEditarEstado(AdminEstado):
             self.error_alta = ""
         if campo in self.errores:
             self.errores = {
-                clave: mensaje
-                for clave, mensaje in self.errores.items()
-                if clave != campo
+                clave: mensaje for clave, mensaje in self.errores.items() if clave != campo
             }
 
     @rx.event
@@ -517,11 +509,7 @@ class ProductoEditarEstado(AdminEstado):
             return destino
 
         fila = next(
-            (
-                variante
-                for variante in self.variantes
-                if variante["id"] == variante_id
-            ),
+            (variante for variante in self.variantes if variante["id"] == variante_id),
             None,
         )
         if fila is None:

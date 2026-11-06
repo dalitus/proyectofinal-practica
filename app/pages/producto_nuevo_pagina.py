@@ -144,16 +144,13 @@ def _pendientes() -> rx.Component:
                         rx.el.th("", class_name="ui-table__actions"),
                     )
                 ),
-                rx.el.tbody(
-                    rx.foreach(ProductoNuevoEstado.variantes, _fila_pendiente)
-                ),
+                rx.el.tbody(rx.foreach(ProductoNuevoEstado.variantes, _fila_pendiente)),
                 class_name="ui-table",
             ),
             class_name="ui-table-wrap",
         ),
         rx.el.p(
-            "Todavia no agregaste variantes. Un producto sin variantes no se "
-            "puede comprar.",
+            "Todavia no agregaste variantes. Un producto sin variantes no se puede comprar.",
             class_name="ui-text ui-text--muted ui-text--small",
         ),
     )

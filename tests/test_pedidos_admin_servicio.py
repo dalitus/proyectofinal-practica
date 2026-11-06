@@ -11,7 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 
 import pytest
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.model.categoria_modelo import Categoria
 from app.model.pedido_item_modelo import PedidoItem
@@ -22,8 +22,8 @@ from app.service import pedido_servicio
 from app.service.auth_servicio import registrar_comprador
 from app.service.carrito_servicio import agregar
 from app.service.pedido_servicio import (
-    ESTADOS_DE_PEDIDO,
     ESTADO_INICIAL,
+    ESTADOS_DE_PEDIDO,
     ErrorDePedido,
     confirmar_pedido,
     listar_pedidos,

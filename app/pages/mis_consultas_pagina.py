@@ -169,8 +169,7 @@ def _paginacion() -> rx.Component:
                 "Siguiente",
                 variant="secondary",
                 on_click=MisConsultasEstado.siguiente,
-                disabled=MisConsultasEstado.pagina
-                >= MisConsultasEstado.total_paginas,
+                disabled=MisConsultasEstado.pagina >= MisConsultasEstado.total_paginas,
             ),
             class_name="ui-pagination",
         ),

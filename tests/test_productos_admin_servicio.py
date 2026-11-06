@@ -74,9 +74,7 @@ def test_crear_producto_guarda_el_producto_y_sus_variantes(session: Session) -> 
     assert producto.precio == Decimal("45000")
     assert producto.activo is True
 
-    variantes = session.exec(
-        select(Stocks).where(Stocks.producto_id == producto_id)
-    ).all()
+    variantes = session.exec(select(Stocks).where(Stocks.producto_id == producto_id)).all()
     assert {(variante.color, variante.talle) for variante in variantes} == {
         ("Negro", "38"),
         ("Negro", "39"),
@@ -220,9 +218,7 @@ def test_agregar_variante_rechaza_la_misma_combinacion(session: Session) -> None
         cantidad=4,
     )
     session.commit()
-    variantes = session.exec(
-        select(Stocks).where(Stocks.producto_id == producto_id)
-    ).all()
+    variantes = session.exec(select(Stocks).where(Stocks.producto_id == producto_id)).all()
     assert len(variantes) == 3
 
 
@@ -313,8 +309,7 @@ def test_eliminar_variante_con_carrito_falla_y_sin_uso_la_borra(
         is not None
     )
     assert (
-        session.exec(select(Stocks.id_stock).where(Stocks.id_stock == segunda_id)).first()
-        is None
+        session.exec(select(Stocks.id_stock).where(Stocks.id_stock == segunda_id)).first() is None
     )
 
 

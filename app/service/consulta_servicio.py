@@ -124,10 +124,7 @@ class PaginaDeMisConsultas:
 
 def opciones_de_filtro() -> list[dict[str, str]]:
     """Options for the filter select, in display order."""
-    return [
-        {"valor": valor, "texto": texto}
-        for valor, texto in FILTROS_DE_CONSULTA.items()
-    ]
+    return [{"valor": valor, "texto": texto} for valor, texto in FILTROS_DE_CONSULTA.items()]
 
 
 def normalizar_filtro(filtro: str | None) -> str:
@@ -295,15 +292,11 @@ def crear(usuario_id: int, asunto: str, mensaje: str) -> int:
     if not titulo:
         raise ErrorDeConsulta("Escribi un asunto.")
     if len(titulo) > MAXIMO_ASUNTO:
-        raise ErrorDeConsulta(
-            f"El asunto no puede superar los {MAXIMO_ASUNTO} caracteres."
-        )
+        raise ErrorDeConsulta(f"El asunto no puede superar los {MAXIMO_ASUNTO} caracteres.")
     if not texto:
         raise ErrorDeConsulta("Escribi tu consulta.")
     if len(texto) > MAXIMO_MENSAJE:
-        raise ErrorDeConsulta(
-            f"La consulta no puede superar los {MAXIMO_MENSAJE} caracteres."
-        )
+        raise ErrorDeConsulta(f"La consulta no puede superar los {MAXIMO_MENSAJE} caracteres.")
 
     consulta_id = consulta_repositorio.crear_consulta(
         usuario_id=usuario_id,
@@ -321,9 +314,7 @@ def responder(consulta_id: int, respuesta: str, admin_id: int) -> str:
     if not texto:
         raise ErrorDeConsulta("Escribi una respuesta.")
     if len(texto) > MAXIMO_RESPUESTA:
-        raise ErrorDeConsulta(
-            f"La respuesta no puede superar los {MAXIMO_RESPUESTA} caracteres."
-        )
+        raise ErrorDeConsulta(f"La respuesta no puede superar los {MAXIMO_RESPUESTA} caracteres.")
 
     try:
         consulta_repositorio.responder(
@@ -335,9 +326,7 @@ def responder(consulta_id: int, respuesta: str, admin_id: int) -> str:
     except ConsultaNoEncontrada as error:
         raise ErrorDeConsulta(f"No existe la consulta #{consulta_id}.") from error
     except ConsultaYaRespondida as error:
-        raise ErrorDeConsulta(
-            "Esa consulta ya tiene respuesta. Recarga la lista."
-        ) from error
+        raise ErrorDeConsulta("Esa consulta ya tiene respuesta. Recarga la lista.") from error
 
     registrar_auditoria(
         accion="responder_consulta",

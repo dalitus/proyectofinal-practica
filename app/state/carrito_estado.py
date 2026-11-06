@@ -12,8 +12,9 @@ detalle tecnico va al log (T-064).
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import asdict
-from typing import Any, Callable
+from typing import Any
 
 import reflex as rx
 from reflex_local_auth.local_auth import LocalAuthState
@@ -122,9 +123,7 @@ class CarritoEstado(rx.State):
     @rx.event
     async def quitar(self, linea_id: int):
         """Remove a line."""
-        return await self._aplicar(
-            lambda usuario: carrito_servicio.quitar(usuario, linea_id)
-        )
+        return await self._aplicar(lambda usuario: carrito_servicio.quitar(usuario, linea_id))
 
     @rx.event
     async def vaciar(self):
@@ -137,9 +136,7 @@ class CarritoEstado(rx.State):
 
     async def _cambiar(self, linea_id: int, cantidad: int):
         return await self._aplicar(
-            lambda usuario: carrito_servicio.cambiar_cantidad(
-                usuario, linea_id, cantidad
-            )
+            lambda usuario: carrito_servicio.cambiar_cantidad(usuario, linea_id, cantidad)
         )
 
     async def _aplicar(self, operacion: Operacion):

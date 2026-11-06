@@ -341,10 +341,7 @@ def etiqueta_de_estado(estado: str) -> str:
 
 def opciones_de_estado() -> list[dict[str, str]]:
     """Options for the admin filter, in lifecycle order (T-044, D-030)."""
-    return [
-        {"valor": estado, "texto": etiqueta_de_estado(estado)}
-        for estado in ESTADOS_DE_PEDIDO
-    ]
+    return [{"valor": estado, "texto": etiqueta_de_estado(estado)} for estado in ESTADOS_DE_PEDIDO]
 
 
 def normalizar_filtro(estado: str | None) -> str:
@@ -526,4 +523,3 @@ def obtener_detalle(pedido_id: int) -> DetalleDePedido:
 
     pedido, perfil = fila
     return _detalle_de(pedido, perfil)
-

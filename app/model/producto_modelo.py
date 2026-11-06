@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -18,17 +18,17 @@ class Producto(SQLModel, table=True):
 
     __tablename__ = "productos"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     nombre: str = Field(index=True)
     descripcion: str = ""
     marca: str = Field(default="", index=True)
     precio: Decimal
     categoria_id: int = Field(foreign_key="categorias.id", index=True)
     activo: bool = Field(default=True, index=True)
-    imagen: Optional[str] = None
+    imagen: str | None = None
 
     categoria: Optional["Categoria"] = Relationship(back_populates="productos")
-    stocks: List["Stocks"] = Relationship(back_populates="producto")
+    stocks: list["Stocks"] = Relationship(back_populates="producto")
 
     @property
     def cantidad_total(self) -> int:

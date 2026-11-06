@@ -1,4 +1,5 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
+
 
 class UbicacionLocal(SQLModel, table=True):
     id: int = Field(default=1, primary_key=True)

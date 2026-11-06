@@ -112,9 +112,7 @@ def responder(
     """
     with get_session() as session:
         consulta = session.exec(
-            select(Consulta)
-            .where(Consulta.id_consulta == consulta_id)
-            .with_for_update()
+            select(Consulta).where(Consulta.id_consulta == consulta_id).with_for_update()
         ).first()
 
         if consulta is None:
@@ -163,9 +161,7 @@ def contar_consultas_de_usuario(*, usuario_id: int) -> int:
     """Total of questions owned by one buyer, for the pagination."""
     with get_session() as session:
         return session.exec(
-            select(func.count())
-            .select_from(Consulta)
-            .where(Consulta.usuario_id == usuario_id)
+            select(func.count()).select_from(Consulta).where(Consulta.usuario_id == usuario_id)
         ).one()
 
 
@@ -198,9 +194,7 @@ def eliminar(consulta_id: int) -> None:
     """Delete the question; the admin confirms before calling this (D-030)."""
     with get_session() as session:
         consulta = session.exec(
-            select(Consulta)
-            .where(Consulta.id_consulta == consulta_id)
-            .with_for_update()
+            select(Consulta).where(Consulta.id_consulta == consulta_id).with_for_update()
         ).first()
 
         if consulta is None:

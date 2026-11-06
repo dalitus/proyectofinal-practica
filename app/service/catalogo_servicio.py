@@ -211,13 +211,9 @@ def opciones_de_filtro() -> OpcionesDeFiltro:
 
     return OpcionesDeFiltro(
         categorias=categorias,
-        talles=[
-            {"valor": talle, "texto": talle}
-            for talle in producto_repositorio.listar_talles()
-        ],
+        talles=[{"valor": talle, "texto": talle} for talle in producto_repositorio.listar_talles()],
         colores=[
-            {"valor": color, "texto": color}
-            for color in producto_repositorio.listar_colores()
+            {"valor": color, "texto": color} for color in producto_repositorio.listar_colores()
         ],
     )
 
@@ -273,8 +269,7 @@ def talles_por_color(detalle: ProductoDetalle) -> dict[str, list[dict[str, Any]]
     lookups and numeric comparisons over an untyped ``Var``.
     """
     cantidades = {
-        (variante.color, variante.talle): variante.cantidad
-        for variante in detalle.variantes
+        (variante.color, variante.talle): variante.cantidad for variante in detalle.variantes
     }
 
     return {

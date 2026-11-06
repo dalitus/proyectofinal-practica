@@ -36,8 +36,14 @@ def _volver() -> rx.Component:
 def _estado() -> rx.Component:
     return rx.match(
         ConsultaAdminEstado.consulta["estado"],
-        ("respondida", Badge(ConsultaAdminEstado.consulta["estado_etiqueta"], tone="success", quiet=True)),
-        ("pendiente", Badge(ConsultaAdminEstado.consulta["estado_etiqueta"], tone="info", quiet=True)),
+        (
+            "respondida",
+            Badge(ConsultaAdminEstado.consulta["estado_etiqueta"], tone="success", quiet=True),
+        ),
+        (
+            "pendiente",
+            Badge(ConsultaAdminEstado.consulta["estado_etiqueta"], tone="info", quiet=True),
+        ),
         Badge(ConsultaAdminEstado.consulta["estado_etiqueta"], tone="neutral", quiet=True),
     )
 
@@ -154,9 +160,7 @@ def _borrar() -> rx.Component:
         ConfirmDialog(
             trigger=Button("Eliminar consulta", variant="danger"),
             title="Eliminar la consulta",
-            description=(
-                "Se borra el mensaje y su respuesta. Esta accion no se puede deshacer."
-            ),
+            description=("Se borra el mensaje y su respuesta. Esta accion no se puede deshacer."),
             confirm_label="Eliminar",
             cancel_label="Volver",
             on_confirm=ConsultaAdminEstado.eliminar,

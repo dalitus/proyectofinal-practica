@@ -13,8 +13,8 @@ admin (productos, pedidos y consultas).
 
 import reflex as rx
 
-from app.pages.catalogo_pagina import catalogo_pagina  # noqa: F401  (registra "/")
 from app.pages.carrito_pagina import carrito_pagina  # noqa: F401  (registra "/carrito")
+from app.pages.catalogo_pagina import catalogo_pagina  # noqa: F401  (registra "/")
 from app.pages.checkout_pagina import checkout_pagina  # noqa: F401  (registra "/checkout")
 from app.pages.consulta_admin_pagina import (  # noqa: F401  (registra "/admin/consultas/[consulta_id]")
     consulta_admin_pagina,
@@ -50,11 +50,11 @@ from app.pages.producto_admin_pagina import (  # noqa: F401  (registra "/admin/p
 from app.pages.producto_nuevo_pagina import (  # noqa: F401  (registra "/admin/productos/nuevo")
     producto_nuevo_pagina,
 )
-from app.pages.productos_admin_pagina import (  # noqa: F401  (registra "/admin/productos")
-    productos_admin_pagina,
-)
 from app.pages.producto_pagina import (  # noqa: F401  (registra "/producto/[producto_id]")
     producto_pagina,
+)
+from app.pages.productos_admin_pagina import (  # noqa: F401  (registra "/admin/productos")
+    productos_admin_pagina,
 )
 from app.pages.redirecciones_pagina import (  # noqa: F401  (rutas viejas -> URL canonica)
     redireccion_catalogo,

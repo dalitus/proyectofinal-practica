@@ -56,9 +56,7 @@ class CatalogoEstado(rx.State):
     @rx.var
     def hay_filtros(self) -> bool:
         """True when at least one filter could remove products from the grid."""
-        return bool(
-            self.busqueda.strip() or self.categoria or self.talle or self.color
-        )
+        return bool(self.busqueda.strip() or self.categoria or self.talle or self.color)
 
     @rx.event
     def on_load(self):

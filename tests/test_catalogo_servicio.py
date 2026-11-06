@@ -121,9 +121,7 @@ def test_busqueda_por_nombre_y_marca(session: Session) -> None:
     assert [p.nombre for p in listar_catalogo(busqueda="running").productos] == [
         "Zapatilla Running Air"
     ]
-    assert [p.nombre for p in listar_catalogo(busqueda="hush").productos] == [
-        "Zapato Formal"
-    ]
+    assert [p.nombre for p in listar_catalogo(busqueda="hush").productos] == ["Zapato Formal"]
     assert listar_catalogo(busqueda="   ").total == 2
     assert listar_catalogo(busqueda="no-existe").total == 0
 

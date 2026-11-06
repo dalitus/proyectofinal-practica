@@ -7,7 +7,6 @@ cambia. El stock se descuenta en la variante (`Stocks`), que es la combinacion
 """
 
 from decimal import Decimal
-from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -15,7 +14,7 @@ from sqlmodel import Field, SQLModel
 class PedidoItem(SQLModel, table=True):
     __tablename__ = "pedido_items"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     pedido_id: int = Field(foreign_key="pedidos.id_pedido", index=True)
     variante_id: int = Field(foreign_key="stocks.id_stock", index=True)
 

@@ -98,9 +98,7 @@ def crear_pedido(
         variantes = {
             variante.id_stock: variante
             for variante in session.exec(
-                select(Stocks)
-                .where(Stocks.id_stock.in_(variantes_ids))
-                .with_for_update()
+                select(Stocks).where(Stocks.id_stock.in_(variantes_ids)).with_for_update()
             ).all()
         }
 
@@ -108,9 +106,7 @@ def crear_pedido(
             producto.id: producto
             for producto in session.exec(
                 select(Producto).where(
-                    Producto.id.in_(
-                        {variante.producto_id for variante in variantes.values()}
-                    )
+                    Producto.id.in_({variante.producto_id for variante in variantes.values()})
                 )
             ).all()
         }
@@ -179,9 +175,7 @@ def obtener_estado(pedido_id: int) -> str:
     needs to tell "no such order" apart from "empty state".
     """
     with get_session() as session:
-        estado = session.exec(
-            select(Pedido.estado).where(Pedido.id_pedido == pedido_id)
-        ).first()
+        estado = session.exec(select(Pedido.estado).where(Pedido.id_pedido == pedido_id)).first()
         if estado is None:
             raise PedidoNoEncontrado(pedido_id)
         return estado
@@ -194,15 +188,11 @@ def _reponer_stock(session: Session, pedido_id: int) -> None:
     same lock order ``crear_pedido`` uses: two transactions touching the same
     variants cannot deadlock by taking the rows in opposite order.
     """
-    items = session.exec(
-        select(PedidoItem).where(PedidoItem.pedido_id == pedido_id)
-    ).all()
+    items = session.exec(select(PedidoItem).where(PedidoItem.pedido_id == pedido_id)).all()
 
     por_variante: dict[int, int] = {}
     for item in items:
-        por_variante[item.variante_id] = (
-            por_variante.get(item.variante_id, 0) + item.cantidad
-        )
+        por_variante[item.variante_id] = por_variante.get(item.variante_id, 0) + item.cantidad
 
     if not por_variante:
         return
@@ -243,9 +233,7 @@ def cambiar_estado(
     """
     with get_session() as session:
         pedido = session.exec(
-            select(Pedido)
-            .where(Pedido.id_pedido == pedido_id)
-            .with_for_update()
+            select(Pedido).where(Pedido.id_pedido == pedido_id).with_for_update()
         ).first()
 
         if pedido is None:
@@ -422,9 +410,7 @@ def contar_pedidos_de_usuario(*, usuario_id: int) -> int:
     """Total of orders owned by one buyer, for the pagination."""
     with get_session() as session:
         return session.exec(
-            select(func.count())
-            .select_from(Pedido)
-            .where(Pedido.usuario_id == usuario_id)
+            select(func.count()).select_from(Pedido).where(Pedido.usuario_id == usuario_id)
         ).one()
 
 

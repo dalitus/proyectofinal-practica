@@ -86,6 +86,27 @@ model/ → repository/ → service/ → state/ → pages/
 - `state/`: estado de Reflex; no abre sesiones de base de datos.
 - `pages/`: composición visual; no accede a la base de datos.
 
+## Calidad y controles locales
+
+El proyecto usa **ruff** para lint y formato, y **pytest** contra `zapateria_test` (D-036, D-037).
+
+```powershell
+.\.venv\Scripts\ruff.exe check .            # lint
+.\.venv\Scripts\ruff.exe format --check .   # formato
+.\.venv\Scripts\python.exe -m pytest        # tests
+```
+
+**Pre-commit** (opcional pero recomendado) corre esos controles antes de commitear:
+
+```powershell
+.\.venv\Scripts\pre-commit.exe install --hook-type pre-commit --hook-type pre-push
+.\.venv\Scripts\pre-commit.exe run --all-files
+```
+
+- `ruff check --fix` y `ruff format` corren en cada commit.
+- `pytest` corre antes de cada push.
+- No hay CI remoto ni GitHub Actions: los controles viven en la máquina (D-037).
+
 ## Documentación del proyecto
 
 | Documento | Contenido |

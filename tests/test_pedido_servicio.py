@@ -132,9 +132,7 @@ def test_confirmar_crea_pedido_con_snapshot_y_vacia_el_carrito(session: Session)
     assert pedido.provincia == "Buenos Aires"
 
     items = session.exec(
-        select(PedidoItem)
-        .where(PedidoItem.pedido_id == pedido_id)
-        .order_by(PedidoItem.color)
+        select(PedidoItem).where(PedidoItem.pedido_id == pedido_id).order_by(PedidoItem.color)
     ).all()
     assert len(items) == 2
     assert [item.color for item in items] == ["Blanco", "Negro"]

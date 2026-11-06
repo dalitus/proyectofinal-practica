@@ -1,9 +1,8 @@
 import os
 
 import reflex as rx
-from reflex.plugins.sitemap import SitemapPlugin
-
 from dotenv import load_dotenv
+from reflex.plugins.sitemap import SitemapPlugin
 
 load_dotenv()
 

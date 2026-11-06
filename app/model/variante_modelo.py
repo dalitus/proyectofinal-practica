@@ -27,7 +27,7 @@ class Stocks(SQLModel, table=True):
         ),
     )
 
-    id_stock: Optional[int] = Field(default=None, primary_key=True)
+    id_stock: int | None = Field(default=None, primary_key=True)
     producto_id: int = Field(foreign_key="productos.id", index=True)
     color: str
     talle: str

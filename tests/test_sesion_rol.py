@@ -6,7 +6,7 @@ pruebas cubren las tres respuestas posibles y la guarda que usan las páginas.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from reflex_local_auth.local_auth import LocalAuthSession
 from sqlmodel import Session
@@ -57,7 +57,7 @@ def _token(
         LocalAuthSession(
             user_id=usuario_id,
             session_id=session_id,
-            expiration=datetime.now(timezone.utc) + vence_en,
+            expiration=datetime.now(UTC) + vence_en,
         )
     )
     session.commit()

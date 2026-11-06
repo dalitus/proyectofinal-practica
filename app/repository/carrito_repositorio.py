@@ -114,9 +114,7 @@ def crear_linea(*, usuario_id: int, variante_id: int, cantidad: int) -> None:
 def actualizar_cantidad(*, linea_id: int, cantidad: int) -> None:
     """Set the quantity of an existing line."""
     with get_session() as session:
-        linea = session.exec(
-            select(Carrito).where(Carrito.id_carrito == linea_id)
-        ).one_or_none()
+        linea = session.exec(select(Carrito).where(Carrito.id_carrito == linea_id)).one_or_none()
         if linea is None:
             return
         linea.cantidad = cantidad
@@ -127,9 +125,7 @@ def actualizar_cantidad(*, linea_id: int, cantidad: int) -> None:
 def borrar_linea(linea_id: int) -> None:
     """Delete one line; deleting an already gone line is not an error."""
     with get_session() as session:
-        linea = session.exec(
-            select(Carrito).where(Carrito.id_carrito == linea_id)
-        ).one_or_none()
+        linea = session.exec(select(Carrito).where(Carrito.id_carrito == linea_id)).one_or_none()
         if linea is None:
             return
         session.delete(linea)
@@ -139,8 +135,6 @@ def borrar_linea(linea_id: int) -> None:
 def vaciar(usuario_id: int) -> None:
     """Delete every line of the user's cart."""
     with get_session() as session:
-        for linea in session.exec(
-            select(Carrito).where(Carrito.usuario_id == usuario_id)
-        ).all():
+        for linea in session.exec(select(Carrito).where(Carrito.usuario_id == usuario_id)).all():
             session.delete(linea)
         session.commit()

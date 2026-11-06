@@ -62,9 +62,7 @@ def _condiciones(
     texto = (busqueda or "").strip()
     if texto:
         patron = f"%{texto}%"
-        condiciones.append(
-            Producto.nombre.ilike(patron) | Producto.marca.ilike(patron)
-        )
+        condiciones.append(Producto.nombre.ilike(patron) | Producto.marca.ilike(patron))
     if categoria_id is not None:
         condiciones.append(Producto.categoria_id == categoria_id)
     if talle:
@@ -125,9 +123,7 @@ def contar_productos(
     )
 
     with get_session() as session:
-        return session.exec(
-            select(func.count()).select_from(Producto).where(*condiciones)
-        ).one()
+        return session.exec(select(func.count()).select_from(Producto).where(*condiciones)).one()
 
 
 def obtener_producto(producto_id: int) -> Producto | None:
@@ -174,17 +170,13 @@ def listar_talles() -> list[str]:
     one; a non-numeric scale would need its own sort key.
     """
     with get_session() as session:
-        return list(
-            session.exec(select(Stocks.talle).distinct().order_by(Stocks.talle)).all()
-        )
+        return list(session.exec(select(Stocks.talle).distinct().order_by(Stocks.talle)).all())
 
 
 def listar_colores() -> list[str]:
     """Distinct colours across all variants, ordered by label."""
     with get_session() as session:
-        return list(
-            session.exec(select(Stocks.color).distinct().order_by(Stocks.color)).all()
-        )
+        return list(session.exec(select(Stocks.color).distinct().order_by(Stocks.color)).all())
 
 
 # --------------------------------------------------------------------------
@@ -379,9 +371,7 @@ def _referencias(session: Any, variante_id: int) -> bool:
     if en_carrito is not None:
         return True
     return (
-        session.exec(
-            select(PedidoItem.id).where(PedidoItem.variante_id == variante_id)
-        ).first()
+        session.exec(select(PedidoItem.id).where(PedidoItem.variante_id == variante_id)).first()
         is not None
     )
 

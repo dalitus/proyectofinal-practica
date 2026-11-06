@@ -19,15 +19,15 @@ from app.model.categoria_modelo import Categoria
 from app.model.consulta_modelo import Consulta
 from app.model.producto_modelo import Producto
 from app.model.variante_modelo import Stocks
-from app.service.carrito_servicio import agregar
 from app.service.auditoria import registrar
+from app.service.carrito_servicio import agregar
 from app.service.configuracion_logs import configurar_logs
 from app.service.consulta_servicio import eliminar as eliminar_consulta
 from app.service.consulta_servicio import responder as responder_consulta
 from app.service.pedido_servicio import (
     ErrorDePedido,
-    cancelar_pedido,
     cambiar_estado,
+    cancelar_pedido,
     confirmar_pedido,
     validar_entrega,
 )
@@ -153,13 +153,9 @@ def test_el_destino_stdout_recibe_una_linea_por_operacion(
                 handler.close()
         logger.setLevel(nivel_anterior)
 
-    lineas = [
-        linea for linea in salida.strip().splitlines() if "app.auditoria" in linea
-    ]
+    lineas = [linea for linea in salida.strip().splitlines() if "app.auditoria" in linea]
     assert len(lineas) == 1
-    assert json.loads(lineas[0].split("app.auditoria: ", 1)[1])["accion"] == (
-        "cambiar_estado"
-    )
+    assert json.loads(lineas[0].split("app.auditoria: ", 1)[1])["accion"] == ("cambiar_estado")
 
 
 def test_cambiar_estado_registra_admin_accion_y_entidad(

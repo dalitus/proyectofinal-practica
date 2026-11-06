@@ -15,7 +15,7 @@ import reflex as rx
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.service import consulta_servicio
-from app.service.consulta_servicio import ErrorDeConsulta, MAXIMO_RESPUESTA
+from app.service.consulta_servicio import MAXIMO_RESPUESTA, ErrorDeConsulta
 from app.state.admin_estado import AdminEstado
 from app.state.parametros import id_de_la_url
 from app.ui import Toast
