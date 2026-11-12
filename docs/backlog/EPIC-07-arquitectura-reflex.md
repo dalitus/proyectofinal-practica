@@ -355,3 +355,35 @@ consistente.
 - **Grill / preguntas abiertas:**
   - Ninguna: cerrado en D-052.
 - **Depende de:** T-021, T-040, T-063
+
+## T-079 · Nombres de tabla en español
+
+- **Estado:** hecha · **Prioridad:** P1 · **Épica:** 07
+- **Archivos:** `app/model/perfil_modelo.py`, `app/model/pedido_item_modelo.py`,
+  `app/model/ubicacion_modelo.py`, `alembic/versions/f7b2c8d4e916_tablas_en_espanol.py`,
+  `tests/test_esquema.py`
+- **Problema:** el esquema mezcla criterios: `productos`, `pedidos` y `carritos` están en español,
+  pero `user_profiles` está en inglés, `pedido_items` mezcla los dos idiomas y `ubicacionlocal`
+  sale del nombre de la clase sin separador.
+- **Decisión (D-055):** `__tablename__` en español, plural y con el dominio adelante. Se conservan
+  `stocks` (anglicismo aceptado) y las tablas de `reflex_local_auth`.
+- **AC:**
+  - [x] `UserProfile` usa `perfiles_usuario`, `PedidoItem` usa `lineas_pedido` y `UbicacionLocal`
+    declara `ubicaciones_locales` explícito.
+  - [x] La migración `f7b2c8d4e916` renombra las tres tablas y recrea los índices con el nombre
+    nuevo, con `downgrade` que vuelve atrás.
+  - [x] Ningún `__tablename__` del proyecto queda en inglés salvo las excepciones de D-055.
+  - [x] `tests/test_esquema.py` espera el conjunto de tablas nuevo.
+  - [x] `alembic upgrade head` aplicado sobre la base local y `alembic check` sin drift.
+  - [x] `pytest` y `reflex compile --dry` en verde.
+- **Verificación (2026-11-12):**
+  - `alembic upgrade head` → `e6f1a4c8b2d9 -> f7b2c8d4e916`; `alembic check` → sin drift.
+  - Round trip `downgrade -1` + `upgrade head` sin errores (el `downgrade` también renombra los
+    índices).
+  - Datos intactos: `perfiles_usuario` 6 filas, `lineas_pedido` 3, `pedidos` 3, `stocks` 297.
+  - `pytest` 292 tests en verde; `reflex compile --dry` → `Success`.
+  - Primer intento con `DROP INDEX` + `CREATE INDEX` falló con error 1553 (el índice sostiene la
+    FK); se cambió a `ALTER TABLE ... RENAME INDEX`.
+- **Grill / preguntas abiertas:**
+  - Ninguna: cerrado en D-055.
+- **Depende de:** T-075, D-019

@@ -967,3 +967,30 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
   - Si una imagen deja de estar disponible, el admin sube una propia desde el panel (D-049) sin
     tocar el seed.
 - **Fecha:** 2026-11-11
+
+---
+
+## D-055 · Nombres de tabla en español
+
+- **Tarea:** T-079
+- **Estado:** decidida
+- **Opciones:** dejar los nombres de tabla en inglés / traducir solo los que rompen la regla /
+  traducir todos incluidos los del plugin
+- **Decisión:** los `__tablename__` van en español, en plural y con el dominio adelante:
+  `perfiles_usuario` (antes `user_profiles`), `lineas_pedido` (antes `pedido_items`) y
+  `ubicaciones_locales` (antes el implícito `ubicacionlocal`). Se conservan `stocks` por ser un
+  anglicismo aceptado en el dominio, y `localuser` / `localauthsession` porque pertenecen a
+  `reflex_local_auth` y renombrarlas rompe el plugin (D-019). Los nombres de clase quedan como
+  están, incluido `Stocks` (D-040).
+- **Motivo:** el resto del esquema ya estaba en español (`productos`, `pedidos`, `carritos`,
+  `consultas`, `categorias`) y las excepciones no tenían criterio: `user_profiles` era inglés puro,
+  `pedido_items` mezclaba y `ubicacionlocal` salía del nombre de la clase sin separador.
+- **Consecuencias:**
+  - La migración `f7b2c8d4e916` renombra las tres tablas y sus índices
+    (`ix_perfiles_usuario_*`, `ix_lineas_pedido_*`) con `ALTER TABLE ... RENAME INDEX`: MySQL 8
+    rechaza `DROP INDEX` porque el índice sostiene la clave foránea (error 1553).
+  - No hay migración de datos: `RENAME TABLE` conserva filas, claves y relaciones.
+  - Una tabla nueva que no sea del plugin se nombra en español aunque modele un término inglés.
+  - `stocks` y las tablas del plugin quedan documentadas acá para no reabrir el tema en cada
+    revisión.
+- **Fecha:** 2026-11-12

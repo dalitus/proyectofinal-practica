@@ -50,7 +50,7 @@ def _comprador(session: Session, email: str = "ana@example.com") -> int:
 
 
 def _variantes(session: Session, cantidad: int) -> list[int]:
-    """Real ``stocks`` rows: ``pedido_items.variante_id`` has a foreign key."""
+    """Real ``stocks`` rows: ``lineas_pedido.variante_id`` has a foreign key."""
     categoria = Categoria(nombre="Running")
     session.add(categoria)
     session.commit()

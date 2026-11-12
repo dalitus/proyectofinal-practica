@@ -24,14 +24,14 @@ TABLAS_ESPERADAS = {
     "categorias",
     "carritos",
     "consultas",
+    "lineas_pedido",
     "localauthsession",
     "localuser",
-    "pedido_items",
     "pedidos",
+    "perfiles_usuario",
     "productos",
     "stocks",
-    "ubicacionlocal",
-    "user_profiles",
+    "ubicaciones_locales",
 }
 
 

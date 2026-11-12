@@ -12,7 +12,7 @@ from sqlmodel import Field, SQLModel
 
 
 class PedidoItem(SQLModel, table=True):
-    __tablename__ = "pedido_items"
+    __tablename__ = "lineas_pedido"
 
     id: int | None = Field(default=None, primary_key=True)
     pedido_id: int = Field(foreign_key="pedidos.id_pedido", index=True)

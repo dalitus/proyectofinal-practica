@@ -84,6 +84,7 @@
 | T-074 | Accesibilidad y responsive básico | 08 Calidad | P2 | hecha |
 | T-075 | Nombres de archivo: ortografía y función | 07 Arquitectura | P1 | hecha |
 | T-078 | Iconos en el header y contador del carrito | 07 Arquitectura | P2 | hecha |
+| T-079 | Nombres de tabla en español | 07 Arquitectura | P1 | hecha |
 
 ## Archivos del backlog
 

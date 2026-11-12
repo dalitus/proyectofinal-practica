@@ -9,7 +9,7 @@ from sqlmodel import Field, SQLModel
 
 
 class UserProfile(SQLModel, table=True):
-    __tablename__ = "user_profiles"
+    __tablename__ = "perfiles_usuario"
 
     id: int | None = Field(default=None, primary_key=True)
     local_user_id: int = Field(foreign_key="localuser.id", unique=True, index=True)
