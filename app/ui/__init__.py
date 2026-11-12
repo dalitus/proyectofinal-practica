@@ -9,6 +9,7 @@ from app.ui.layout import (
     Footer,
     PageHeader,
     TopNav,
+    TopNavLink,
 )
 from app.ui.primitives import (
     ALERT_TONES,
@@ -61,4 +62,5 @@ __all__ = [
     "TYPE",
     "Toast",
     "TopNav",
+    "TopNavLink",
 ]

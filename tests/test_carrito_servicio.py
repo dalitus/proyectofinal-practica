@@ -20,6 +20,7 @@ from app.service.carrito_servicio import (
     ErrorDeCarrito,
     agregar,
     cambiar_cantidad,
+    contar_unidades,
     quitar,
     vaciar,
     ver_carrito,
@@ -253,3 +254,35 @@ def test_subtotal_suma_varias_lineas(session: Session) -> None:
     assert carrito.subtotal_valor == Decimal("30000.00")
     # Ordenado por nombre y despues por color.
     assert [linea.color for linea in carrito.lineas] == ["Blanco", "Negro"]
+
+
+def test_contar_unidades_suma_las_lineas_del_comprador(session: Session) -> None:
+    """T-078: the header badge reads one SUM, not the whole cart."""
+    comprador = _crear_comprador(session)
+    _, stocks = _crear_producto(
+        session,
+        variantes=[("Blanco", "40", 5), ("Negro", "41", 5)],
+    )
+    usuario_id = comprador.id or 0
+
+    assert contar_unidades(usuario_id) == 0
+
+    agregar(usuario_id, stocks[0].id_stock or 0, 2)
+    agregar(usuario_id, stocks[1].id_stock or 0, 1)
+
+    assert contar_unidades(usuario_id) == 3
+
+    vaciar(usuario_id)
+    assert contar_unidades(usuario_id) == 0
+
+
+def test_contar_unidades_no_mezcla_carritos(session: Session) -> None:
+    """Each buyer only counts their own units."""
+    duenio = _crear_comprador(session, "ana@example.com")
+    otro = _crear_comprador(session, "beto@example.com")
+    _, stocks = _crear_producto(session, variantes=[("Blanco", "40", 5)])
+
+    agregar(duenio.id or 0, stocks[0].id_stock or 0, 2)
+
+    assert contar_unidades(duenio.id or 0) == 2
+    assert contar_unidades(otro.id or 0) == 0

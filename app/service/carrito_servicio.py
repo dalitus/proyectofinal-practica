@@ -154,6 +154,15 @@ def ver_carrito(usuario_id: int) -> CarritoDeCompra:
     return _armar(carrito_repositorio.listar_lineas(usuario_id))
 
 
+def contar_unidades(usuario_id: int) -> int:
+    """Units in the cart, for the header badge (T-078).
+
+    A read, not a purchase action: the caller decides who sees the number, and
+    the admin's cart is always empty anyway (D-050).
+    """
+    return carrito_repositorio.contar_unidades(usuario_id)
+
+
 def agregar(usuario_id: int, variante_id: int, cantidad: int = 1) -> CarritoDeCompra:
     """Add units of a variant, adding up when the line already exists (D-022).
 

@@ -673,6 +673,8 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 - **Consecuencias:** `docs/design.md` documenta `page`/`card` y la regla de modo claro. Cualquier
   pantalla nueva debe usar `COLORS["page"]` en el contenedor y `COLORS["card"]` en las tarjetas.
   Si algún día se quiere modo oscuro, hay que tokenizar los colores de texto antes de habilitarlo.
+- **Actualizada por:** D-053 (el valor de `page` pasa a `#EBF2FA`; la regla lienzo/tarjeta y el modo
+  claro siguen vigentes).
 - **Fecha:** 2026-10-27
 
 ---
@@ -895,3 +897,73 @@ opción elegida y motivo. Las decisiones pendientes se marcan como `pendiente`.
 - **Consecuencias:** el AC "todas las capas usan `<dominio>_<capa>.py`" se interpreta sobre módulos
   de dominio; la excepción vive acá para no reabrirla en cada pantalla nueva.
 - **Fecha:** 2026-11-06
+
+---
+
+## D-052 — Iconos y contador del carrito en el header
+
+- **Tarea:** T-078
+- **Estado:** decidida
+- **Opciones:** dejar el header solo con texto / sumar iconos y un badge con la cantidad /
+  mostrar un panel de carrito desplegable en el header
+- **Decisión:** los enlaces del header llevan un icono Lucide y el carrito muestra un badge con la
+  suma de unidades. El badge se oculta en cero, para invitados y para el administrador (D-050). El
+  número sale de la base con una sola suma, no de una variable del cliente. En pantallas de hasta
+  767 px queda solo el icono y el enlace conserva su nombre accesible.
+- **Motivo:** el header se entiende de un vistazo y el comprador ve el estado del carrito sin abrir
+  otra pantalla. Un panel desplegable duplicaba el carrito y agregaba estado de UI.
+- **Consecuencias:** `app/ui` sigue sin conocer estados: el contador entra como slot
+  (`TopNav(cart_count=...)`) y `pages/cuenta_menu.py` lo conecta a `SesionEstado`. El badge cuenta
+  unidades, no líneas: dos pares en una misma línea muestran 2.
+- **Fecha:** 2026-11-11
+
+---
+
+## D-053 · Lienzo celeste tenue en la shell
+
+- **Tarea:** T-063 (sistema de diseño)
+- **Estado:** decidida
+- **Opciones:** dejar el lienzo gris neutro `#F7F7F5` / teñir solo `page` con un celeste tenue /
+  volver a un fondo celeste saturado en toda la app
+- **Decisión:** el lienzo de la shell pasa a `#EBF2FA` (`COLORS["page"]`). El resto de la paleta no
+  cambia: las tarjetas siguen blancas, `surface` sigue neutro y ninguna página declara un hex. Se
+  mantiene la regla de D-041 (lienzo distinto de tarjeta, sin sombras) y solo cambia el valor del
+  token.
+- **Motivo:** se pidió un fondo ligeramente celeste que dé mejor contraste. El celeste tenue sube el
+  contraste tarjeta/lienzo de 1.07:1 a 1.13:1 sin que el fondo compita con la foto del producto, que
+  era el motivo para sacar `#ADD8E6` el 2026-10-27 y para fijar `page` en gris en D-041.
+- **Consecuencias:** el valor vive en `app/ui/tokens.py` y el stylesheet lo emite como
+  `--color-page`; `body` y `.ui-shell` lo heredan sin tocar `styles.py`. El texto `muted` sobre el
+  lienzo queda en 4.72:1 (AA para texto normal): si se sube la saturación hay que volver a medir.
+  `surface` queda neutro a propósito porque los inputs y los huecos de imagen viven dentro de
+  tarjetas blancas.
+- **Fecha:** 2026-11-11
+
+---
+
+## D-054 — Catálogo inicial con datos reales de tiendas
+
+- **Tarea:** seed / catálogo de demostración
+- **Estado:** decidida
+- **Opciones:** mantener los productos ficticios del seed / cargar datos reales relevados de
+  tiendas / inventar datos "realistas"
+- **Decisión:** el seed carga 30 productos reales del catálogo público de Topper, Fila y Asics
+  Argentina (relevados el 2026-11-11): nombre, marca, precio de lista, colores, talles y
+  disponibilidad. Las descripciones son propias y las imágenes se enlazan al CDN público de cada
+  marca, pedidas en 600x600.
+- **Motivo:** el proyecto es académico y un catálogo con nombres inventados ("Zapatilla Running
+  Air") no permite mostrar filtros, buscador ni precios creíbles. Son datos públicos de catálogo,
+  no contenido que se vaya a comercializar.
+- **Consecuencias:**
+  - Solo se consultan endpoints públicos de catálogo (VTEX
+    `catalog_system/pub/products/search`); no se scrapean páginas con sesión ni se copian textos de
+    marketing.
+  - El seed sigue siendo idempotente por (nombre, marca) y no pisa productos creados desde el panel.
+  - Los seis productos ficticios del seed anterior quedaron con `activo = FALSE` (D-028) porque
+    tienen carritos y pedidos históricos: no se borraron.
+  - Las variantes conservan los talles agotados con stock 0 para que el detalle muestre el estado
+    "sin stock" (D-009); el stock disponible real se acota a 8 unidades por variante.
+  - Las categorías pasan a Running, Urbano, Outdoor, Infantil, Verano, Fútbol y Tenis.
+  - Si una imagen deja de estar disponible, el admin sube una propia desde el panel (D-049) sin
+    tocar el seed.
+- **Fecha:** 2026-11-11

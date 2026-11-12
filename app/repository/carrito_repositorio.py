@@ -9,6 +9,7 @@ is a ``stocks`` id, so "negro 40" and "negro 41" are two different lines.
 
 from __future__ import annotations
 
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
@@ -33,6 +34,22 @@ def listar_lineas(usuario_id: int) -> list[tuple[Carrito, Stocks, Producto]]:
             .order_by(Carrito.id_carrito)
         )
         return [tuple(fila) for fila in session.exec(consulta).all()]  # type: ignore[misc]
+
+
+def contar_unidades(usuario_id: int) -> int:
+    """Total units in the user's cart, in one SUM (T-078).
+
+    The header badge needs a number, not the whole cart: summing in SQL keeps
+    every page load at one cheap query instead of a join and a Python loop.
+    """
+    with get_session() as session:
+        total = session.exec(
+            select(func.coalesce(func.sum(Carrito.cantidad), 0)).where(
+                Carrito.usuario_id == usuario_id
+            )
+        ).one()
+
+    return int(total)
 
 
 def obtener_variante(variante_id: int) -> tuple[Stocks, Producto] | None:

@@ -25,6 +25,58 @@ def Container(*children: Any, class_name: str | None = None, **props: Any) -> rx
     return rx.el.div(*children, class_name=_join("ui-container", class_name), **props)
 
 
+def TopNavLink(
+    label: str,
+    *,
+    href: str,
+    icon: str,
+    aria_label: str | rx.Var | None = None,
+    badge: rx.Component | None = None,
+    class_name: str | None = None,
+) -> rx.Component:
+    """Header link: icon + visible text + accessible name (T-078).
+
+    Under 768px the stylesheet hides ``.ui-topnav__label`` and only the icon
+    stays. The ``aria-label`` carries the name (and the cart count) so the link
+    is still announced when the text is not painted.
+    """
+    children: list[Any] = [
+        rx.icon(icon, size=16, **{"aria-hidden": "true"}),
+        rx.el.span(label, class_name="ui-topnav__label"),
+    ]
+    if badge is not None:
+        children.append(badge)
+
+    return rx.el.a(
+        *children,
+        href=href,
+        class_name=_join("ui-topnav__link", class_name),
+        **{"aria-label": aria_label if aria_label is not None else label},
+    )
+
+
+def _cart_badge(count: rx.Var) -> rx.Component:
+    """Pill with the unit total; nothing at zero."""
+    return rx.cond(
+        count > 0,
+        rx.el.span(count.to_string(), class_name="ui-topnav__badge"),
+        rx.fragment(),
+    )
+
+
+def _cart_label(count: rx.Var) -> rx.Var:
+    """Accessible name with the count, singular included."""
+    return rx.cond(
+        count == 0,
+        "Carrito",
+        rx.cond(
+            count == 1,
+            "Carrito, 1 producto",
+            "Carrito, " + count.to_string() + " productos",
+        ),
+    )
+
+
 def TopNav(
     *,
     brand: str = DEFAULT_BRAND,
@@ -33,14 +85,17 @@ def TopNav(
     account: rx.Component | None = None,
     links: list[rx.Component] | None = None,
     cart: bool | rx.Var = True,
+    cart_count: int | rx.Var = 0,
     class_name: str | None = None,
 ) -> rx.Component:
     """Sticky header: brand, optional search, nav links, account area.
 
-    ``account`` and ``search`` are slots. When ``account`` is omitted the header
-    shows the guest entry points; a page with a session passes its own component
-    instead of the shell guessing. ``cart=False`` hides the link entirely (the
-    admin panel, T-023); a Var lets a page hide it per role (D-050).
+    ``account``, ``search`` and ``cart_count`` are slots. When ``account`` is
+    omitted the header shows the guest entry points; a page with a session
+    passes its own component instead of the shell guessing. ``cart=False`` hides
+    the link entirely (the admin panel, T-023); a Var lets a page hide it per
+    role (D-050). ``cart_count`` is the unit total for the badge: zero paints
+    nothing, and the page wires it to the state (T-078).
     """
     inner: list[Any] = [
         rx.el.a(brand, href=brand_href, class_name="ui-topnav__brand"),
@@ -51,13 +106,20 @@ def TopNav(
 
     if account is None:
         account = rx.fragment(
-            rx.el.a("Iniciar sesión", href="/login", class_name="ui-topnav__link"),
-            rx.el.a("Crear cuenta", href="/register", class_name="ui-topnav__link"),
+            TopNavLink("Iniciar sesión", href="/login", icon="log-in"),
+            TopNavLink("Crear cuenta", href="/register", icon="user-plus"),
         )
 
+    count = rx.Var.create(cart_count)
     nav_items: list[Any] = list(links or [])
     if cart is not False:
-        cart_link = rx.el.a("Carrito", href="/carrito", class_name="ui-topnav__link")
+        cart_link = TopNavLink(
+            "Carrito",
+            href="/carrito",
+            icon="shopping-cart",
+            aria_label=_cart_label(count),
+            badge=_cart_badge(count),
+        )
         if isinstance(cart, bool):
             nav_items.append(cart_link)
         else:

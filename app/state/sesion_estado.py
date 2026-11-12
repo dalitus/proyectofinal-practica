@@ -19,7 +19,7 @@ from typing import Any
 import reflex as rx
 from reflex_local_auth.local_auth import DEFAULT_AUTH_REFRESH_DELTA, LocalAuthState
 
-from app.service import auth_servicio
+from app.service import auth_servicio, carrito_servicio
 from app.service.sesion_servicio import ADMIN, rol, usuario_autenticado
 from app.state.carrito_estado import CarritoEstado
 
@@ -43,6 +43,24 @@ class SesionEstado(LocalAuthState):
             "nombre": nombre,
             "es_admin": rol(self.auth_token) == ADMIN,
         }
+
+    @rx.var(cache=True, deps=[CarritoEstado.total_unidades])
+    def unidades_carrito(self) -> int:
+        """Units in the cart, for the header badge (T-078).
+
+        The number comes from the database, never from a client var, and the
+        dependency on ``CarritoEstado.total_unidades`` is what refreshes it in
+        every page when the cart changes. Guests and the admin see no badge
+        (D-050): the header hides it, and zero already means "nothing to show".
+        """
+        sesion = self.cuenta
+        if not sesion["logueado"] or sesion["es_admin"]:
+            return 0
+
+        usuario_id = usuario_autenticado(self.auth_token)
+        if usuario_id is None:
+            return 0
+        return carrito_servicio.contar_unidades(usuario_id)
 
     @rx.event
     async def cerrar_sesion(self):

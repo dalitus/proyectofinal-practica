@@ -324,3 +324,34 @@ consistente.
     `service/configuracion_logs.py`, `state/parametros.py`, `pages/cuenta_menu.py`) conservan su
     nombre por D-051; los primitivos de `app/ui/` siguen la convención de T-063.
 - **Depende de:** T-005, T-013, T-019, T-060, T-061
+
+## T-078 · Iconos en el header y contador reactivo del carrito
+
+- **Estado:** hecha · **Prioridad:** P2 · **Épica:** 07
+- **Archivos:** `app/ui/layout.py`, `app/ui/styles.py`, `app/pages/cuenta_menu.py`,
+  `app/state/sesion_estado.py`, `app/service/carrito_servicio.py`,
+  `app/repository/carrito_repositorio.py`
+- **Problema:** el header es solo texto: no se reconoce de un vistazo qué hace cada enlace y el
+  comprador no sabe cuántos productos lleva hasta abrir el carrito.
+- **Decisión (D-052):** iconos Lucide (`rx.icon`) en todos los enlaces del header y un badge con la
+  cantidad total de unidades, oculto en cero y para las cuentas que no compran. En móvil queda el
+  icono con nombre accesible y el texto se oculta.
+- **AC:**
+  - [x] Todos los enlaces del header (carrito, cuenta, panel) tienen icono y texto visible.
+  - [x] El badge muestra la suma de unidades y se actualiza al agregar, sumar, restar, quitar o
+    vaciar, sin recargar la página.
+  - [x] Con el carrito vacío no se muestra badge; invitado y admin tampoco lo ven (D-050).
+  - [x] El contador sale de una sola suma en la base, no de una var del cliente.
+  - [x] En pantallas de hasta 767px se ve el icono y el enlace conserva su nombre accesible.
+  - [x] `pytest`, `ruff check`, `ruff format --check` y `reflex compile --dry` en verde.
+- **Verificación (2026-11-12):**
+  - Invitado: iconos y texto, sin badge.
+  - Comprador: al agregar el badge pasa a 1 y a 2 sin recargar; en el carrito, `+` → 3,
+    `-` → 2 y quitar la línea lo oculta. La etiqueta accesible acompaña
+    ("Carrito, 2 productos").
+  - Admin: en catálogo y en `/admin/pedidos` no hay link de carrito ni badge.
+  - `ruff check` / `ruff format --check` limpios; `pytest` 292 tests en verde;
+    `reflex compile --dry` → `Success`.
+- **Grill / preguntas abiertas:**
+  - Ninguna: cerrado en D-052.
+- **Depende de:** T-021, T-040, T-063

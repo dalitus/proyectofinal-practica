@@ -131,13 +131,30 @@ _SHELL = """
 .ui-topnav__link {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-xs);
   min-height: 44px;
+  padding: 0 var(--space-xs);
   font-size: var(--text-small);
   color: var(--color-muted);
   text-decoration: none;
 }
 
 .ui-topnav__link:hover { color: var(--color-text); }
+
+.ui-topnav__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1;
+}
 
 .ui-topnav__account {
   display: flex;
@@ -223,9 +240,14 @@ _SHELL = """
 }
 
 /* The header keeps only brand + account on narrow screens: the catalog shows
-   its own search field in the page body instead of squeezing it into 360px. */
+   its own search field in the page body instead of squeezing it into 360px.
+   Nav links lose their text and keep the icon plus its aria-label (T-078). */
 @media (max-width: 767px) {
   .ui-topnav__search { display: none; }
+  .ui-topnav__nav { gap: var(--space-xs); }
+  .ui-topnav__account { gap: var(--space-xs); }
+  .ui-topnav__label { display: none; }
+  .ui-topnav__link--muted { display: none; }
 }
 """
 

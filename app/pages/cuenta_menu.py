@@ -15,7 +15,19 @@ from __future__ import annotations
 import reflex as rx
 
 from app.state.sesion_estado import SesionEstado
-from app.ui import TopNav
+from app.ui import TopNav, TopNavLink
+
+
+def _boton_salir() -> rx.Component:
+    """Logout is a button, not a link, so it owns its markup (T-078)."""
+    return rx.el.button(
+        rx.icon("log-out", size=16, **{"aria-hidden": "true"}),
+        rx.el.span("Salir", class_name="ui-topnav__label"),
+        on_click=SesionEstado.cerrar_sesion,
+        type="button",
+        class_name="ui-topnav__link ui-topnav__link--button",
+        **{"aria-label": "Salir"},
+    )
 
 
 def MenuDeCuenta() -> rx.Component:
@@ -25,18 +37,10 @@ def MenuDeCuenta() -> rx.Component:
         rx.el.div(
             rx.cond(
                 SesionEstado.cuenta["es_admin"],
-                rx.el.a("Panel", href="/admin/pedidos", class_name="ui-topnav__link"),
+                TopNavLink("Panel", href="/admin/pedidos", icon="layout-dashboard"),
                 rx.el.div(
-                    rx.el.a(
-                        "Mis pedidos",
-                        href="/pedidos",
-                        class_name="ui-topnav__link",
-                    ),
-                    rx.el.a(
-                        "Mis consultas",
-                        href="/consultas",
-                        class_name="ui-topnav__link",
-                    ),
+                    TopNavLink("Mis pedidos", href="/pedidos", icon="package"),
+                    TopNavLink("Mis consultas", href="/consultas", icon="message-square"),
                     class_name="ui-topnav__account",
                 ),
             ),
@@ -44,17 +48,12 @@ def MenuDeCuenta() -> rx.Component:
                 SesionEstado.cuenta["nombre"],
                 class_name="ui-topnav__link ui-topnav__link--muted",
             ),
-            rx.el.button(
-                "Salir",
-                on_click=SesionEstado.cerrar_sesion,
-                type="button",
-                class_name="ui-topnav__link ui-topnav__link--button",
-            ),
+            _boton_salir(),
             class_name="ui-topnav__account",
         ),
         rx.el.div(
-            rx.el.a("Iniciar sesión", href="/login", class_name="ui-topnav__link"),
-            rx.el.a("Crear cuenta", href="/register", class_name="ui-topnav__link"),
+            TopNavLink("Iniciar sesión", href="/login", icon="log-in"),
+            TopNavLink("Crear cuenta", href="/register", icon="user-plus"),
             class_name="ui-topnav__account",
         ),
     )
@@ -64,9 +63,12 @@ def nav_de_cuenta(*, cart: bool = True) -> rx.Component:
     """Header for every page; the admin panel hides the cart (T-023, D-050).
 
     On buyer pages the cart link is hidden for the admin once the role resolves,
-    even though the add-to-cart action is rejected server-side anyway.
+    even though the add-to-cart action is rejected server-side anyway. The badge
+    count is a cached var of ``SesionEstado`` (T-078): the UI layer stays unaware
+    of states, it only receives the number.
     """
     return TopNav(
         account=MenuDeCuenta(),
         cart=~SesionEstado.cuenta["es_admin"] if cart else False,
+        cart_count=SesionEstado.unidades_carrito if cart else 0,
     )
