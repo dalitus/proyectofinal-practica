@@ -31,7 +31,7 @@ No se copian estilos: se copian **patrones de layout**.
 
 | Token | Valor | Uso |
 |---|---|---|
-| `page` | `#F7F7F5` | Fondo de la aplicación (el lienzo) |
+| `page` | `#EBF2FA` | Fondo de la aplicación (el lienzo), con un celeste tenue |
 | `card` | `#FFFFFF` | Fondo de tarjetas, tablas y bloques de contenido |
 | `bg` | `#FFFFFF` | Alias histórico de `card` |
 | `surface` | `#F7F7F5` | Inputs, header de tabla, zonas de imagen |
@@ -43,12 +43,14 @@ No se copian estilos: se copian **patrones de layout**.
 | `danger` | `#B42318` | Solo error y acción destructiva |
 | `success` | `#067647` | Solo stock disponible / pedido entregado |
 
-**Prohibido:** fondos de color (`#ADD8E6`), `color_scheme` de Radix sin criterio, más de un
-color de acento activo por pantalla.
+**Prohibido:** fondos de color saturados (`#ADD8E6` es el ejemplo de lo que no se usa, no un
+valor válido), `color_scheme` de Radix sin criterio, más de un color de acento activo por
+pantalla. El único fondo con tinte es `page`, y siempre como token del sistema (D-053).
 
 **Contraste lienzo/tarjeta:** la app se pinta con `page` y cada tarjeta con `card` + borde de
-`border`. El bloque blanco se despega del fondo gris sin necesidad de sombra. Nunca dos
-superficies del mismo color encimadas.
+`border`. El bloque blanco se despega del lienzo celeste sin necesidad de sombra: 1.13:1 entre
+ambos, y el texto `muted` conserva 4.72:1 sobre el lienzo. Nunca dos superficies del mismo color
+encimadas.
 
 **Modo claro obligatorio:** la UI no tiene variante oscura. `rxconfig.py` fija
 `default_color_mode="light"` y el `App` fuerza `light` en `localStorage` antes de hidratar, así
@@ -253,7 +255,7 @@ Se inyecta una vez desde `app/app.py`, así que toda pantalla lo hereda.
 COLORS = {
     "bg": "#FFFFFF",
     "surface": "#F7F7F5",
-    "page": "#F7F7F5",
+    "page": "#EBF2FA",
     "card": "#FFFFFF",
     "border": "#E5E5E5",
     "text": "#111111",
@@ -293,7 +295,7 @@ Nunca se escribe un hex suelto en una página.
 - [ ] Funciona a 360px, 768px y 1280px.
 - [ ] Un solo CTA primario visible.
 - [ ] Teclado: se puede completar el flujo sin mouse.
-- [ ] Contraste AA verificado en textos sobre `surface` y `accent`.
+- [ ] Contraste AA verificado en textos sobre `page`, `surface` y `accent`.
 - [ ] Sin emojis en la UI.
 
 ---
@@ -303,6 +305,7 @@ Nunca se escribe un hex suelto en una página.
 | Fecha | Decisión | Motivo |
 |---|---|---|
 | 2026-10-27 | Paleta neutra con acento negro; se elimina `#ADD8E6` | El fondo celeste competía con el producto y no es una referencia de tienda |
+| 2026-11-11 | El lienzo (`page`) pasa a celeste tenue `#EBF2FA` | Las tarjetas blancas se despegan mejor del fondo sin que el tinte compita con la foto del producto (D-053) |
 | 2026-10-27 | Sin sombras; borde `1px` | Menos ruido, más consistencia entre card, tabla e input |
 | 2026-10-27 | Una sola familia tipográfica, dos pesos | La jerarquía se resuelve por tamaño, no por cantidad de fuentes |
 | 2026-10-27 | Componentes en `app/ui/`, no en `pages/` | Evita duplicación; `ui_helpers.py` queda obsoleto y se reemplaza |

@@ -9,8 +9,10 @@ COLORS = {
     "bg": "#FFFFFF",
     "surface": "#F7F7F5",
     # Deliberate contrast: the app paints `page` and cards paint `card`, so the
-    # white block separates from the grey canvas without any shadow.
-    "page": "#F7F7F5",
+    # white block separates from the canvas without any shadow. The canvas keeps
+    # a faint blue tint (D-053): white/canvas is 1.13:1 and `muted` text on the
+    # canvas still holds 4.72:1, so raising the tint means measuring again.
+    "page": "#EBF2FA",
     "card": "#FFFFFF",
     "border": "#E5E5E5",
     "text": "#111111",
